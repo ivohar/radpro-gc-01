@@ -35,44 +35,37 @@ static InitState initState = INIT_START;
 
 static void onInitViewEvent(const View *view, Event event)
 {
-    switch (event)
+    if (EVENT_PERIOD == event)
     {
-    case EVENT_PERIOD:
-        if ((initState == INIT_START) && verifyFlash())
-            initState = INIT_FLASHFAILURE;
-
-        if (initState == INIT_START)
+        switch (initState)
         {
-            initState = INIT_FLASHFAILURE;
-
-            drawNotification("WARNING",
-                             "Firmware checksum failure.");
-            playSystemAlert();
+            case INIT_START:
+                if (verifyFlash()) 
+                {
+                    initState = INIT_FLASHFAILURE;
+                    break;
+                }
+                initState = INIT_FLASHFAILURE;
+                drawNotification("WARNING", "Firmware checksum failure.");
+                playSystemAlert();
+                break;
+            case INIT_FLASHFAILURE:
+                initState = INIT_SPLASH;
+                drawNotification(FIRMWARE_NAME, FIRMWARE_VERSION);
+                initRTC();
+                break;
+            case INIT_SPLASH:
+                initState = INIT_DONE;
+                // Start measurements
+                setTubeHV(true);
+                enableMeasurements();
+                setCommEnabled(true);
+                startDatalog();
+                setMeasurementView(0);     
+                break;
+            default:    
+                break;   
         }
-        else if (initState == INIT_FLASHFAILURE)
-        {
-            initState = INIT_SPLASH;
-
-            drawNotification(FIRMWARE_NAME,
-                             FIRMWARE_VERSION);
-            initRTC();
-        }
-        else
-        {
-            initState = INIT_DONE;
-
-            // Start measurements
-            setTubeHV(true);
-            enableMeasurements();
-            setCommEnabled(true);
-            startDatalog();
-
-            setMeasurementView(0);
-        }
-        break;
-
-    default:
-        break;
     }
 }
 
