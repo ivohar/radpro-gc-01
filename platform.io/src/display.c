@@ -548,7 +548,7 @@ static const mr_color_t displayColors[][3] = {
     // Element neutral (on container background)
     {mr_get_color(0x666366), // 0x666666
      mr_get_color(0x9a9a9a),
-     mr_get_color(0x2e2f00)}, // 0x2e2e00
+     mr_get_color(0x474600)}, // 0x2e2e00 // orig 0x2e2f00
 
     // Container background [global background]
     {mr_get_color(0xf7f7f7),
@@ -676,9 +676,9 @@ static const mr_color_t displayColors[][3] = {
      mr_get_color(0x000000)},
 
     // Flat checked background (on container global) [menu selected background]
-    {mr_get_color(0xd6dde9),  // Changed alpha to 20%
-     mr_get_color(0x324563),  // Changed alpha to 50%
-     mr_get_color(0x00230f)}, // Changed alpha to 50%
+    {mr_get_color(0xb0b6bf),  // Changed alpha to 20% // orig 0xd6dde9 
+     mr_get_color(0x3c5275),  // Changed alpha to 50% // orig 0x324563 
+     mr_get_color(0x002912)}, // Changed alpha to 50% // orig 0x00230f 
 
     // On flat active (on container global) [menu selected foreground]
     {mr_get_color(0x161718),
@@ -688,7 +688,7 @@ static const mr_color_t displayColors[][3] = {
     // On flat neutral (on container global) [menu selected gadget]
     {mr_get_color(0x737473),  // 0x737373
      mr_get_color(0xa3a4a3),  // 0xa3a3a3
-     mr_get_color(0x333200)}, // 0x333300
+     mr_get_color(0x474600)}, // 0x333300 //0x333200  test1: 0x474600
 
     // Selected enabled background [game square selected]
     {mr_get_color(0x305792),

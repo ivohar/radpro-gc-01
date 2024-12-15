@@ -66,6 +66,7 @@ static void onPowerOnViewEvent(const View *view, Event event)
             enableComm(true);
             openDatalog();
 
+            sleep(500);
             setMeasurementView(0);
         }
 
