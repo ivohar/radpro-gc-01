@@ -424,7 +424,9 @@ void triggerAlarm(void)
 
 void triggerPowerOnTest(void)
 {
+#if defined(VIBRATOR)
     syncTimerThread();
 
-    setBuzzerTimer(POWERON_TEST_TICKS, 1);
+    setVibratorTimer(POWERON_TEST_TICKS);
+#endif
 }
