@@ -688,7 +688,7 @@ static const mr_color_t displayColors[][3] = {
     // On flat neutral (on container global) [menu selected gadget]
     {mr_get_color(0x737473),  // 0x737373
      mr_get_color(0xa3a4a3),  // 0xa3a3a3
-     mr_get_color(0x474600)}, // 0x333300 //0x333200  test1: 0x474600
+     mr_get_color(0x474600)}, // 0x333300 // orig 0x333200
 
     // Selected enabled background [game square selected]
     {mr_get_color(0x305792),

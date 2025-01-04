@@ -40,6 +40,7 @@
 #define ALARM_FLASH_TICKS ((uint32_t)(0.200 * SYSTICK_FREQUENCY))
 
 #define POWERON_TEST_TICKS ((uint32_t)(0.100 * SYSTICK_FREQUENCY))
+#define POWERON_TEST_TICKS_EXT ((uint32_t)(0.150 * SYSTICK_FREQUENCY))
 
 typedef enum
 {
@@ -427,6 +428,7 @@ void triggerPowerOnTest(void)
 #if defined(VIBRATOR)
     syncTimerThread();
 
-    setVibratorTimer(POWERON_TEST_TICKS);
+    setBuzzerTimer(POWERON_TEST_TICKS, 1);
+    setVibratorTimer(POWERON_TEST_TICKS_EXT);
 #endif
 }
