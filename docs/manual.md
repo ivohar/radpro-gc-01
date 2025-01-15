@@ -3,13 +3,14 @@
 ## Features
 
 * Measurement view with large digits, ideal for field application.
-* Multiple measurement units: Sievert, rem, cpm (counts per minute), cps (counts per second).
+* Configurable instantaneous rate averaging (adaptive fast, adaptive precision, 60 seconds, 30 seconds and 10 seconds), 
 * Configurable averaging for performing surveys.
+* Multiple measurement units: Sievert, rem, cpm (counts per minute), cps (counts per second).
 * Offline and live data logging with data compression.
 * Compatibility with the [GeigerLog](https://github.com/Gissio/geigerlog-radpro) data logging software.
 * Configurable pulse indication with optional thresholding: pulse clicks (off, clicks, beeps), pulse LED (on supported devices), display flashes (on display sleep) and haptic pulses (on supported devices).
 * Dead-time measurement.
-* Customizable Geiger-Müller tube settings: conversion factor, instantaneous rate averaging (adaptive fast, adaptive precision, 60 seconds, 30 seconds and 10 seconds), dead-time compensation, background compensation, high voltage generator PWM frequency and duty cycle (on supported devices).
+* Customizable Geiger-Müller tube settings: conversion factor, dead-time compensation, background compensation, high voltage generator PWM frequency and duty cycle (on supported devices).
 * Preconfigured high voltage profiles (on supported devices).
 * Tube fault alarm.
 * Statistics for tracking device usage and state.
@@ -35,6 +36,8 @@ The [confidence interval](https://en.wikipedia.org/wiki/Confidence_interval) est
 
 An example: Imagine measuring an instantaneous radiation rate of 1.000 µSv/h with a confidence interval of ±40%. This means there's a 95% probability that the true radiation level lies between 0.600 µSv/h and 1.400 µSv/h. In other words, there's a 5% chance the true level falls outside this range. As the confidence interval narrows (becomes smaller), the measurement becomes more precise and certain.
 
+To reset the instantaeous rate and dismiss an rate alarm, read the device's installation instructions.
+
 ### Average rate
 
 The average rate is estimated by dividing the number of pulses within the averaging period, minus one, by the time between the first and last pulse within that period.
@@ -45,7 +48,7 @@ The confidence interval assumes a constant level of radiation over the averaging
 
 Averaging can be indefinite, or limited by a configurable time or confidence level. When averaging finishes, the device will flash and emit a beep, signaling the completion of the measurement.
 
-To reset averaging, read the device's installation instructions.
+To reset the average, read the device's installation instructions.
 
 An example: Imagine measuring background radiation. A one-minute average yields 0.210 µSv/h with a ±36% confidence interval. This means there's a 95% chance the true radiation level lies between 0.134 µSv/h and 0.286 µSv/h. Finding this interval too wide, you repeat the measurement with a 30-minute average. The new measurement is 0.154 µSv/h, now with a much narrower ±7.7% confidence interval.
 
@@ -55,7 +58,7 @@ The cumulative dose is calculated from the number of pulses in the time period.
 
 The secondary view can be switched between a time view that displays the length of the time period, and a counts view.
 
-To reset cumulative dose, read the device's installation instructions.
+To reset the cumulative dose and dismiss a dose alarm, read the device's installation instructions.
 
 ### History
 
@@ -63,7 +66,7 @@ The history is calculated from the instantaneous rate, sampled once per second. 
 
 The view can be switched between a 10-minute view, a 60-minute view and a 24-hours view.
 
-To reset history, read the device's installation instructions.
+To reset the history, read the device's installation instructions.
 
 ## Conversion factor
 
@@ -206,7 +209,7 @@ To communicate with Rad Pro through a USB serial port, read the [communications 
 
 **Q: I enabled clicks but am not hearing any.**
 
-**A:** If you've enabled pulse thresholding, pulse indication will only occur above a certain radiation level threshold. Check if this feature is activated.
+**A:** If you've enabled a pulse threshold, pulse indication will only occur above a certain radiation level threshold. Check if this feature is activated.
 
 **Q: Why isn’t the rate alarm triggering?**
 
