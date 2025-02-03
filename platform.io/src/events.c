@@ -429,7 +429,16 @@ void triggerVibrator(void)
 #if defined(VIBRATOR)
     syncTimerThread();
 
+    setVibratorTimer(POWERON_TEST_TICKS);
+#endif
+}
+
+void BuzzerAndVibrator(void)
+{
+    syncTimerThread();
+
     setBuzzerTimer(POWERON_TEST_TICKS, 1);
+#if defined(VIBRATOR)
     setVibratorTimer(POWERON_TEST_TICKS_EXT);
 #endif
 }

@@ -101,7 +101,7 @@ void setPowerOnView(void)
 
     requestDisplayBacklightTrigger();
     clearKeyboardEvents();
-    triggerVibrator();
+    BuzzerAndVibrator();
     startEvents();
 
     setView(&powerOnView);
