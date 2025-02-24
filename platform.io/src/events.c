@@ -444,13 +444,13 @@ void triggerVibration(void)
 #endif
 }
 
-void BuzzerAndVibrator(void)
+void BuzzerAndVibration(void)
 {
     syncTimerThread();
 
     setBuzzerTimer(POWERON_TEST_TICKS, 1);
 #if defined(VIBRATION)
-    setVibratorTimer(POWERON_TEST_TICKS_EXT);
+    setVibrationTimer(POWERON_TEST_TICKS_EXT);
 #endif
 }
 
