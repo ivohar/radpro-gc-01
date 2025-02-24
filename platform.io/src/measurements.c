@@ -95,6 +95,9 @@ typedef struct
     uint8_t timeTickNum;
 } History;
 
+static void onAlarmsSubMenuBack(const Menu *menu);
+static void onMeasurementsSubMenuBack(const Menu *menu);
+
 static const History histories[] = {
     {"History (10 min)", 10 * 60 / HISTORY_BUFFER_SIZE, 10},
     {"History (1 h)", 60 * 60 / HISTORY_BUFFER_SIZE, 6},
@@ -119,6 +122,7 @@ static const float rateAlarmsSvH[] = {
     2E-3F,
     5E-3F,
     10E-3F,
+    20E-3F,
 };
 
 static const float doseAlarmsSv[] = {
@@ -137,6 +141,7 @@ static const float doseAlarmsSv[] = {
     10E-3F,
     20E-3F,
     50E-3F,
+    100E-3F,
 };
 
 static struct
@@ -216,10 +221,15 @@ uint8_t instantaneousAveragingPeriods[] = {
 
 static const int32_t averagingTimes[] = {
     30 * 24 * 60 * 60, // Off (actually 30 days)
-    5 * 60,            // 5 minutes
-    10 * 60,           // 10 minutes
+    60 * 60,           // 1 hour
     30 * 60,           // 30 minutes
-    60 * 60,           // 60 minutes
+    10 * 60,           // 10 minutes
+    5 * 60,            // 5 minutes
+    60,                // 1 minute
+    30,                // 30 minute
+    10,                // 10 seconds
+    5,                 // 5 seconds
+    1,                 // 1 second
 };
 
 static const float averagingConfidences[] = {
@@ -229,16 +239,11 @@ static const float averagingConfidences[] = {
     0.0505F, // ±5% confidence
 };
 
-static const View rateAlarmMenuView;
-static const View doseAlarmMenuView;
-static const View alarmSignalingMenuView;
-static const View unitsMenuView;
-static const View instantaneousMenuView;
-static const View averageMenuView;
-
+static const Menu alarmsMenu;
 static const Menu rateAlarmMenu;
 static const Menu doseAlarmMenu;
 static const Menu alarmSignalingMenu;
+static const Menu measurementsMenu;
 static const Menu unitsMenu;
 static const Menu instantaneousMenu;
 static const Menu averageMenu;
@@ -261,6 +266,19 @@ const View *const measurementViews[] = {
 
 void initMeasurements(void)
 {
+    Dose tubeDose = measurements.tube.dose;
+    Dose cumulativeDose = measurements.cumulativeDose.dose;
+    memset(&measurements, 0, sizeof(measurements));
+    measurements.tube.dose = tubeDose;
+    measurements.cumulativeDose.dose = cumulativeDose;
+    updateMeasurementUnits();
+}
+
+void initMeasurementsMenus(void)
+{
+    selectMenuItem(&alarmsMenu,
+                   0,
+                   0);
     selectMenuItem(&rateAlarmMenu,
                    settings.rateAlarm,
                    RATEALARM_NUM);
@@ -268,8 +286,12 @@ void initMeasurements(void)
                    settings.doseAlarm,
                    DOSEALARM_NUM);
     selectMenuItem(&alarmSignalingMenu,
-                   settings.alarmSignaling,
-                   ALARMSIGNALING_NUM);
+                   0,
+                   0);
+
+    selectMenuItem(&measurementsMenu,
+                   0,
+                   0);
     selectMenuItem(&unitsMenu,
                    settings.units,
                    UNITS_NUM);
@@ -279,11 +301,6 @@ void initMeasurements(void)
     selectMenuItem(&averageMenu,
                    settings.averaging,
                    AVERAGING_NUM);
-
-    Dose tubeDose = measurements.tube.dose;
-    memset(&measurements, 0, sizeof(measurements));
-    measurements.tube.dose = tubeDose;
-    updateMeasurementUnits();
 }
 
 // Measurement events
@@ -1048,7 +1065,7 @@ static void onAverageRateViewEvent(const View *view,
             break;
 
         case AVERAGE_TAB_RATE:
-            if (measurements.average.rate.value > 0)
+            if (measurements.average.timedRate.value > 0)
             {
                 uint32_t unitsIndex = ((settings.units != UNITS_CPM) &&
                                        (settings.units != UNITS_CPS))
@@ -1067,7 +1084,7 @@ static void onAverageRateViewEvent(const View *view,
             break;
 
         case AVERAGE_TAB_DOSE:
-            if (measurements.average.pulseCount > 0)
+            if (measurements.average.timedPulseCount > 0)
                 buildValueString(valueString,
                                  unitString,
                                  measurements.average.timedPulseCount,
@@ -1351,64 +1368,9 @@ const View historyView = {
     NULL,
 };
 
-// Alarms menu
-
-bool isAlarmEnabled(void)
-{
-    return (settings.rateAlarm || settings.doseAlarm);
-}
-
-bool isAlarm(void)
-{
-    return (measurements.instantaneous.alarm ||
-            measurements.cumulativeDose.alarm ||
-            measurements.period.faultAlarm);
-}
-
-static const OptionView alarmsMenuOptions[] = {
-    {"Rate alarm", &rateAlarmMenuView},
-    {"Dose alarm", &doseAlarmMenuView},
-    {"Signaling", &alarmSignalingMenuView},
-    {NULL},
-};
-
-static const char *onAlarmsMenuGetOption(const Menu *menu,
-                                         uint32_t index,
-                                         MenuStyle *menuStyle)
-{
-    *menuStyle = MENUSTYLE_SUBMENU;
-
-    return alarmsMenuOptions[index].option;
-}
-
-static void onAlarmsMenuSelect(const Menu *menu)
-{
-    setView(alarmsMenuOptions[menu->state->selectedIndex].view);
-}
-
-static MenuState displayMenuState;
-
-static const Menu displayMenu = {
-    "Alarms",
-    &displayMenuState,
-    onAlarmsMenuGetOption,
-    onAlarmsMenuSelect,
-    onSettingsSubMenuBack,
-};
-
-const View alarmsMenuView = {
-    onMenuEvent,
-    &displayMenu,
-};
-
-static void onAlarmsSubMenuBack(const Menu *menu)
-{
-    setView(&alarmsMenuView);
-}
-
 // Rate alarm menu
 
-static char *buildRateAlarmMenuOption(uint32_t index)
+char *buildRateAlarmMenuOption(uint32_t index)
 {
     const Unit *rateUnit = &units[settings.units].rate;
     float value = rateAlarmsSvH[index] /
@@ -1508,24 +1470,31 @@ static const View doseAlarmMenuView = {
 // Alarm signaling menu
 
 static const char *const alarmSignalingMenuOptions[] = {
-    "Acoustic",
-    "Haptic",
-    "Visual",
+    "Sound",
+#if defined(VIBRATION)
+    "Vibration",
+#endif
+#if defined(ALERT_LED)
+    "Alert LED",
+#elif defined(PULSE_LED)
+    "Pulse LED",
+#endif
+    "Display flash",
     NULL,
 };
 
 static const char *onAlarmSignalingMenuGetOption(const Menu *menu,
-                                                     uint32_t index,
-                                                     MenuStyle *menuStyle)
+                                                 uint32_t index,
+                                                 MenuStyle *menuStyle)
 {
-    *menuStyle = (index == settings.alarmSignaling);
+    *menuStyle = (settings.alarmSignaling >> index) & 1;
 
     return alarmSignalingMenuOptions[index];
 }
 
 static void onAlarmSignalingMenuSelect(const Menu *menu)
 {
-    settings.alarmSignaling = menu->state->selectedIndex;
+    settings.alarmSignaling ^= (1 << menu->state->selectedIndex);
 }
 
 static MenuState alarmSignalingMenuState;
@@ -1543,47 +1512,59 @@ static const View alarmSignalingMenuView = {
     &alarmSignalingMenu,
 };
 
-// Measurements menu
+// Alarms menu
 
-static const OptionView measurementMenuOptions[] = {
-    {"Units", &unitsMenuView},
-    {"Instantaneous", &instantaneousMenuView},
-    {"Average", &averageMenuView},
+bool isAlarmEnabled(void)
+{
+    return (settings.rateAlarm || settings.doseAlarm);
+}
+
+bool isAlarm(void)
+{
+    return (measurements.instantaneous.alarm ||
+            measurements.cumulativeDose.alarm ||
+            measurements.period.faultAlarm);
+}
+
+static const OptionView alarmsMenuOptions[] = {
+    {"Rate alarm", &rateAlarmMenuView},
+    {"Dose alarm", &doseAlarmMenuView},
+    {"Signaling", &alarmSignalingMenuView},
     {NULL},
 };
 
-static const char *onMeasurementsMenuGetOption(const Menu *menu,
-                                               uint32_t index,
-                                               MenuStyle *menuStyle)
+static const char *onAlarmsMenuGetOption(const Menu *menu,
+                                         uint32_t index,
+                                         MenuStyle *menuStyle)
 {
     *menuStyle = MENUSTYLE_SUBMENU;
 
-    return measurementMenuOptions[index].option;
+    return alarmsMenuOptions[index].option;
 }
 
-static void onMeasurementsMenuSelect(const Menu *menu)
+static void onAlarmsMenuSelect(const Menu *menu)
 {
-    setView(measurementMenuOptions[menu->state->selectedIndex].view);
+    setView(alarmsMenuOptions[menu->state->selectedIndex].view);
 }
 
-static MenuState measurementsMenuState;
+static MenuState alarmsMenuState;
 
-static const Menu measurementMenu = {
-    "Measurements",
-    &measurementsMenuState,
-    onMeasurementsMenuGetOption,
-    onMeasurementsMenuSelect,
+static const Menu alarmsMenu = {
+    "Alarms",
+    &alarmsMenuState,
+    onAlarmsMenuGetOption,
+    onAlarmsMenuSelect,
     onSettingsSubMenuBack,
 };
 
-const View measurementsMenuView = {
+const View alarmsMenuView = {
     onMenuEvent,
-    &measurementMenu,
+    &alarmsMenu,
 };
 
-static void onMeasurementsSubMenuBack(const Menu *menu)
+static void onAlarmsSubMenuBack(const Menu *menu)
 {
-    setView(&measurementsMenuView);
+    setView(&alarmsMenuView);
 }
 
 // Units menu
@@ -1630,7 +1611,7 @@ static const View unitsMenuView = {
 static const char *const instantaneousMenuOptions[] = {
     "Adaptive fast",
     "Adaptive precision",
-    "60 seconds",
+    "1 minute",
     "30 seconds",
     "10 seconds",
     NULL,
@@ -1669,10 +1650,15 @@ static const View instantaneousMenuView = {
 
 static const char *const averageMenuOptions[] = {
     "Unlimited",
-    "5 minutes",
-    "10 minutes",
+    "1 hour",
     "30 minutes",
-    "60 minutes",
+    "10 minutes",
+    "5 minutes",
+    "1 minute",
+    "30 seconds",
+    "10 seconds",
+    "5 seconds",
+    "1 second",
     "\xb1"
     "40% confidence",
     "\xb1"
@@ -1713,38 +1699,45 @@ static const View averageMenuView = {
     &averageMenu,
 };
 
-// Pulse threshold menu
+// Measurements menu
 
-static const char *onPulseThresholdMenuGetOption(const Menu *menu,
-                                                 uint32_t index,
-                                                 MenuStyle *menuStyle)
-{
-    *menuStyle = (index == settings.pulseThreshold);
-
-    if (index == 0)
-        return "Off";
-    else if (index < RATEALARM_NUM)
-        return buildRateAlarmMenuOption(index);
-    else
-        return NULL;
-}
-
-static void onPulseThresholdMenuSelect(const Menu *menu)
-{
-    settings.pulseThreshold = menu->state->selectedIndex;
-}
-
-static MenuState pulseThresholdMenuState;
-
-static const Menu pulsesThresholdMenu = {
-    "Threshold",
-    &pulseThresholdMenuState,
-    onPulseThresholdMenuGetOption,
-    onPulseThresholdMenuSelect,
-    onPulsesSubMenuBack,
+static const OptionView measurementMenuOptions[] = {
+    {"Units", &unitsMenuView},
+    {"Instantaneous", &instantaneousMenuView},
+    {"Average", &averageMenuView},
+    {NULL},
 };
 
-const View pulseThresholdMenuView = {
+static const char *onMeasurementsMenuGetOption(const Menu *menu,
+                                               uint32_t index,
+                                               MenuStyle *menuStyle)
+{
+    *menuStyle = MENUSTYLE_SUBMENU;
+
+    return measurementMenuOptions[index].option;
+}
+
+static void onMeasurementsMenuSelect(const Menu *menu)
+{
+    setView(measurementMenuOptions[menu->state->selectedIndex].view);
+}
+
+static MenuState measurementsMenuState;
+
+static const Menu measurementsMenu = {
+    "Measurements",
+    &measurementsMenuState,
+    onMeasurementsMenuGetOption,
+    onMeasurementsMenuSelect,
+    onSettingsSubMenuBack,
+};
+
+const View measurementsMenuView = {
     onMenuEvent,
-    &pulsesThresholdMenu,
+    &measurementsMenu,
 };
+
+static void onMeasurementsSubMenuBack(const Menu *menu)
+{
+    setView(&measurementsMenuView);
+}

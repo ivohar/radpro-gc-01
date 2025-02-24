@@ -20,7 +20,7 @@
 #define FIRMWARE_BASE 0x08004000
 #if defined(CH32)
 #define FLASH_SIZE 0x10000
-#define FIRMWARE_SIZE 0xa000
+#define FIRMWARE_SIZE 0xa400
 #elif defined(APM32)
 #define FLASH_SIZE 0x20000
 #define FIRMWARE_SIZE 0xc800
@@ -103,8 +103,8 @@
 #define PULSE_LED_PORT GPIOA
 #define PULSE_LED_PIN 15
 
-#define VIBRATOR_PORT GPIOA
-#define VIBRATOR_PIN 9
+#define VIBRATION_PORT GPIOA
+#define VIBRATION_PIN 9
 
 #if !defined(GC01_USART)
 #define USB_INTERFACE USB

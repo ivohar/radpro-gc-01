@@ -72,7 +72,7 @@ Last, read the [user's manual](../../manual.md) for learning how to use Rad Pro,
   * Connect the serial converter's GND and 5V pins to the FS2011 board's 0V and 5V pads, respectively.
   * Connect the PA2 pin of the microprocessor to the serial converter's RX pin.
   * Connect the PA3 pin of the microprocessor to the serial converter's TX pin.
-* Add a vibrator (which you can recover from an old cellphone). Solder one terminal to the output of the Q5 transistor, and the other terminal to 3.3 V.
+* Add a vibration device (which you can recover from an old cellphone). Solder one terminal to the output of the Q5 transistor, and the other terminal to 3.3 V.
 * For easier access to XS1, use a file to extend the hole for the battery holder clip so that a 4-pin header connector can fit. Solder four cables between XS1 and the 4-pin header. Using a glue gun, attach the header to the inside of the back case, so you can access the header with the battery case open.
 * On some FS2011 devices, the tube is not aligned to the holes of the back case. For improved measurement, align the tube to the holes using a heat gun/glue gun. Be careful, as the tube's glass is very delicate.
 * Some AA rechargeable batteries have low-profile caps that don't make electrical contact with the battery holder. Fix this problem by applying solder on the battery holder's pads.
@@ -89,25 +89,24 @@ The keys are mapped as follows:
   * Power on/off: long hold of the power key.
   * Switch measurement mode: the up and down keys.
   * Switch measurement secondary view: the play/pause or power key.
-  * Reset measurement: long hold of the play/pause key.
-  * Dismiss alarm: long hold of the play/pause key.
+  * Reset measurement/dismiss alarm: long hold of the play/pause key.
+  * Toggle pulses sound in measurement view: long hold of the menu/ok key.
   * Enter settings: the menu/ok key.
   * Go up/down: the up and down keys.
   * Select option: the menu/ok or power key.
   * Go back: the play/pause key.
   * Leave lock mode: long hold of the power and play/pause key.
-
 <!-- Calculated as follows:
 
-* With 1-byte differential values: [25 pages * (1 timestamp entry/page [9 bytes] + 1010 differential entries/page [2 byte each])] = 25275 entries
-* With 2-byte differential values: [25 pages * (1 timestamp entry/page [9 bytes] + 505 differential entries/page [2 byte each])] = 12650 entries
+* With 1-byte differential values: [25 pages * (1 timestamp entry/page [10 bytes] + 1012 differential entries/page [1 byte each])] = 25325 entries
+* With 2-byte differential values: [25 pages * (1 timestamp entry/page [10 bytes] + 506 differential entries/page [2 byte each])] = 12675 entries
 
 * 60-minute and 10-minute intervals require 2-byte differential values.
-* 10-minute intervals and less require 1-byte differential values.
+* 1-minute intervals and less require 1-byte differential values.
 
  -->
 
-On the FS2011, Rad Pro can store up to 26312 data points. At normal radiation levels (20 cpm), this allows for 527 days of data at 60-minute intervals, 87 days at 10-minute intervals, 17 days at 1-minute intervals, almost 3 days at 10-second intervals and 7 hours at 1-second intervals.
+On the FS2011, Rad Pro can store up to 25325 data points. At normal radiation levels (20 cpm), this allows for 528 days of data at 60-minute intervals, 88 days at 10-minute intervals, 17 days at 1-minute intervals, almost 3 days at 10-second intervals and 7 hours at 1-second intervals.
 
 The FS2011 includes two Zener diodes that limit the maximum voltage to 440 V (nominal).
 

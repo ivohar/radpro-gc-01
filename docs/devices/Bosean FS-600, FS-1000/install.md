@@ -72,8 +72,8 @@ On the FS-600, the keys are mapped as follows:
   * Power on/off: long hold of the ok/power key.
   * Switch measurement mode: the up and down keys.
   * Switch measurement secondary view: the left/back or ok/power key.
-  * Reset measurement: long hold of the left/back key.
-  * Dismiss alarm: long hold of the left/back key.
+  * Reset measurement/dismiss alarm: long hold of the left/back key.
+  * Toggle pulses sound in measurement view: long hold of the menu/ok key.
   * Enter settings: the right/settings key.
   * Go up/down: the up and down keys.
   * Select option: the ok/power or right/settings key.
@@ -85,8 +85,7 @@ On the FS-1000, the keys are mapped as follows:
   * Power on/off: long hold of the set/power key.
   * Switch measurement mode: the mode key.
   * Switch measurement secondary view: the set/power key.
-  * Reset measurement: long hold of the mode key.
-  * Dismiss alarm: long hold of the mode key.
+  * Reset measurement/dismiss alarm: long hold of the mode key.
   * Enter settings: short hold of the set/power key.
   * Go up/down: the mode and set/power key.
   * Select option: short hold of the set/power key.
@@ -99,15 +98,15 @@ To establish a USB data connection, connect your FS-600 or FS-1000 to a computer
 
 <!-- Calculated as follows:
 
-* With 1-byte differential values: [44 pages * (1 timestamp entry/page [9 bytes] + 2024 differential entries/page [2 byte each])] = 89100 entries
-* With 2-byte differential values: [44 pages * (1 timestamp entry/page [9 bytes] + 1012 differential entries/page [2 byte each])] = 44572 entries
+* With 1-byte differential values: [44 pages * (1 timestamp entry/page [16 bytes] + 2024 differential entries/page [1 byte each])] = 89100 entries
+* With 2-byte differential values: [44 pages * (1 timestamp entry/page [16 bytes] + 1012 differential entries/page [2 byte each])] = 44572 entries
 
 * 60-minute and 10-minute intervals require 2-byte differential values.
-* 10-minute intervals and less require 1-byte differential values.
+* 1-minute intervals and less require 1-byte differential values.
 
  -->
 
-On the FS-600 and FS-1000, Rad Pro can store up to 91125 data points. At normal radiation levels (20 cpm), this allows for 1857 days of data at 60-minute intervals, 309 days at 10-minute intervals, 61 days at 1-minute intervals, 10 days at 10-second intervals and 24 hours at 1-second intervals.
+On the FS-600 and FS-1000, Rad Pro can store up to 89100 data points. At normal radiation levels (20 cpm), this allows for 1857 days of data at 60-minute intervals, 309 days at 10-minute intervals, 61 days at 1-minute intervals, 10 days at 10-second intervals and 24 hours at 1-second intervals.
 
 The FS-600 and FS-1000 include two Zener diodes that limit the maximum voltage to 440 V (nominal).
 

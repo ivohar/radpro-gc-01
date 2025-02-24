@@ -13,12 +13,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "menu.h"
+#include "view.h"
+
 #define SYSTICK_FREQUENCY 1000
 #define PULSE_MEASUREMENT_FREQUENCY 1000000
 
 #define KEY_TICKS ((uint32_t)(0.025 * SYSTICK_FREQUENCY))
 
+extern const View pulsesMenuView;
+
 extern float timerCountToSeconds;
+
+void initEventsMenus(void);
 
 void initEvents(void);
 void startEvents(void);
@@ -43,7 +50,9 @@ bool isPulseThresholdEnabled(void);
 
 void triggerPulse(void);
 void triggerAlarm(void);
-void triggerVibrator(void);
-void BuzzerAndVibrator(void);
+void triggerVibration(void);
+void BuzzerAndVibration(void);
+
+void togglePulseClicks(void);
 
 #endif

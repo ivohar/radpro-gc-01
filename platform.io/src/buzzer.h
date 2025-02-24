@@ -12,12 +12,7 @@
 
 #include <stdbool.h>
 
-#include "view.h"
-
-extern const View pulseClicksMenuView;
-
 void initBuzzer(void);
-void initBuzzerController(void);
 
 #if defined(SIMULATOR)
 

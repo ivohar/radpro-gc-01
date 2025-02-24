@@ -18,6 +18,9 @@
 #include "measurements.h"
 #include "rtc.h"
 #include "power.h"
+#include "rng.h"
+#include "rtc.h"
+#include "settings.h"
 #include "system.h"
 #include "tube.h"
 
@@ -90,7 +93,7 @@ void setPowerOnView(void)
 #endif
     initDatalog();
 
-    if (!verifyFlash()) 
+    if (!verifyFlash())
     {
         powerOnViewState = POWERON_VIEW_FLASHFAILURE;
 
@@ -101,8 +104,23 @@ void setPowerOnView(void)
 
     requestDisplayBacklightTrigger();
     clearKeyboardEvents();
-    BuzzerAndVibrator();
+    BuzzerAndVibration();
     startEvents();
+
+    // Initialize menus
+    initSettingsMenus();
+    initEventsMenus();
+    initPowerMenus();
+    initCommMenus();
+    initTubeMenus();
+    initDisplayMenus();
+    initMeasurementsMenus();
+#if defined(GAME)
+    initGameMenus();
+#endif
+    initDatalogMenus();
+    initRTCMenus();
+    initRNGMenus();
 
     setView(&powerOnView);
 }

@@ -17,6 +17,7 @@
 #include "cstring.h"
 #include "datalog.h"
 #include "display.h"
+#include "events.h"
 #include "flash.h"
 #include "game.h"
 #include "led.h"
@@ -27,6 +28,8 @@
 #include "settings.h"
 #include "system.h"
 #include "tube.h"
+
+static const Menu settingsMenu;
 
 typedef struct
 {
@@ -42,14 +45,25 @@ static FlashState *getFlashState(FlashIterator *iterator);
 void initSettings(void)
 {
     // Default values
+#if defined(PULSE_LED)
+    settings.pulseLED = PULSE_LED_ON;
+#endif
+    settings.pulseSound = PULSE_SOUND_ON_CLICKS;
+
+    settings.alarmSignaling =
+        (1 << ALARMSIGNALING_SOUND) |
+#if defined(VIBRATION)
+        (1 << ALARMSIGNALING_VIBRATION) |
+#endif
+#if defined(PULSE_LED) || defined(ALERT_LED)
+        (1 << ALARMSIGNALING_ALERT_LED) |
+#endif
+        (1 << ALARMSIGNALING_DISPLAY_FLASH);
+
 #if defined(TUBE_HV_PWM)
     settings.tubeConversionFactor = TUBE_CONVERSIONFACTOR_DEFAULT;
 #endif
 
-#if defined(PULSE_LED)
-    settings.pulseLED = PULSE_LED_ON;
-#endif
-    settings.pulseClicks = PULSE_CLICKS_CLICKS;
 #if defined(DISPLAY_MONOCHROME)
     settings.displayContrast = DISPLAY_CONTRAST_DEFAULT;
 #endif
@@ -59,6 +73,7 @@ void initSettings(void)
     settings.displayBrightness = DISPLAY_BRIGHTNESS_HIGH;
 #endif
     settings.displaySleep = DISPLAY_SLEEP_30S;
+
 #if defined(SIMULATOR)
     time_t unixTime = time(NULL);
     struct tm *localTM = gmtime(&unixTime);
@@ -79,7 +94,40 @@ void initSettings(void)
         setTubeTime(flashState->tube.time);
         setTubePulseCount(flashState->tube.pulseCount);
         settings = flashState->settings;
+
+        // Validate settings
+        if (settings.averaging >= AVERAGING_NUM)
+            settings.averaging = AVERAGING_UNLIMITED;
+        if (settings.instantaneousAveraging >= INSTANTANEOUSAVERAGING_NUM)
+            settings.instantaneousAveraging = INSTANTANEOUSAVERAGING_ADAPTIVEFAST;
+        if (settings.tubeConversionFactor >= TUBE_CONVERSIONFACTOR_NUM)
+            settings.tubeConversionFactor = TUBE_CONVERSIONFACTOR_DEFAULT;
+#if defined(TUBE_HV_PWM)
+        if ((settings.tubeHVFrequency >= TUBE_HVFREQUENCY_NUM) ||
+            (settings.tubeHVDutyCycle >= TUBE_HVDUTYCYCLE_NUM))
+        {
+            settings.tubeHVFrequency = TUBE_HVFREQUENCY_1_25;
+            settings.tubeHVDutyCycle = 0;
+        }
+#endif
+        if (settings.datalogInterval >= DATALOG_INTERVAL_NUM)
+            settings.datalogInterval = DATALOG_INTERVAL_OFF;
+#if defined(DISPLAY_COLOR)
+        if (settings.displayTheme >= DISPLAY_THEME_NUM)
+            settings.displayTheme = DISPLAY_THEME_DAY;
+#endif
+        if (settings.displaySleep >= DISPLAY_SLEEP_NUM)
+            settings.displaySleep = DISPLAY_SLEEP_30S;
+        if (settings.rtcTimeZone >= RTC_TIMEZONE_NUM)
+            settings.rtcTimeZone = RTC_TIMEZONE_P0000;
     }
+}
+
+void initSettingsMenus(void)
+{
+    selectMenuItem(&settingsMenu,
+                   0,
+                   0);
 }
 
 static FlashState *getFlashState(FlashIterator *iterator)
@@ -131,7 +179,7 @@ static const OptionView settingsMenuOptions[] = {
     {"Geiger tube", &tubeMenuView},
     {"Data log", &datalogMenuView},
     {"Display", &displayMenuView},
-    {"Date and time", &dateAndTimeMenuView},
+    {"Date and time", &rtcMenuView},
 #if defined(BATTERY_REMOVABLE)
     {"Battery type", &batteryTypeMenuView},
 #endif

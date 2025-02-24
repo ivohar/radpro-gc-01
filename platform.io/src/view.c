@@ -56,7 +56,14 @@ void dispatchViewEvents(void)
                 setPowerOffView();
             else
             {
-                view.currentView->onEvent(view.currentView, event);
+                if (event == EVENT_KEY_TOGGLEPULSECLICKS)
+                {
+                    togglePulseClicks();
+
+                    triggerVibration();
+                }
+                else
+                    view.currentView->onEvent(view.currentView, event);
 
                 requestDisplayBacklightTrigger();
             }
@@ -71,7 +78,7 @@ void dispatchViewEvents(void)
 #if defined(DISPLAY_MONOCHROME)
         bool isDisplayActive = !isPowerOffViewActive();
 #elif defined(DISPLAY_COLOR)
-        bool isPulseFlashesActive = settings.pulseFlashes &&
+        bool isPulseFlashesActive = settings.pulseDisplayFlash &&
                                     !isPulseThresholdEnabled();
         bool isDisplayActive = !isPowerOffViewActive() &&
                                (isDisplayBacklightActive() ||
