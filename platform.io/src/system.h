@@ -17,9 +17,8 @@
 
 #define FIRMWARE_AUTHOR "Gissio"
 #define FIRMWARE_NAME "Rad Pro GC-01"
-#define FIRMWARE_VERSION "2.1-iha-c1"
+#define FIRMWARE_VERSION "2.1.1beta1-iha-c1"
 
-extern const View lockView;
 extern const View statisticsView;
 
 void initSystem(void);
