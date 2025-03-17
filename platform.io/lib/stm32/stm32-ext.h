@@ -701,7 +701,6 @@ __STATIC_INLINE void exti_clear_pending_interrupt(uint8_t pin)
 #define ADC_VREF_CHANNEL 0
 #define ADC_TEMP_CHANNEL 17
 #define ADC_VBAT_CHANNEL 18
-#define ADC_VREF_CHANNEL 0
 #endif
 
 #if defined(STM32F0) && defined(GD32)
@@ -1017,8 +1016,8 @@ __STATIC_INLINE void adc_start_conversion_oneshot(ADC_TypeDef *base,
     else
         base->SMPR2 = sample_time << (3 * (channel - 10));
 
-    set_bits(base->CFGR,
-             ADC_CFGR_OVRMOD);
+    set_bits(base->ISR,
+             ADC_ISR_OVR);
 
     set_bits(base->CR,
              ADC_CR_ADSTART);
