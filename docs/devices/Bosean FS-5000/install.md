@@ -53,7 +53,7 @@ Also take note of the type of LCD display: the marking on the ribbon cable shoul
 
 ## Step 4: Configure your device
 
-Start your device and go to Rad Pro's settings, select "Geiger tube", "Conversion factor", and select the option that matches the Geiger-Müller tube installed in your device.
+Start your device and go to Rad Pro's settings, select "Geiger tube", "Sensitivity", and select the option that matches the Geiger-Müller tube installed in your device.
 
 To establish a USB data connection under Windows, install the [CH340 driver](https://www.catalog.update.microsoft.com/Search.aspx?q=USB%5CVID_1A86%26PID_7523).
 
@@ -76,7 +76,7 @@ On the FS-5000, the keys are mapped as follows:
   * Go up/down: the up/back and down/settings keys.
   * Select option: short hold of the right/settings key, or the ok/power key.
   * Go back: short hold of the up/back key.
-  * Toggle pulses sound in measurement view: the up/back and down/settings key simultaneously.
+  * Toggle pulses sound in measurement view: long hold of the the up/back and down/settings keys.
   * Toggle lock mode: long hold of the ok/power and up/back keys.
 
 To establish a USB data connection, connect your FS-5000 to a computer using a USB data cable.

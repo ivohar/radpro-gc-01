@@ -87,11 +87,11 @@ void setPowerOnView(void)
     setPower(true);
 
     // Initialize modules
-    initMeasurements();
+    resetMeasurements();
 #if defined(GAME)
-    initGame();
+    resetGame();
 #endif
-    initDatalog();
+    resetDatalog();
 
     if (!verifyFlash())
     {
@@ -103,24 +103,19 @@ void setPowerOnView(void)
         powerOnViewState = POWERON_VIEW_SPLASH;
 
     requestDisplayBacklightTrigger();
-    clearKeyboardEvents();
     BuzzerAndVibration();
     startEvents();
 
-    // Initialize menus
-    initSettingsMenus();
-    initEventsMenus();
-    initPowerMenus();
-    initCommMenus();
-    initTubeMenus();
-    initDisplayMenus();
-    initMeasurementsMenus();
-#if defined(GAME)
-    initGameMenus();
-#endif
-    initDatalogMenus();
-    initRTCMenus();
-    initRNGMenus();
+    // Reset modules
+    resetSettings();
+    resetEvents();
+    resetPower();
+    resetComm();
+    resetTube();
+    resetDisplay();
+    resetDatalog();
+    resetRTC();
+    resetRNG();
 
     setView(&powerOnView);
 }
