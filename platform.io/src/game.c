@@ -111,7 +111,7 @@ static void updateGameBoard(void)
     switch (game.state)
     {
     case GAME_SHOWING_LAST_MOVE:
-        for (int i = 0; i < GAME_HISTORY_MOVE_NUM; i++)
+        for (uint32_t i = 0; i < GAME_HISTORY_MOVE_NUM; i++)
             if (game.history[i].from != MCUMAX_SQUARE_INVALID)
                 move = game.history[i];
 
@@ -409,8 +409,7 @@ static void onGameViewEvent(const View *view, Event event)
         if (game.state != GAME_OVER)
         {
             uint32_t side = (game.moveIndex & 0x1);
-            game.playerTime[side] =
-                game.playerTime[side] + 1;
+            game.playerTime[side] = game.playerTime[side] + 1;
         }
 
         break;
