@@ -11,6 +11,7 @@
 * Configurable instantaneous rate averaging (adaptive fast, adaptive precision, 1 minute, 30 seconds and 10 seconds).
 * Configurable average timer for performing surveys.
 * Customizable Geiger-Müller tube settings: sensitivity, dead-time compensation, high voltage generator PWM frequency and duty cycle (on supported devices).
+* Optional overrange alarm when dead-time compensation exceeds 10%.
 * Preconfigured high voltage profiles (on supported devices).
 * Offline and live data logging with data compression.
 * Compatibility with the [GeigerLog](https://github.com/Gissio/geigerlog-radpro) data logging software.
@@ -118,17 +119,19 @@ To minimize false alarms, the instantaneous rate alarm triggers only when the co
 
 [Dead time](https://en.wikipedia.org/wiki/Geiger%E2%80%93M%C3%BCller_tube#Quenching_and_dead_time) is the period of time during which the Geiger-Müller tube is unable to detect another radiation event immediately after detecting one. This occurs because the tube becomes saturated after each radiation event, typically for 50-200 µs. Consequently, measurements of high levels of radiation will be inaccurate as the tube fails to register the counts during the dead-time period.
 
-Rad Pro lets you add these missed counts by applying dead-time compensation.
+Rad Pro's dead-time compensation lets you add these missed counts.
 
-To use dead-time compensation you need to measure the dead time first. You can do this by going to Rad Pro's settings, selecting "Statistics" and monitoring the "Dead time" value. Dead time is estimated by measuring the shortest time interval between pulses. Obtaining an accurate result requires several hours under normal levels of radiation. To accelerate this process, use a radioactive source.
+To apply dead-time compensation, you must first measure the tube's dead time. In Rad Pro, navigate to "Settings" > "Statistics", and monitor the "Dead time" value. Dead time is estimated by measuring the shortest time interval between pulses. For reliable results, measure over several hours under normal radiation levels. Using a radioactive source can speed up this process.
 
-Rad Pro employs the non-paralyzable model for dead-time compensation:
+Rad Pro uses the non-paralyzable model for dead-time compensation:
 
 $$n = \frac{m}{1 - m \tau}$$
 
 Here, $m$ is the uncompensated rate in counts per seconds, $\tau$ is the tube's dead time in seconds and $n$ is the compensated rate in counts per second. To prevent overflow, the compensation factor $1/(1 - m\tau)$ is limited to a maximum value of 10.
 
 Dead-time compensation is applied to instantaneous rate, average rate, cumulative dose and history. It is not applied to tube life pulse count nor data logs.
+
+An optional "Overrange" alarm can be set to trigger when dead-time correction exceeds 10%.
 
 ## HV profiles
 
@@ -138,13 +141,15 @@ HV profiles let you control the high voltage supplied to the Geiger-Müller tube
 
 You can also define your own HV profile. **WARNING:** Wrong profile settings may damage the tube from overvoltage, as well as the switching transistor from overcurrent.
 
-Setting up a custom HV profile requires measuring the high voltage at the tube. To accomplish this, connect a 1 GΩ resistor in series to the positive terminal of a high-quality multimeter (with a 10 MΩ input impedance). Ensure the resistor is clean to prevent spurious currents. Set the multimeter to the 20 V range. Connect the negative terminal of the multimeter to ground, and the free end of the resistor to the tube's anode. The high voltage corresponds approximately to the multimeter reading multiplied by a factor of (1000 MΩ + 10 MΩ) / 10 MΩ = 101. **WARNING:** High voltage can be lethal.
+Setting up a custom HV profile requires measuring the high voltage at the tube. To accomplish this, connect a 1 GΩ resistor in series to the positive terminal of a high-quality multimeter (with a 10 MΩ input impedance). Ensure the resistor is clean to prevent spurious currents. Set the multimeter to the 20 V range. Connect the negative terminal of the multimeter to ground, and the free end of the resistor to the tube's anode. The high voltage corresponds approximately to the multimeter reading multiplied by a factor of (1,000 MΩ + 10 MΩ) / 10 MΩ = 101. **WARNING:** High voltage can be lethal.
 
 An HV profile consists of a [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) frequency and duty cycle. Typically, higher frequency values produce lower voltage ripple (voltage variations in time) but consume more power. Conversely, lower frequency values require less power, but may sacrifice measurement accuracy.
 
 ## Tube fault alarm
 
-Rad Pro triggers a fault alarm if no pulses are detected within a five-minute interval. This may occur due to a malfunctioning high-voltage generator, or a defective Geiger-Müller tube.
+Rad Pro triggers a fault alarm if no pulses are detected within a certain safety interval. This may occur due to a malfunctioning high-voltage generator, or a defective Geiger-Müller tube. The safety interval $t_s$ (in seconds) is calculated based on the Geiger tube's sensitivity $S$ (in cpm/µSv/h) using the formula:
+
+$$t_s = \frac{12000}{S}$$
 
 Rad Pro also triggers a fault alarm if the Geiger-Müller tube becomes saturated due to high radiation levels, or shorted due to a malfunction.
 

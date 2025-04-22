@@ -79,7 +79,9 @@ enum
 {
     AVERAGING_UNLIMITED,
     AVERAGING_24H,
+    AVERAGING_12H,
     AVERAGING_6H,
+    AVERAGING_3H,
     AVERAGING_1H,
     AVERAGING_30M,
     AVERAGING_10M,
@@ -91,10 +93,12 @@ enum
     AVERAGING_1S,
     AVERAGING_TIME_NUM,
 
-    AVERAGING_40CONFIDENCE = AVERAGING_TIME_NUM,
+    AVERAGING_50CONFIDENCE = AVERAGING_TIME_NUM,
     AVERAGING_20CONFIDENCE,
     AVERAGING_10CONFIDENCE,
     AVERAGING_5CONFIDENCE,
+    AVERAGING_2CONFIDENCE,
+    AVERAGING_1CONFIDENCE,
 
     AVERAGING_NUM,
 };
@@ -180,16 +184,16 @@ enum
     TUBE_SENSITIVITY_PRESETS_NUM,
 };
 
-#define TUBE_SENSITIVITY_VALUE_MIN 25.0F
-#define TUBE_SENSITIVITY_VALUE_MAX 12800.01F
-#define TUBE_SENSITIVITY_VALUE_LOG_MAX_MIN 9.0F
-#define TUBE_SENSITIVITY_VALUE_NUM 145
+#define TUBE_SENSITIVITY_VALUE_MIN 1.0F
+#define TUBE_SENSITIVITY_VALUE_MAX 10000.01F
+#define TUBE_SENSITIVITY_VALUE_LOG2_MAX_MIN 13.28771237F
+#define TUBE_SENSITIVITY_VALUE_NUM 241
 #define TUBE_SENSITIVITY_NUM (TUBE_SENSITIVITY_PRESETS_NUM + TUBE_SENSITIVITY_VALUE_NUM)
 
-#define TUBE_DEADTIMECOMPENSATION_MIN 0.000020F
-#define TUBE_DEADTIMECOMPENSATION_MAX 0.000320F
-#define TUBE_DEADTIMECOMPENSATION_LOG_MAX_MIN 4.0F
-#define TUBE_DEADTIMECOMPENSATION_NUM 64
+#define TUBE_DEADTIMECOMPENSATION_MIN 0.000005F
+#define TUBE_DEADTIMECOMPENSATION_MAX 0.000500F
+#define TUBE_DEADTIMECOMPENSATION_LOG2_MAX_MIN 6.643856189F
+#define TUBE_DEADTIMECOMPENSATION_NUM 121
 
 #if defined(SIMULATOR)
 #define TUBE_SENSITIVITY_DEFAULT TUBE_SENSITIVITY_M4011
@@ -398,15 +402,16 @@ typedef struct
     unsigned int pulseThreshold : 4;
 
     unsigned int units : 2;
-    unsigned int averaging : 4;
+    unsigned int averaging : 5;
     unsigned int instantaneousAveraging : 3;
 
     unsigned int rateAlarm : 4;
     unsigned int doseAlarm : 4;
+    unsigned int overrangeAlarm : 1;
     unsigned int alarmSignaling : 4;
 
     unsigned int tubeSensitivity : 8;
-    unsigned int tubeDeadTimeCompensation : 6;
+    unsigned int tubeDeadTimeCompensation : 7;
 #if defined(TUBE_HV_PWM)
     unsigned int tubeHVProfile : 2;
     unsigned int tubeHVFrequency : 3;
