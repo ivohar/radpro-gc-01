@@ -452,7 +452,11 @@ typedef enum
 // Online color blender: https://pinetools.com/blend-colors
 // Online RGB565 color picker: https://rgbcolorpicker.com/565
 
-static const mr_color_t displayColors[][3] = {
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
+static const uint32_t displayColors[][3] = {
+#else
+static const mr_color_t displayColors[][3] = {    
+#endif
     // Element active
     {mr_get_color(0x1a1a1a),
      mr_get_color(0xf2f0f2), // 0xf2f2f2
@@ -690,6 +694,95 @@ void resetDisplay(void)
 
 // Drawing functions
 
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
+typedef struct 
+{ 
+    int x; 
+    int y; 
+} val_array_t;
+
+// Define the array for interpolation
+#if 0
+static const val_array_t colorArray2[] = {
+    {0x00, 0x00}, 
+    {0x20, 0x40}, 
+    {0x40, 0x80}, 
+    {0x60, 0xA0}, 
+    {0x80, 0xB0}, 
+    {0xA0, 0xD0}, 
+    {0xC0, 0xE0}, 
+    {0xE0, 0xF0}, 
+    {0x100, 0xFF}
+};
+#endif
+
+static const val_array_t colorArray[] = {
+    {0x00, 0x00}, 
+    {0x20, 0x33}, 
+    {0x40, 0x55}, 
+    {0x60, 0x70}, 
+    {0x80, 0x88}, 
+    {0xA0, 0x9E}, 
+    {0xC0, 0xB3}, 
+    {0xE0, 0xC8}, 
+    {0x100, 0xFF}
+};
+
+static const int colorArraySize = sizeof(colorArray) / sizeof(colorArray[0]);
+
+// (A*(255-x)+B*x)/255
+// performs linear interpolation on array vals, either on x or y axis (reverse = false/true)
+uint8_t linint(uint8_t x, const val_array_t* vals, int arr_size)
+{
+    for( int i = 0; i < arr_size-1; i++ )
+    {
+        if (vals[i].x <= x && vals[i+1].x >= x)
+        {
+            return (uint8_t) (vals[i].y + (vals[i+1].y - vals[i].y) * (x - vals[i].x) / (vals[i+1].x - vals[i].x)); 
+        }
+    }
+
+    return 0; // Not in Range
+}
+
+static uint32_t interpolate_color(uint32_t color)
+{
+
+    // Extract RGB components from the input color
+    uint8_t r = (color >> 16) & 0xFF;
+    uint8_t g = (color >> 8) & 0xFF;
+    uint8_t b = color & 0xFF;
+
+    // Perform linear interpolation for each component
+    r = linint(r, colorArray, colorArraySize);
+    g = linint(g, colorArray, colorArraySize);
+    b = linint(b, colorArray, colorArraySize);
+
+    // Combine the interpolated components back into 24-bit RGB format
+    uint32_t interpolatedColor = (r << 16) | (g << 8) | b;
+
+    return interpolatedColor;
+}
+
+static mr_color_t TransformColor(uint32_t color, int mod_index)
+{
+    switch (mod_index)
+    {
+    case 1:
+        color = barbie_color(color);
+        break;
+    case 2:
+        color = interpolate_color(color);
+        break;
+    case 0:
+    default:
+        break;
+    }
+    return mr_get_color_565(color);
+}
+
+#endif
+
 static inline mr_color_t getFillColor(Color color)
 {
 #if defined(DISPLAY_MONOCHROME)
@@ -704,7 +797,11 @@ static inline mr_color_t getFillColor(Color color)
     else
         return 0x0000;
 #elif defined(DISPLAY_COLOR)
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
+    return TransformColor(displayColors[color][settings.displayTheme], 2);
+#else
     return displayColors[color][settings.displayTheme];
+#endif
 #endif
 }
 

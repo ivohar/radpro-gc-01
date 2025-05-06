@@ -52,7 +52,13 @@ typedef uint16_t mr_color_t;
         (((((color_code >> 0) & 0xff) * 249 + 1014) >> 11) << 0)
 
 #define RGB2COLOR(r, g, b) (((((r)>>3)<<11) | (((g)>>2)<<5) | ((b)>>3)))
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)        
+#define barbie_color(color_code) (((color_code & (0x1f<<16))<<3) | ((color_code & (0x3f<<8))<<2) | ((color_code & 0x1f)<<3))
+#define mr_get_color(color_code) (color_code)
+#define mr_get_color_565(color_code) RGB2COLOR((color_code >> 16) & 0xff, (color_code >> 8) & 0xff, color_code & 0xff)
+#else
 #define mr_get_color(color_code) RGB2COLOR((color_code >> 16) & 0xff, (color_code >> 8) & 0xff, color_code & 0xff)
+#endif
 
 // Basic color palette
 
