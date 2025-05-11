@@ -716,7 +716,7 @@ static const val_array_t colorArray2[] = {
 };
 #endif
 
-static const val_array_t colorArray[] = {
+static const val_array_t LogColorArray[] = {
     {0x00, 0x00}, 
     {0x20, 0x33}, 
     {0x40, 0x55}, 
@@ -728,7 +728,21 @@ static const val_array_t colorArray[] = {
     {0x100, 0xFF}
 };
 
-static const int colorArraySize = sizeof(colorArray) / sizeof(colorArray[0]);
+static const int LogColorArraySize = sizeof(LogColorArray) / sizeof(LogColorArray[0]);
+
+static const val_array_t thirdDeg_colorArray[] = {
+    {0x00, 0x00}, 
+    {0x20, 0x33}, 
+    {0x40, 0x66}, 
+    {0x60, 0x7A}, // Flat region starts
+    {0x80, 0x80}, 
+    {0xA0, 0x86}, // Flat region ends
+    {0xC0, 0xBC}, 
+    {0xE0, 0xE0}, 
+    {0x100, 0xFF}
+};
+
+static const int thirdDeg_colorArraySize = sizeof(thirdDeg_colorArray) / sizeof(thirdDeg_colorArray[0]);
 
 // (A*(255-x)+B*x)/255
 // performs linear interpolation on array vals, either on x or y axis (reverse = false/true)
@@ -754,9 +768,9 @@ static uint32_t interpolate_color(uint32_t color)
     uint8_t b = color & 0xFF;
 
     // Perform linear interpolation for each component
-    r = linint(r, colorArray, colorArraySize);
-    g = linint(g, colorArray, colorArraySize);
-    b = linint(b, colorArray, colorArraySize);
+    r = linint(r, LogColorArray, LogColorArraySize);
+    g = linint(g, LogColorArray, LogColorArraySize);
+    b = linint(b, LogColorArray, LogColorArraySize);
 
     // Combine the interpolated components back into 24-bit RGB format
     uint32_t interpolatedColor = (r << 16) | (g << 8) | b;
@@ -764,17 +778,16 @@ static uint32_t interpolate_color(uint32_t color)
     return interpolatedColor;
 }
 
-static mr_color_t TransformColor(uint32_t color, int mod_index)
+static mr_color_t TransformColor(uint32_t color)
 {
-    switch (mod_index)
+    switch (settings.displayFNIRSI)
     {
-    case 1:
+    case 0:
         color = barbie_color(color);
         break;
-    case 2:
+    case 1:
         color = interpolate_color(color);
         break;
-    case 0:
     default:
         break;
     }
@@ -798,7 +811,7 @@ static inline mr_color_t getFillColor(Color color)
         return 0x0000;
 #elif defined(DISPLAY_COLOR)
 #if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
-    return TransformColor(displayColors[color][settings.displayTheme], 2);
+    return TransformColor(displayColors[color][settings.displayTheme]);
 #else
     return displayColors[color][settings.displayTheme];
 #endif
@@ -2383,6 +2396,46 @@ const View displayThemeMenuView = {
     &displayThemeMenu,
 };
 
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
+// Display FNIRSI enhancements menu
+static const char *const displayFNIRSIMenuOptions[] = {
+    getString(STRING_FNIRSI_BARBIE),
+    getString(STRING_FNIRSI_LOGSCALE),
+    NULL,
+};
+
+static const char *onDisplayFNIRSIMenuGetOption(const Menu *menu,
+                                               uint32_t index,
+                                               MenuStyle *menuStyle)
+{
+    *menuStyle = (index == settings.displayFNIRSI);
+
+    return displayFNIRSIMenuOptions[index];
+}
+
+static void onDisplayFNIRSIMenuSelect(const Menu *menu)
+{
+    settings.displayFNIRSI = menu->state->selectedIndex;
+
+    updateView();
+}
+
+static MenuState displayFNIRSIMenuState;
+
+static const Menu displayFNIRSIMenu = {
+    getString(STRING_FNIRSI_ENHANCEMENTS),
+    &displayFNIRSIMenuState,
+    onDisplayFNIRSIMenuGetOption,
+    onDisplayFNIRSIMenuSelect,
+    onDisplaySubMenuBack,
+};
+
+const View displayFNIRSIMenuView = {
+    onMenuEvent,
+    &displayFNIRSIMenu,
+};
+#endif
+
 #endif
 
 // Display brightness level menu
@@ -2473,6 +2526,9 @@ const View displaySleepMenuView = {
 static const OptionView displayMenuOptions[] = {
 #if defined(DISPLAY_COLOR)
     {getString(STRING_THEME), &displayThemeMenuView},
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
+    {getString(STRING_FNIRSI_ENHANCEMENTS), &displayFNIRSIMenuView},
+#endif      
 #endif
     {getString(STRING_BRIGHTNESS), &displayBrightnessMenuView},
 #if defined(DISPLAY_MONOCHROME)
