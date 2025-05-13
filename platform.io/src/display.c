@@ -731,15 +731,15 @@ static const val_array_t LogColorArray[] = {
 static const int LogColorArraySize = sizeof(LogColorArray) / sizeof(LogColorArray[0]);
 
 static const val_array_t thirdDeg_colorArray[] = {
-    {0x00, 0x00}, 
-    {0x20, 0x33}, 
-    {0x40, 0x66}, 
-    {0x60, 0x7A}, // Flat region starts
-    {0x80, 0x80}, 
-    {0xA0, 0x86}, // Flat region ends
-    {0xC0, 0xBC}, 
-    {0xE0, 0xE0}, 
-    {0x100, 0xFF}
+    {0x00, 0x00},  // Start at origin
+    {0x20, 0x50},  // Steep initial rise
+    {0x40, 0x79},  // Approaching flat region
+    {0x60, 0x88},  // Start of flat region
+    {0x80, 0x8C},  // Middle of flat region
+    {0xA0, 0x90},  // End of flat region
+    {0xC0, 0x9E},  // Beginning to rise again
+    {0xE0, 0xBF},  // Steeper rise
+    {0x100, 0xFF}  // End
 };
 
 static const int thirdDeg_colorArraySize = sizeof(thirdDeg_colorArray) / sizeof(thirdDeg_colorArray[0]);
@@ -759,7 +759,7 @@ uint8_t linint(uint8_t x, const val_array_t* vals, int arr_size)
     return 0; // Not in Range
 }
 
-static uint32_t interpolate_color(uint32_t color)
+static uint32_t interpolate_color(uint32_t color, int mode)
 {
 
     // Extract RGB components from the input color
@@ -768,9 +768,18 @@ static uint32_t interpolate_color(uint32_t color)
     uint8_t b = color & 0xFF;
 
     // Perform linear interpolation for each component
-    r = linint(r, LogColorArray, LogColorArraySize);
-    g = linint(g, LogColorArray, LogColorArraySize);
-    b = linint(b, LogColorArray, LogColorArraySize);
+    if (mode == 3)
+    {
+        r = linint(r, thirdDeg_colorArray, thirdDeg_colorArraySize);
+        g = linint(g, thirdDeg_colorArray, thirdDeg_colorArraySize);
+        b = linint(b, thirdDeg_colorArray, thirdDeg_colorArraySize);
+    }
+    else
+    {
+        r = linint(r, LogColorArray, LogColorArraySize);
+        g = linint(g, LogColorArray, LogColorArraySize);
+        b = linint(b, LogColorArray, LogColorArraySize);
+    }
 
     // Combine the interpolated components back into 24-bit RGB format
     uint32_t interpolatedColor = (r << 16) | (g << 8) | b;
@@ -782,12 +791,14 @@ static mr_color_t TransformColor(uint32_t color)
 {
     switch (settings.displayFNIRSI)
     {
-    case 0:
+    case 1:
         color = barbie_color(color);
         break;
-    case 1:
-        color = interpolate_color(color);
+    case 2:
+    case 3:
+        color = interpolate_color(color, settings.displayFNIRSI);
         break;
+    case 0:
     default:
         break;
     }
@@ -2399,8 +2410,10 @@ const View displayThemeMenuView = {
 #if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
 // Display FNIRSI enhancements menu
 static const char *const displayFNIRSIMenuOptions[] = {
+    getString(STRING_FNIRSI_LIN),
     getString(STRING_FNIRSI_BARBIE),
     getString(STRING_FNIRSI_LOGSCALE),
+    getString(STRING_FNIRSI_THRDDEG_CURVE),
     NULL,
 };
 

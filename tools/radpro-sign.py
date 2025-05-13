@@ -134,7 +134,7 @@ def main():
     sign_firmware('bosean-fs1000', 0x20000, 0x0, 0xa000, 0xb800)
     sign_firmware('bosean-fs5000-portrait', 0x40000, 0x0, 0xf000, 0x1a000)
     sign_firmware('bosean-fs5000-landscape', 0x40000, 0x0, 0xf000, 0x1a000)
-    sign_firmware('fnirsi-gc01-ch32f103r8', 0x10000, 0x4000, 0xa400, 0xa400)
+    sign_firmware('fnirsi-gc01-ch32f103r8', 0x10000, 0x4000, 0xa800, 0xa400)
     sign_firmware('fnirsi-gc01-apm32f103rb', 0x20000, 0x4000, 0xf000, 0x1a000)
 
 
