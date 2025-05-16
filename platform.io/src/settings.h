@@ -424,9 +424,6 @@ typedef struct
     unsigned int displayContrast : 3;
 #elif defined(DISPLAY_COLOR)
     unsigned int displayTheme : 2;
-#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
-    unsigned int displayFNIRSI : 2;
-#endif   
 #endif
     unsigned int displayBrightness : 2;
     unsigned int displaySleep : 3;

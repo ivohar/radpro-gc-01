@@ -189,9 +189,6 @@
 
 // Display menu items
 #define STRING_THEME "Theme"
-#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
-#define STRING_FNIRSI_ENHANCEMENTS "FNIRSI enhancements"
-#endif      
 #define STRING_BRIGHTNESS "Brightness"
 #define STRING_CONTRAST "Contrast"
 #define STRING_SLEEP "Sleep"
@@ -200,13 +197,9 @@
 #define STRING_THEME_DAY "Day"
 #define STRING_THEME_DUSK "Dusk"
 #define STRING_THEME_NIGHT "Night"
-
 #if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
 // Display - FNIRSI enhancements menu items
-#define STRING_FNIRSI_LIN "Linear curve"
-#define STRING_FNIRSI_BARBIE "Barbie colors"
-#define STRING_FNIRSI_LOGSCALE "Logarithmic scale"
-#define STRING_FNIRSI_THRDDEG_CURVE "3rd degree curve"
+#define STRING_THEME_FNIRSI_BARBIE "Barbie"
 #endif
 
 // Display - Brightness menu items

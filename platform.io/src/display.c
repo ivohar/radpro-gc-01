@@ -453,10 +453,45 @@ typedef enum
 // Online RGB565 color picker: https://rgbcolorpicker.com/565
 
 #if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
-static const uint32_t displayColors[][3] = {
+static const mr_color_t displayColors[][4] = {
+{mr_get_color(0x292929), mr_get_color(0xF2F0F2), mr_get_color(0x7C7C00), mr_get_color(0xD068D0)},
+{mr_get_color(0x747274), mr_get_color(0x9A9A9A), mr_get_color(0x7C7B00), mr_get_color(0x308C30)},
+{mr_get_color(0xF0F0F0), mr_get_color(0x1F1F1F), mr_get_color(0x000000), mr_get_color(0xB8DCB8)},
+{mr_get_color(0xF9FBF9), mr_get_color(0x262726), mr_get_color(0x191900), mr_get_color(0xE0F4E0)},
+{mr_get_color(0xBDBDBD), mr_get_color(0x181818), mr_get_color(0x000000), mr_get_color(0x804080)},
+{mr_get_color(0xD6D6D6), mr_get_color(0x1F1F1F), mr_get_color(0x000000), mr_get_color(0x40A040)},
+{mr_get_color(0xBDBDBD), mr_get_color(0x202020), mr_get_color(0x000000), mr_get_color(0x804080)},
+{mr_get_color(0xD6D6D6), mr_get_color(0x282828), mr_get_color(0x000000), mr_get_color(0x40A040)},
+{mr_get_color(0x466B99), mr_get_color(0x5696C7), mr_get_color(0x006834), mr_get_color(0x906CD0)},
+{mr_get_color(0xC1C6DB), mr_get_color(0x3B4550), mr_get_color(0x142F07), mr_get_color(0xB07858)},
+{mr_get_color(0xADB3BB), mr_get_color(0x222C37), mr_get_color(0x415807), mr_get_color(0xC00068)},
+{mr_get_color(0xFFFFFF), mr_get_color(0x333233), mr_get_color(0x191900), mr_get_color(0xF8FCF8)},
+{mr_get_color(0xC3C2C3), mr_get_color(0x141214), mr_get_color(0x515500), mr_get_color(0xC860C8)},
+{mr_get_color(0x416591), mr_get_color(0x45789F), mr_get_color(0x005B2A), mr_get_color(0x705070)},
+{mr_get_color(0xB6BBC3), mr_get_color(0x2F3740), mr_get_color(0x0F2505), mr_get_color(0x2834C8)},
+{mr_get_color(0xA4A9B1), mr_get_color(0x1B232C), mr_get_color(0x344D05), mr_get_color(0x50C4E8)},
+{mr_get_color(0xDBDFDB), mr_get_color(0x292929), mr_get_color(0x141400), mr_get_color(0x58B458)},
+{mr_get_color(0xB8B8B8), mr_get_color(0x101010), mr_get_color(0x414800), mr_get_color(0x402040)},
+{mr_get_color(0x3D5F8A), mr_get_color(0x37607F), mr_get_color(0x005123), mr_get_color(0x503418)},
+{mr_get_color(0xACB1B8), mr_get_color(0x262C33), mr_get_color(0x0C1B05), mr_get_color(0xB0F440)},
+{mr_get_color(0x9B9FA7), mr_get_color(0x161C23), mr_get_color(0x2A3E05), mr_get_color(0xE88C70)},
+{mr_get_color(0xC3C2C3), mr_get_color(0x212121), mr_get_color(0x0F1100), mr_get_color(0xC860C8)},
+{mr_get_color(0xADADAD), mr_get_color(0x0D0F0D), mr_get_color(0x343900), mr_get_color(0xC0E0C0)},
+{mr_get_color(0x474647), mr_get_color(0xE6E6E6), mr_get_color(0x7C7C00), mr_get_color(0x98C898)},
+{mr_get_color(0x7C7C7C), mr_get_color(0x9C9C9C), mr_get_color(0x686700), mr_get_color(0x80C080)},
+{mr_get_color(0xC72B2B), mr_get_color(0xE52626), mr_get_color(0x7F000C), mr_get_color(0xF86CD8)},
+{mr_get_color(0xFFFFFF), mr_get_color(0x333233), mr_get_color(0x000000), mr_get_color(0xF8FCF8)},
+{mr_get_color(0xA8ACB2), mr_get_color(0x3C5275), mr_get_color(0x005B2D), mr_get_color(0x80D8F8)},
+{mr_get_color(0x232426), mr_get_color(0xF2F0F2), mr_get_color(0x7C7C00), mr_get_color(0xB05CC0)},
+{mr_get_color(0x7E7F7E), mr_get_color(0xA3A4A3), mr_get_color(0x7C7B00), mr_get_color(0x98D098)},
+{mr_get_color(0x446894), mr_get_color(0x5779A2), mr_get_color(0x3E6952), mr_get_color(0x805C90)},
+{mr_get_color(0xAD937C), mr_get_color(0xB89070), mr_get_color(0x505000), mr_get_color(0xC04080)},
+{mr_get_color(0xBDA88D), mr_get_color(0xD0B088), mr_get_color(0x646400), mr_get_color(0x80C040)},
+{mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000)},
+{mr_get_color(0xFFFFFF), mr_get_color(0xFFFFFF), mr_get_color(0x7C7C00), mr_get_color(0xF8FCF8)}
+};    
 #else
 static const mr_color_t displayColors[][3] = {    
-#endif
     // Element active
     {mr_get_color(0x1a1a1a),
      mr_get_color(0xf2f0f2), // 0xf2f2f2
@@ -632,6 +667,7 @@ static const mr_color_t displayColors[][3] = {
      mr_get_color(0xffffff),
      mr_get_color(0x484800)},
 };
+#endif
 
 #endif
 
@@ -694,119 +730,6 @@ void resetDisplay(void)
 
 // Drawing functions
 
-#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
-typedef struct 
-{ 
-    int x; 
-    int y; 
-} val_array_t;
-
-// Define the array for interpolation
-#if 0
-static const val_array_t colorArray2[] = {
-    {0x00, 0x00}, 
-    {0x20, 0x40}, 
-    {0x40, 0x80}, 
-    {0x60, 0xA0}, 
-    {0x80, 0xB0}, 
-    {0xA0, 0xD0}, 
-    {0xC0, 0xE0}, 
-    {0xE0, 0xF0}, 
-    {0x100, 0xFF}
-};
-#endif
-
-static const val_array_t LogColorArray[] = {
-    {0x00, 0x00}, 
-    {0x20, 0x33}, 
-    {0x40, 0x55}, 
-    {0x60, 0x70}, 
-    {0x80, 0x88}, 
-    {0xA0, 0x9E}, 
-    {0xC0, 0xB3}, 
-    {0xE0, 0xC8}, 
-    {0x100, 0xFF}
-};
-
-static const int LogColorArraySize = sizeof(LogColorArray) / sizeof(LogColorArray[0]);
-
-static const val_array_t thirdDeg_colorArray[] = {
-    {0x00, 0x00},  // Start at origin
-    {0x20, 0x50},  // Steep initial rise
-    {0x40, 0x79},  // Approaching flat region
-    {0x60, 0x88},  // Start of flat region
-    {0x80, 0x8C},  // Middle of flat region
-    {0xA0, 0x90},  // End of flat region
-    {0xC0, 0x9E},  // Beginning to rise again
-    {0xE0, 0xBF},  // Steeper rise
-    {0x100, 0xFF}  // End
-};
-
-static const int thirdDeg_colorArraySize = sizeof(thirdDeg_colorArray) / sizeof(thirdDeg_colorArray[0]);
-
-// (A*(255-x)+B*x)/255
-// performs linear interpolation on array vals, either on x or y axis (reverse = false/true)
-uint8_t linint(uint8_t x, const val_array_t* vals, int arr_size)
-{
-    for( int i = 0; i < arr_size-1; i++ )
-    {
-        if (vals[i].x <= x && vals[i+1].x >= x)
-        {
-            return (uint8_t) (vals[i].y + (vals[i+1].y - vals[i].y) * (x - vals[i].x) / (vals[i+1].x - vals[i].x)); 
-        }
-    }
-
-    return 0; // Not in Range
-}
-
-static uint32_t interpolate_color(uint32_t color, int mode)
-{
-
-    // Extract RGB components from the input color
-    uint8_t r = (color >> 16) & 0xFF;
-    uint8_t g = (color >> 8) & 0xFF;
-    uint8_t b = color & 0xFF;
-
-    // Perform linear interpolation for each component
-    if (mode == 3)
-    {
-        r = linint(r, thirdDeg_colorArray, thirdDeg_colorArraySize);
-        g = linint(g, thirdDeg_colorArray, thirdDeg_colorArraySize);
-        b = linint(b, thirdDeg_colorArray, thirdDeg_colorArraySize);
-    }
-    else
-    {
-        r = linint(r, LogColorArray, LogColorArraySize);
-        g = linint(g, LogColorArray, LogColorArraySize);
-        b = linint(b, LogColorArray, LogColorArraySize);
-    }
-
-    // Combine the interpolated components back into 24-bit RGB format
-    uint32_t interpolatedColor = (r << 16) | (g << 8) | b;
-
-    return interpolatedColor;
-}
-
-static mr_color_t TransformColor(uint32_t color)
-{
-    switch (settings.displayFNIRSI)
-    {
-    case 1:
-        color = barbie_color(color);
-        break;
-    case 2:
-    case 3:
-        color = interpolate_color(color, settings.displayFNIRSI);
-        break;
-    case 0:
-    default:
-        break;
-    }
-    return mr_get_color_565(color);
-}
-
-#endif
-
 static inline mr_color_t getFillColor(Color color)
 {
 #if defined(DISPLAY_MONOCHROME)
@@ -821,11 +744,7 @@ static inline mr_color_t getFillColor(Color color)
     else
         return 0x0000;
 #elif defined(DISPLAY_COLOR)
-#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
-    return TransformColor(displayColors[color][settings.displayTheme]);
-#else
     return displayColors[color][settings.displayTheme];
-#endif
 #endif
 }
 
@@ -2373,6 +2292,9 @@ static const char *const displayThemeMenuOptions[] = {
     getString(STRING_THEME_DAY),
     getString(STRING_THEME_DUSK),
     getString(STRING_THEME_NIGHT),
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
+    getString(STRING_THEME_FNIRSI_BARBIE),
+#endif    
     NULL,
 };
 
@@ -2406,48 +2328,6 @@ const View displayThemeMenuView = {
     onMenuEvent,
     &displayThemeMenu,
 };
-
-#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
-// Display FNIRSI enhancements menu
-static const char *const displayFNIRSIMenuOptions[] = {
-    getString(STRING_FNIRSI_LIN),
-    getString(STRING_FNIRSI_BARBIE),
-    getString(STRING_FNIRSI_LOGSCALE),
-    getString(STRING_FNIRSI_THRDDEG_CURVE),
-    NULL,
-};
-
-static const char *onDisplayFNIRSIMenuGetOption(const Menu *menu,
-                                               uint32_t index,
-                                               MenuStyle *menuStyle)
-{
-    *menuStyle = (index == settings.displayFNIRSI);
-
-    return displayFNIRSIMenuOptions[index];
-}
-
-static void onDisplayFNIRSIMenuSelect(const Menu *menu)
-{
-    settings.displayFNIRSI = menu->state->selectedIndex;
-
-    updateView();
-}
-
-static MenuState displayFNIRSIMenuState;
-
-static const Menu displayFNIRSIMenu = {
-    getString(STRING_FNIRSI_ENHANCEMENTS),
-    &displayFNIRSIMenuState,
-    onDisplayFNIRSIMenuGetOption,
-    onDisplayFNIRSIMenuSelect,
-    onDisplaySubMenuBack,
-};
-
-const View displayFNIRSIMenuView = {
-    onMenuEvent,
-    &displayFNIRSIMenu,
-};
-#endif
 
 #endif
 
@@ -2539,9 +2419,6 @@ const View displaySleepMenuView = {
 static const OptionView displayMenuOptions[] = {
 #if defined(DISPLAY_COLOR)
     {getString(STRING_THEME), &displayThemeMenuView},
-#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
-    {getString(STRING_FNIRSI_ENHANCEMENTS), &displayFNIRSIMenuView},
-#endif      
 #endif
     {getString(STRING_BRIGHTNESS), &displayBrightnessMenuView},
 #if defined(DISPLAY_MONOCHROME)
