@@ -31,7 +31,7 @@ LogColorArray = [
     (0xA0, 0x9E),
     (0xC0, 0xB3),
     (0xE0, 0xC8),
-    (0x100, 0xFF)
+    (0xFF, 0xFF)
 ]
 
 thirdDeg_colorArray = [
@@ -43,7 +43,7 @@ thirdDeg_colorArray = [
     (0xA0, 0x90),
     (0xC0, 0x9E),
     (0xE0, 0xBF),
-    (0x100, 0xFF)
+    (0xFF, 0xFF)
 ]
 
 def interpolate_color(color, mode):
@@ -112,10 +112,11 @@ displayColors = [
 # Theme: Dusk - Linear
 # Theme: Night - Enhancement 3rd Degree
 # Theme: Barbie - Linear from Day
-for fnirsi in range(1, 4):
-    print(f"settings.displayFNIRSI = {fnirsi}")
-    for row in displayColors:
-        color = row[0]
-        transformed = TransformColor(color, fnirsi)
-        print(f"0x{row[0]:06X}, 0x{transformed:06X}")
-    print()
+for row in displayColors:
+    color = row[0]
+    transformed1 = TransformColor(row[0], 2)
+    transformed2 = row[1]
+    transformed3 = TransformColor(row[2], 3)
+    transformed4 = barbie_color(row[0])
+    print(f"{{mr_get_color(0x{transformed1:06X}), mr_get_color(0x{transformed2:06X}), mr_get_color(0x{transformed3:06X}), mr_get_color(0x{transformed4:06X})}},")
+print()
