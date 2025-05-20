@@ -7,8 +7,8 @@
  * License: MIT
  */
 
-// Application name (should only be translated with non-latin scripts)
-#define STRING_APP_NAME "Рад Про"
+// Application name (should not be translated)
+#define STRING_APP_NAME "Rad Pro"
 
 // Styling characters (should not be translated)
 #define STRING_NUMBERS "0123456789.:"
@@ -87,7 +87,7 @@
 
 // Measurement view secondary view strings
 #define STRING_TIME "Час"
-#define STRING_MAX "Макс"
+#define STRING_MAX "Макс."
 #define STRING_RATE "Темп"
 #define STRING_DOSE "Доза"
 
@@ -130,7 +130,7 @@
 #define STRING_RATE_ALARM "Сигнал швидкості"
 #define STRING_DOSE_ALARM "Сигнал дози"
 #define STRING_OVERRANGE_ALARM "Сигнал перевищення"
-#define STRING_SIGNALING "Сигналізація"
+#define STRING_INDICATION "Індикація"
 
 // Measurements menu items
 #define STRING_UNITS "Одиниці"

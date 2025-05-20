@@ -8,7 +8,7 @@
  */
 
 // Application name (transliterated for non-Latin scripts)
-#define STRING_APP_NAME "Ραδ Προ"
+#define STRING_APP_NAME "Rad Pro"
 
 // Styling characters (should not be translated)
 #define STRING_NUMBERS "0123456789.:"
@@ -130,7 +130,7 @@
 #define STRING_RATE_ALARM "Συναγερμός ρυθμού"
 #define STRING_DOSE_ALARM "Συναγερμός δόσης"
 #define STRING_OVERRANGE_ALARM "Συναγερμός υπέρβασης"
-#define STRING_SIGNALING "Σήμανση"
+#define STRING_INDICATION "Ένδειξη"
 
 // Measurements menu items
 #define STRING_UNITS "Μονάδες"

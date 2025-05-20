@@ -7,8 +7,8 @@
  * License: MIT
  */
 
-// Application name (should only be translated with non-latin scripts)
-#define STRING_APP_NAME "Рад Про"
+// Application name (should not be translated)
+#define STRING_APP_NAME "Rad Pro"
 
 // Styling characters (should not be translated)
 #define STRING_NUMBERS "0123456789.:"
@@ -61,33 +61,33 @@
 #define STRING_OFF "Изключено"
 
 // Notification headings (upper case)
-#define STRING_NOTIFICATION_WARNING "ПРЕДУПРЕЖДЕНИЕ"
+#define STRING_NOTIFICATION_WARNING "ВНИМАНИЕ"
 #define STRING_NOTIFICATION_SUCCESS "УСПЕХ"
 
 // Firmware checksum failure notification (shorter than 30 characters)
-#define STRING_NOTIFICATION_FIRMWARE_CHECKSUM_FAILURE "Неуспех на фърмуера."
+#define STRING_NOTIFICATION_FIRMWARE_CHECKSUM_FAILURE "Грешка на фърмуера."
 
 // HV profile menu items (shorter than 30 characters)
-#define STRING_NOTIFICATION_HVCUSTOM "Грешни стойности вредят."
+#define STRING_NOTIFICATION_HVCUSTOM "Грешни стойности -> повреда."
 
 // Data log reset notification (shorter than 30 characters)
-#define STRING_NOTIFICATION_DATALOG_RESET_TITLE "Нулиране лог?"
-#define STRING_NOTIFICATION_DATALOG_RESET_SUBTITLE "Всички записи изтрити."
+#define STRING_NOTIFICATION_DATALOG_RESET_TITLE "Нулиране?"
+#define STRING_NOTIFICATION_DATALOG_RESET_SUBTITLE "Всичко ще бъде изтрито."
 
 // Data log reset success notification (shorter than 30 characters)
-#define STRING_NOTIFICATION_DATALOG_RESET_SUCCESS "Данните са нулирани."
+#define STRING_NOTIFICATION_DATALOG_RESET_SUCCESS "Записите са изтрити."
 
 // Measurement view UI heading strings
 #define STRING_INSTANTANEOUS "Моментно"
 #define STRING_AVERAGE "Средно"
-#define STRING_CUMULATIVE "Натрупано"
+#define STRING_CUMULATIVE "С натрупване"
 #define STRING_HISTORY10_MIN "История (10 мин)"
 #define STRING_HISTORY1_H "История (1 ч)"
 #define STRING_HISTORY24_H "История (24 ч)"
 
 // Measurement view secondary view strings
 #define STRING_TIME "Време"
-#define STRING_MAX "Макс"
+#define STRING_MAX "Макс."
 #define STRING_RATE "Чест."
 #define STRING_DOSE "Доза"
 
@@ -103,15 +103,15 @@
 #define STRING_PULSES "Импулси"
 #define STRING_ALARMS "Аларми"
 #define STRING_MEASUREMENTS "Измервания"
-#define STRING_GEIGER_TUBE "Гайгеров брояч"
-#define STRING_DATA_LOG "Журнал данни"
+#define STRING_GEIGER_TUBE "G-M брояч"
+#define STRING_DATA_LOG "Журнал с данни"
 #define STRING_DISPLAY "Дисплей"
 #define STRING_DATE_AND_TIME "Дата и час"
 #define STRING_BATTERY_TYPE "Тип батерия"
 #define STRING_RANDOM_GENERATOR "Случаен генератор"
 #define STRING_GAME "Игра"
 #define STRING_STATISTICS "Статистика"
-#define STRING_DATA_MODE "Режим данни"
+#define STRING_DATA_MODE "Режим на данни"
 
 // Pulses menu items
 #define STRING_SOUND "Звук"
@@ -122,31 +122,31 @@
 #define STRING_THRESHOLD "Праг"
 
 // Sound menu items
-#define STRING_CLICKS "Щраквания"
-#define STRING_CHIRPS "Чуруликане"
-#define STRING_BEEPS "Сигнали"
+#define STRING_CLICKS "Щракане"
+#define STRING_CHIRPS "Цвъркане"
+#define STRING_BEEPS "Бипкане"
 
 // Alarms menu items
-#define STRING_RATE_ALARM "Аларма за честота"
+#define STRING_RATE_ALARM "Аларма за ниво"
 #define STRING_DOSE_ALARM "Аларма за доза"
 #define STRING_OVERRANGE_ALARM "Аларма за превишаване"
-#define STRING_SIGNALING "Сигнализация"
+#define STRING_INDICATION "Индикация"
 
 // Measurements menu items
 #define STRING_UNITS "Единици"
 
 // Instantaneous menu items
-#define STRING_ADAPTIVE_FAST "Адаптивно бързо"
-#define STRING_ADAPTIVE_PRECISION "Адаптивно прецизно"
+#define STRING_ADAPTIVE_FAST "Адаптивно-бързо"
+#define STRING_ADAPTIVE_PRECISION "Адаптивно-прецизно"
 
 // Average menu items
 #define STRING_UNLIMITED "Неограничено"
-#define STRING_50_CONFIDENCE "±50% доверие"
-#define STRING_20_CONFIDENCE "±20% доверие"
-#define STRING_10_CONFIDENCE "±10% доверие"
-#define STRING_5_CONFIDENCE "±5% доверие"
-#define STRING_2_CONFIDENCE "±2% доверие"
-#define STRING_1_CONFIDENCE "±1% доверие"
+#define STRING_50_CONFIDENCE "±50% достоверност"
+#define STRING_20_CONFIDENCE "±20% достоверност"
+#define STRING_10_CONFIDENCE "±10% достоверност"
+#define STRING_5_CONFIDENCE "±5% достоверност"
+#define STRING_2_CONFIDENCE "±2% достоверност"
+#define STRING_1_CONFIDENCE "±1% достоверност"
 
 // Geiger tube menu items
 #define STRING_SENSITIVITY "Чувствителност"
@@ -167,14 +167,14 @@
 #define STRING_SBM20 "СБМ-20"
 
 // HV profile menu items
-#define STRING_FACTORY_DEFAULT "Фабрично по подразбиране"
-#define STRING_ACCURACY "Точност"
+#define STRING_FACTORY_DEFAULT "Фабричен"
+#define STRING_ACCURACY "Прецизен"
 #define STRING_ENERGY_SAVING "Енергоспестяващ"
-#define STRING_CUSTOM "Персонализиран"
+#define STRING_CUSTOM "Потребителски"
 
 // HV profile - custom menu items
-#define STRING_PWMFREQUENCY "PWM честота"
-#define STRING_PWMDUTY_CYCLE "PWM работен цикъл"
+#define STRING_PWMFREQUENCY "ШИМ честота"
+#define STRING_PWMDUTY_CYCLE "ШИМ коеф. запълване"
 
 // Data Log menu items
 #define STRING_LOGGING_MODE "Режим на запис"
@@ -238,17 +238,17 @@
 
 // Random generator menu items
 #define STRING_FULL_ASCII "Пълен ASCII"
-#define STRING_ALPHANUMERIC "Алфанумеричен"
+#define STRING_ALPHANUMERIC "Буквено-цифрен"
 #define STRING_HEXADECIMAL "Шестнадесетичен"
 #define STRING_DECIMAL "Десетичен"
 #define STRING_BINARY "Двоичен"
-#define STRING_100_SIDED_DIE "100-странен зар (0-99)"
-#define STRING_20_SIDED_DIE "20-странен зар"
-#define STRING_12_SIDED_DIE "12-странен зар"
-#define STRING_10_SIDED_DIE "10-странен зар (0-9)"
-#define STRING_8_SIDED_DIE "8-странен зар"
-#define STRING_6_SIDED_DIE "6-странен зар"
-#define STRING_4_SIDED_DIE "4-странен зар"
+#define STRING_100_SIDED_DIE "100-стенен зар (0-99)"
+#define STRING_20_SIDED_DIE "20-стенен зар"
+#define STRING_12_SIDED_DIE "12-стенен зар"
+#define STRING_10_SIDED_DIE "10-стенен зар (0-9)"
+#define STRING_8_SIDED_DIE "8-стенен зар"
+#define STRING_6_SIDED_DIE "6-стенен зар"
+#define STRING_4_SIDED_DIE "4-стенен зар"
 #define STRING_COIN_FLIP "Хвърляне на монета"
 
 // Random generator coin head/tail
@@ -260,22 +260,22 @@
 #define STRING_PLAY_BLACK "Играй с черните"
 #define STRING_CONTINUE_GAME "Продължи играта"
 #define STRING_NEW_GAME "Нова игра"
-#define STRING_STRENGTH "Сила"
+#define STRING_STRENGTH "Трудност"
 
 // Game strength menu items prefix (followed by a number from 1 to 8)
 #define STRING_GAME_LEVEL "Ниво"
 
 // Statistics view items
-#define STRING_TUBE_LIFE_TIME "Живот тръба"
-#define STRING_TUBE_LIFE_PULSES "Импулси"
+#define STRING_TUBE_LIFE_TIME "Работа на брояча"
+#define STRING_TUBE_LIFE_PULSES "Общо импулси"
 #define STRING_TUBE_DEAD_TIME "Мъртво време"
-#define STRING_DEVICE_ID "Устройство ID"
+#define STRING_DEVICE_ID "ID на устр."
 #define STRING_DEVICE_VOLTAGE "Напрежение"
 
-#define STRING_TUBE "Тръба"
+#define STRING_TUBE "Детектор"
 #define STRING_LIFE_TIME "Живот"
 #define STRING_LIFE_PULSES "Импулси"
-#define STRING_DEAD_TIME "Мъртво в."
+#define STRING_DEAD_TIME "Мъртво вр."
 #define STRING_DEVICE "Устройство"
 #define STRING_ID "ID"
-#define STRING_VOLTAGE "Волтаж"
+#define STRING_VOLTAGE "Напр."

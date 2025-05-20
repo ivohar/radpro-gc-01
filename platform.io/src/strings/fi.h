@@ -7,7 +7,7 @@
  * License: MIT
  */
 
-// Application name (should only be translated with non-latin scripts)
+// Application name (should not be translated)
 #define STRING_APP_NAME "Rad Pro"
 
 // Styling characters (should not be translated)
@@ -130,7 +130,7 @@
 #define STRING_RATE_ALARM "Nopeushälytys"
 #define STRING_DOSE_ALARM "Annoshälytys"
 #define STRING_OVERRANGE_ALARM "Ylialuehälytys"
-#define STRING_SIGNALING "Signalointi"
+#define STRING_INDICATION "Ilmoitus"
 
 // Measurements menu items
 #define STRING_UNITS "Yksiköt"

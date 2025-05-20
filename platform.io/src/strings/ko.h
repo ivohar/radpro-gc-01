@@ -8,7 +8,7 @@
  */
 
 // Application name (translated with non-latin script)
-#define STRING_APP_NAME "래드 프로"
+#define STRING_APP_NAME "Rad Pro"
 
 // Styling characters (should not be translated)
 #define STRING_NUMBERS "0123456789.:"
@@ -130,7 +130,7 @@
 #define STRING_RATE_ALARM "비율 알람"
 #define STRING_DOSE_ALARM "선량 알람"
 #define STRING_OVERRANGE_ALARM "초과 알람"
-#define STRING_SIGNALING "신호"
+#define STRING_INDICATION "표시"
 
 // Measurements menu items
 #define STRING_UNITS "단위"

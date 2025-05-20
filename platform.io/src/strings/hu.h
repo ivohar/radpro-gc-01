@@ -7,7 +7,7 @@
  * License: MIT
  */
 
-// Application name (should only be translated with non-latin scripts)
+// Application name (should not be translated)
 #define STRING_APP_NAME "Rad Pro"
 
 // Styling characters (should not be translated)
@@ -130,7 +130,7 @@
 #define STRING_RATE_ALARM "Arány riasztás"
 #define STRING_DOSE_ALARM "Dózis riasztás"
 #define STRING_OVERRANGE_ALARM "Túlterhelés riasztás"
-#define STRING_SIGNALING "Jelzés"
+#define STRING_INDICATION "Jelzés"
 
 // Measurements menu items
 #define STRING_UNITS "Mértékegységek"
