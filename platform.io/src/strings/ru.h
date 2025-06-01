@@ -38,8 +38,8 @@
 #define STRING_CPMUSVH "cpm/µSv/h"
 
 // Units for indicating Geiger tube pulse count, as in "1 count" or "14 counts"
-#define STRING_COUNT "счёт"
-#define STRING_COUNTS "счёты"
+#define STRING_COUNT "имп."
+#define STRING_COUNTS "имп."
 
 // Common time menu items
 #define STRING_24_HOURS "24 часа"
@@ -62,25 +62,25 @@
 
 // Notification headings (upper case)
 #define STRING_NOTIFICATION_WARNING "ПРЕДУПРЕЖДЕНИЕ"
-#define STRING_NOTIFICATION_SUCCESS "УСПЕХ"
+#define STRING_NOTIFICATION_SUCCESS "УСПЕШНО"
 
 // Firmware checksum failure notification (shorter than 30 characters)
-#define STRING_NOTIFICATION_FIRMWARE_CHECKSUM_FAILURE "Ошибка суммы прошивки."
+#define STRING_NOTIFICATION_FIRMWARE_CHECKSUM_FAILURE "Ошибка прошивки."
 
 // HV profile menu items (shorter than 30 characters)
 #define STRING_NOTIFICATION_HVCUSTOM "Ошибки вредят устройству."
 
 // Data log reset notification (shorter than 30 characters)
-#define STRING_NOTIFICATION_DATALOG_RESET_TITLE "Сброс журнала?"
+#define STRING_NOTIFICATION_DATALOG_RESET_TITLE "Очистка журнала?"
 #define STRING_NOTIFICATION_DATALOG_RESET_SUBTITLE "Все записи будут удалены."
 
 // Data log reset success notification (shorter than 30 characters)
-#define STRING_NOTIFICATION_DATALOG_RESET_SUCCESS "Журнал данных сброшен."
+#define STRING_NOTIFICATION_DATALOG_RESET_SUCCESS "Журнал данных очищен."
 
 // Measurement view UI heading strings
-#define STRING_INSTANTANEOUS "Мгновенный"
-#define STRING_AVERAGE "Средний"
-#define STRING_CUMULATIVE "Накопленный"
+#define STRING_INSTANTANEOUS "Мгновенное"
+#define STRING_AVERAGE "Среднее"
+#define STRING_CUMULATIVE "Накопленная"
 #define STRING_HISTORY10_MIN "История (10 мин)"
 #define STRING_HISTORY1_H "История (1 ч)"
 #define STRING_HISTORY24_H "История (24 ч)"
@@ -119,7 +119,7 @@
 #define STRING_ALERT_LED "Светодиод тревоги"
 #define STRING_PULSE_LED "Светодиод импульса"
 #define STRING_DISPLAY_FLASH "Мигание дисплея"
-#define STRING_THRESHOLD "Порог"
+#define STRING_THRESHOLD "Порог тревоги"
 
 // Sound menu items
 #define STRING_CLICKS "Щелчки"
@@ -133,7 +133,7 @@
 #define STRING_INDICATION "Индикация"
 
 // Measurements menu items
-#define STRING_UNITS "Единицы"
+#define STRING_UNITS "Единицы измерения"
 
 // Instantaneous menu items
 #define STRING_ADAPTIVE_FAST "Адаптивный быстрый"
@@ -150,7 +150,7 @@
 
 // Geiger tube menu items
 #define STRING_SENSITIVITY "Чувствительность"
-#define STRING_DEAD_TIME_COMPENSATION "Компенсация мёртвого времени"
+#define STRING_DEAD_TIME_SHORT_COMPENSATION "Компенсация мёртвого времени"
 #define STRING_HVPROFILE "Профиль HV"
 
 // Suffix for indicating the default Geiger tube (as short as possible)
@@ -176,9 +176,12 @@
 #define STRING_PWMFREQUENCY "Частота ШИМ"
 #define STRING_PWMDUTY_CYCLE "Скважность ШИМ"
 
+// Tube/battery voltage
+#define STRING_VOLTAGE "Напряжение"
+
 // Data Log menu items
 #define STRING_LOGGING_MODE "Режим записи"
-#define STRING_RESET "Сброс"
+#define STRING_RESET "Очистить"
 
 // Data log - Logging menu items
 #define STRING_EVERY_HOUR "Каждый час"
@@ -260,22 +263,19 @@
 #define STRING_PLAY_BLACK "Играть чёрными"
 #define STRING_CONTINUE_GAME "Продолжить игру"
 #define STRING_NEW_GAME "Новая игра"
-#define STRING_STRENGTH "Сила"
+#define STRING_STRENGTH "Сложность"
 
 // Game strength menu items prefix (followed by a number from 1 to 8)
 #define STRING_GAME_LEVEL "Уровень"
 
 // Statistics view items
-#define STRING_TUBE_LIFE_TIME "Жизнь трубки"
-#define STRING_TUBE_LIFE_PULSES "Импульсы"
-#define STRING_TUBE_DEAD_TIME "Мёртвое время"
+#define STRING_TUBE_LIFE_TIME "Работа детектора"
+#define STRING_DEAD_TIME "Мёртвое время"
 #define STRING_DEVICE_ID "ID устройства"
-#define STRING_DEVICE_VOLTAGE "Напряжение"
 
-#define STRING_TUBE "Трубка"
-#define STRING_LIFE_TIME "жизнь"
-#define STRING_LIFE_PULSES "Импульсы"
-#define STRING_DEAD_TIME "Мёртвое в."
+#define STRING_TUBE "Детектор"
+#define STRING_LIFE_TIME "Наработка"
+#define STRING_DEAD_TIME_SHORT "Мёртвое вр."
 #define STRING_DEVICE "Устройство"
 #define STRING_ID "ID"
-#define STRING_VOLTAGE "Напр."
+#define STRING_VOLTAGE_SHORT "Напр."
