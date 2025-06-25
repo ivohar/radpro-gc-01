@@ -17,7 +17,7 @@
 #include "device.h"
 
 #define TUBE_HV_LOW_FREQUENCY 1250
-#define TUBE_HV_LOW_FREQUENCY_PERIOD (TIM_FREQUENCY / \
+#define TUBE_HV_LOW_FREQUENCY_PERIOD (TUBE_HV_FREQUENCY / \
                                       TUBE_HV_LOW_FREQUENCY)
 #define TUBE_HV_LOW_DUTYCYCLE_MULTIPLIER ((uint32_t)(TUBE_HVDUTYCYCLE_VALUE_STEP * \
                                                      TUBE_HV_LOW_FREQUENCY_PERIOD))
@@ -34,8 +34,13 @@ static struct
     volatile uint32_t pulseQueue[TUBE_PULSE_QUEUE_SIZE];
 } tube;
 
-void initTubeController(void)
+void initTubeHardware(void)
 {
+    // RCC
+    rcc_enable_tim(TUBE_HV_TIMER);
+    rcc_enable_tim(TUBE_DET_TIMER_MASTER);
+    rcc_enable_tim(TUBE_DET_TIMER_SLAVE);
+    
     // GPIO
 #if defined(STM32F0) || defined(STM32G0) || defined(STM32L4)
 
@@ -101,7 +106,7 @@ void initTubeController(void)
                      TUBE_DET_TIMER_SLAVE,
                      TUBE_DET_TIMER_TRIGGER_CONNECTION);
     tim_set_prescaler_factor(TUBE_DET_TIMER_MASTER,
-                             TIM_FREQUENCY / PULSE_MEASUREMENT_FREQUENCY);
+                             TUBE_DET_FREQUENCY / PULSE_MEASUREMENT_FREQUENCY);
 
     tim_enable(TUBE_DET_TIMER_SLAVE);
     tim_enable(TUBE_DET_TIMER_MASTER);
@@ -128,41 +133,41 @@ void setTubeHV(bool value)
 void updateTubeHV(void)
 {
 #if defined(TUBE_HV_PWM)
-    uint32_t hvPeriod = TIM_FREQUENCY / getTubeHVFrequency();
-    uint32_t hvOnTime = tube.enabled
-                            ? hvPeriod * getTubeHVDutyCycle() + 0.5F
+    uint32_t period = TUBE_HV_FREQUENCY / getTubeHVFrequency();
+    uint32_t onTime = tube.enabled
+                            ? period * getTubeHVDutyCycle() + 0.5F
                             : 0;
 
     // Get presacler factor
-    uint32_t hvPrescalerFactor = getGCD(hvPeriod, hvOnTime);
-    hvPeriod /= hvPrescalerFactor;
-    hvOnTime /= hvPrescalerFactor;
+    uint32_t prescalerFactor = getGCD(period, onTime);
+    period /= prescalerFactor;
+    onTime /= prescalerFactor;
 
     // Scale prescaler factor
-    while (hvPrescalerFactor >= 0x10000)
+    while (prescalerFactor >= 0x10000)
     {
-        hvPeriod <<= 1;
-        hvOnTime <<= 1;
-        hvPrescalerFactor >>= 1;
+        period <<= 1;
+        onTime <<= 1;
+        prescalerFactor >>= 1;
     }
 
     // Scale period
-    while (hvPeriod >= 0x10000)
+    while (period >= 0x10000)
     {
-        hvPeriod >>= 1;
-        hvOnTime >>= 1;
-        hvPrescalerFactor <<= 1;
+        period >>= 1;
+        onTime >>= 1;
+        prescalerFactor <<= 1;
     }
 
     tim_set_prescaler_factor(TUBE_HV_TIMER,
-                             hvPrescalerFactor);
+                             prescalerFactor);
 
     tim_set_period(TUBE_HV_TIMER,
-                   hvPeriod);
+                   period);
 
     tim_set_ontime(TUBE_HV_TIMER,
                    TUBE_HV_TIMER_CHANNEL,
-                   hvOnTime);
+                   onTime);
 
     tim_generate_update(TUBE_HV_TIMER);
 #else

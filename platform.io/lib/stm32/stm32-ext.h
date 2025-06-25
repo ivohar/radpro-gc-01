@@ -72,6 +72,11 @@ __STATIC_INLINE void rcc_enable_afio(void)
 {
     set_bits(RCC->APB2ENR, RCC_APB2ENR_AFIOEN);
 }
+
+__STATIC_INLINE void rcc_disable_afio(void)
+{
+    clear_bits(RCC->APB2ENR, RCC_APB2ENR_AFIOEN);
+}
 #endif
 
 __STATIC_INLINE void rcc_enable_adc(const ADC_TypeDef *base)
@@ -92,6 +97,26 @@ __STATIC_INLINE void rcc_enable_adc(const ADC_TypeDef *base)
     set_bits(RCC->APBENR2, RCC_APBENR2_ADCEN);
 #elif defined(STM32L4)
     set_bits(RCC->AHB2ENR, RCC_AHB2ENR_ADCEN);
+#endif
+}
+
+__STATIC_INLINE void rcc_disable_adc(const ADC_TypeDef *base)
+{
+#if defined(STM32F0)
+    clear_bits(RCC->CR2, RCC_CR2_HSI14ON);
+
+    clear_bits(RCC->APB2ENR, RCC_APB2ENR_ADCEN);
+#elif defined(STM32F1)
+    if (base == ADC1)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_ADC1EN);
+#if defined(ADC2)
+    else if (base == ADC2)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_ADC2EN);
+#endif
+#elif defined(STM32G0)
+    clear_bits(RCC->APBENR2, RCC_APBENR2_ADCEN);
+#elif defined(STM32L4)
+    clear_bits(RCC->AHB2ENR, RCC_AHB2ENR_ADCEN);
 #endif
 }
 
@@ -123,6 +148,46 @@ __STATIC_INLINE void rcc_enable_tim(const TIM_TypeDef *base)
         set_bits(RCC->APB1ENR, RCC_APB1ENR_TIM3EN);
     else if (base == TIM4)
         set_bits(RCC->APB1ENR, RCC_APB1ENR_TIM4EN);
+#if defined(TIM5)
+    else if (base == TIM5)
+        set_bits(RCC->APB1ENR, RCC_APB1ENR_TIM5EN);
+#endif
+#if defined(TIM6)
+    else if (base == TIM6)
+        set_bits(RCC->APB1ENR, RCC_APB1ENR_TIM6EN);
+#endif
+#if defined(TIM7)
+    else if (base == TIM7)
+        set_bits(RCC->APB1ENR, RCC_APB1ENR_TIM7EN);
+#endif
+#if defined(TIM8)
+    else if (base == TIM8)
+        set_bits(RCC->APB2ENR, RCC_APB2ENR_TIM8EN);
+#endif
+#if defined(TIM9)
+    else if (base == TIM9)
+        set_bits(RCC->APB2ENR, RCC_APB2ENR_TIM9EN);
+#endif
+#if defined(TIM10)
+    else if (base == TIM10)
+        set_bits(RCC->APB2ENR, RCC_APB2ENR_TIM10EN);
+#endif
+#if defined(TIM11)
+    else if (base == TIM11)
+        set_bits(RCC->APB2ENR, RCC_APB2ENR_TIM11EN);
+#endif
+#if defined(TIM12)
+    else if (base == TIM12)
+        set_bits(RCC->APB1ENR, RCC_APB2ENR_TIM12EN);
+#endif
+#if defined(TIM13)
+    else if (base == TIM13)
+        set_bits(RCC->APB1ENR, RCC_APB2ENR_TIM13EN);
+#endif
+#if defined(TIM14)
+    else if (base == TIM14)
+        set_bits(RCC->APB1ENR, RCC_APB2ENR_TIM14EN);
+#endif
 #elif defined(STM32G0)
     if (base == TIM1)
         set_bits(RCC->APBENR2, RCC_APBENR2_TIM1EN);
@@ -156,6 +221,107 @@ __STATIC_INLINE void rcc_enable_tim(const TIM_TypeDef *base)
 #endif
 }
 
+__STATIC_INLINE void rcc_disable_tim(const TIM_TypeDef *base)
+{
+#if defined(STM32F0)
+    if (base == TIM1)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM1EN);
+    else if (base == TIM2)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM2EN);
+    else if (base == TIM3)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM3EN);
+    else if (base == TIM6)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM6EN);
+    else if (base == TIM14)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM14EN);
+    else if (base == TIM15)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM15EN);
+    else if (base == TIM16)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM16EN);
+    else if (base == TIM17)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM17EN);
+#elif defined(STM32F1)
+    if (base == TIM1)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM1EN);
+    else if (base == TIM2)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM2EN);
+    else if (base == TIM3)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM3EN);
+    else if (base == TIM4)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM4EN);
+#if defined(TIM5)
+    else if (base == TIM5)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM5EN);
+#endif
+#if defined(TIM6)
+    else if (base == TIM6)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM6EN);
+#endif
+#if defined(TIM7)
+    else if (base == TIM7)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_TIM7EN);
+#endif
+#if defined(TIM8)
+    else if (base == TIM8)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM8EN);
+#endif
+#if defined(TIM9)
+    else if (base == TIM9)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM9EN);
+#endif
+#if defined(TIM10)
+    else if (base == TIM10)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM10EN);
+#endif
+#if defined(TIM11)
+    else if (base == TIM11)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM11EN);
+#endif
+#if defined(TIM12)
+    else if (base == TIM12)
+        clear_bits(RCC->APB1ENR, RCC_APB2ENR_TIM12EN);
+#endif
+#if defined(TIM13)
+    else if (base == TIM13)
+        clear_bits(RCC->APB1ENR, RCC_APB2ENR_TIM13EN);
+#endif
+#if defined(TIM14)
+    else if (base == TIM14)
+        clear_bits(RCC->APB1ENR, RCC_APB2ENR_TIM14EN);
+#endif
+#elif defined(STM32G0)
+    if (base == TIM1)
+        clear_bits(RCC->APBENR2, RCC_APBENR2_TIM1EN);
+    else if (base == TIM3)
+        clear_bits(RCC->APBENR1, RCC_APBENR1_TIM3EN);
+    else if (base == TIM6)
+        clear_bits(RCC->APBENR1, RCC_APBENR1_TIM6EN);
+    else if (base == TIM7)
+        clear_bits(RCC->APBENR1, RCC_APBENR1_TIM7EN);
+    else if (base == TIM14)
+        clear_bits(RCC->APBENR2, RCC_APBENR2_TIM14EN);
+    else if (base == TIM15)
+        clear_bits(RCC->APBENR2, RCC_APBENR2_TIM15EN);
+    else if (base == TIM16)
+        clear_bits(RCC->APBENR2, RCC_APBENR2_TIM16EN);
+    else if (base == TIM17)
+        clear_bits(RCC->APBENR2, RCC_APBENR2_TIM17EN);
+#elif defined(STM32L4)
+    if (base == TIM1)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM1EN);
+    else if (base == TIM2)
+        clear_bits(RCC->APB1ENR1, RCC_APB1ENR1_TIM2EN);
+    else if (base == TIM6)
+        clear_bits(RCC->APB1ENR1, RCC_APB1ENR1_TIM6EN);
+    else if (base == TIM7)
+        clear_bits(RCC->APB1ENR1, RCC_APB1ENR1_TIM7EN);
+    else if (base == TIM15)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM15EN);
+    else if (base == TIM16)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_TIM16EN);
+#endif
+}
+
 __STATIC_INLINE void rcc_enable_rtc(void)
 {
 #if defined(STM32F0)
@@ -166,6 +332,19 @@ __STATIC_INLINE void rcc_enable_rtc(void)
     set_bits(RCC->APBENR1, RCC_APBENR1_PWREN | RCC_APBENR1_RTCAPBEN);
 #elif defined(STM32L4)
     set_bits(RCC->APB1ENR1, RCC_APB1ENR1_PWREN | RCC_APB1ENR1_RTCAPBEN);
+#endif
+}
+
+__STATIC_INLINE void rcc_disable_rtc(void)
+{
+#if defined(STM32F0)
+    clear_bits(RCC->APB1ENR, RCC_APB1ENR_PWREN);
+#elif defined(STM32F1)
+    clear_bits(RCC->APB1ENR, RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN);
+#elif defined(STM32G0)
+    clear_bits(RCC->APBENR1, RCC_APBENR1_PWREN | RCC_APBENR1_RTCAPBEN);
+#elif defined(STM32L4)
+    clear_bits(RCC->APB1ENR1, RCC_APB1ENR1_PWREN | RCC_APB1ENR1_RTCAPBEN);
 #endif
 }
 
@@ -188,6 +367,90 @@ __STATIC_INLINE void rcc_enable_usart(const USART_TypeDef *base)
         set_bits(RCC->APB1ENR1, RCC_APB1ENR1_USART2EN);
     else if (base == USART3)
         set_bits(RCC->APB1ENR1, RCC_APB1ENR1_USART3EN);
+#endif
+}
+
+__STATIC_INLINE void rcc_disable_usart(const USART_TypeDef *base)
+{
+#if defined(STM32F0) || defined(STM32F1)
+    if (base == USART1)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_USART1EN);
+    else if (base == USART2)
+        clear_bits(RCC->APB1ENR, RCC_APB1ENR_USART2EN);
+#elif defined(STM32G0)
+    if (base == USART1)
+        clear_bits(RCC->APBENR2, RCC_APBENR2_USART1EN);
+    else if (base == USART2)
+        clear_bits(RCC->APBENR1, RCC_APBENR1_USART2EN);
+#elif defined(STM32L4)
+    if (base == USART1)
+        clear_bits(RCC->APB2ENR, RCC_APB2ENR_USART1EN);
+    else if (base == USART2)
+        clear_bits(RCC->APB1ENR1, RCC_APB1ENR1_USART2EN);
+    else if (base == USART3)
+        clear_bits(RCC->APB1ENR1, RCC_APB1ENR1_USART3EN);
+#endif
+}
+
+__STATIC_INLINE void rcc_enable_dma(const DMA_TypeDef *base)
+{
+#if defined(STM32F0)
+    if (base == DMA1)
+        set_bits(RCC->AHBENR, RCC_AHBENR_DMA1EN);
+#if defined(DMA2)
+    else if (base == DMA2)
+        set_bits(RCC->AHBENR, RCC_AHBENR_DMA2EN);
+#endif
+#elif defined(STM32F1)
+    if (base == DMA1)
+        set_bits(RCC->AHBENR, RCC_AHBENR_DMA1EN);
+#if defined(DMA2)
+    else if (base == DMA2)
+        set_bits(RCC->AHBENR, RCC_AHBENR_DMA2EN);
+#endif
+#elif defined(STM32G0)
+    if (base == DMA1)
+        set_bits(RCC->AHBENR, RCC_AHBENR_DMA1EN);
+#if defined(DMA2)
+    else if (base == DMA2)
+        set_bits(RCC->AHBENR, RCC_AHBENR_DMA2EN);
+#endif
+#elif defined(STM32L4)
+    if (base == DMA1)
+        set_bits(RCC->AHB1ENR, RCC_AHB1ENR_DMA1EN);
+    else if (base == DMA2)
+        set_bits(RCC->AHB1ENR, RCC_AHB1ENR_DMA2EN);
+#endif
+}
+
+__STATIC_INLINE void rcc_disable_dma(const DMA_TypeDef *base)
+{
+#if defined(STM32F0)
+    if (base == DMA1)
+        clear_bits(RCC->AHBENR, RCC_AHBENR_DMA1EN);
+#if defined(DMA2)
+    else if (base == DMA2)
+        clear_bits(RCC->AHBENR, RCC_AHBENR_DMA2EN);
+#endif
+#elif defined(STM32F1)
+    if (base == DMA1)
+        clear_bits(RCC->AHBENR, RCC_AHBENR_DMA1EN);
+#if defined(DMA2)
+    else if (base == DMA2)
+        clear_bits(RCC->AHBENR, RCC_AHBENR_DMA2EN);
+#endif
+#elif defined(STM32G0)
+    if (base == DMA1)
+        clear_bits(RCC->AHBENR, RCC_AHBENR_DMA1EN);
+#if defined(DMA2)
+    else if (base == DMA2)
+        clear_bits(RCC->AHBENR, RCC_AHBENR_DMA2EN);
+#endif
+#elif defined(STM32L4)
+    if (base == DMA1)
+        clear_bits(RCC->AHB1ENR, RCC_AHB1ENR_DMA1EN);
+    else if (base == DMA2)
+        clear_bits(RCC->AHB1ENR, RCC_AHB1ENR_DMA2EN);
 #endif
 }
 
@@ -661,10 +924,13 @@ __STATIC_INLINE void exti_clear_pending_interrupt(uint8_t pin)
 
 // ADC
 
-#if defined(STM32F0)
+#if defined(STM32F0) && !defined(GD32)
 #define ADC_TEMP_CHANNEL 16
 #define ADC_VREF_CHANNEL 17
 #define ADC_VBAT_CHANNEL 18
+#elif defined(STM32F0) && defined(GD32)
+#define ADC_TEMP_CHANNEL 16
+#define ADC_VREF_CHANNEL 17
 #elif defined(STM32F1)
 #define ADC_TEMP_CHANNEL 16
 #define ADC_VREF_CHANNEL 17
@@ -904,8 +1170,12 @@ __STATIC_INLINE void adc_enable_temperature_channel(ADC_TypeDef *base)
 {
 #if defined(STM32F0) || defined(STM32G0)
     set_bits(((ADC_Common_TypeDef *)((uint8_t *)base + 0x308))->CCR, ADC_CCR_TSEN);
+
+    STM32_EXT_USLEEP(0.000012);
 #elif defined(STM32L4)
     set_bits(((ADC_Common_TypeDef *)((uint8_t *)base + 0x300))->CCR, ADC_CCR_TSEN);
+
+    STM32_EXT_USLEEP(0.000012);
 #endif
 }
 
@@ -922,8 +1192,12 @@ __STATIC_INLINE void adc_enable_temperature_vref_channel(ADC_TypeDef *base)
 {
 #if defined(STM32F0) && defined(GD32)
     set_bits(((ADC_GD32_TypeDef *)base)->CTL1, ADC_CTL1_TSVREN);
+
+    STM32_EXT_USLEEP(0.000012);
 #elif defined(STM32F1)
     set_bits(base->CR2, ADC_CR2_TSVREFE);
+
+    STM32_EXT_USLEEP(0.000012);
 #endif
 }
 
@@ -1096,8 +1370,6 @@ __STATIC_INLINE void tim_set_ontime(TIM_TypeDef *base,
 __STATIC_INLINE void tim_setup_pwm(TIM_TypeDef *base,
                                    uint32_t channel)
 {
-    rcc_enable_tim(base);
-
     switch (channel)
     {
     case TIM_CH1:
@@ -1141,15 +1413,18 @@ __STATIC_INLINE void tim_setup_linked(TIM_TypeDef *base_master,
                                       TIM_TypeDef *base_slave,
                                       uint8_t trigger_connection)
 {
-    rcc_enable_tim(base_master);
     set_bits(base_master->CR2, TIM_CR2_MMS_UPDATE);
     base_master->ARR = 0xffff;
 
-    rcc_enable_tim(base_slave);
     set_bits(base_slave->SMCR, (trigger_connection << TIM_SMCR_TS_Pos) | TIM_SMCR_SMS_ECM1);
     base_slave->ARR = 0xffff;
 
     tim_generate_update(base_master);
+}
+
+__STATIC_INLINE void tim_setup_dma(TIM_TypeDef *base)
+{
+    set_bits(base->DIER, TIM_DIER_UDE);
 }
 
 // IWDG
@@ -1337,8 +1612,6 @@ __STATIC_INLINE void rtc_set_count(uint32_t value)
 __STATIC_INLINE void usart_setup_8n1(USART_TypeDef *base,
                                      uint32_t baud_rate)
 {
-    rcc_enable_usart(base);
-
     base->BRR = baud_rate;
     base->CR1 = USART_CR1_UE |       // Enable USART
                 USART_CR1_M_8BITS |  // 8 bits
@@ -1479,12 +1752,53 @@ __STATIC_INLINE void usart_send_blocking(USART_TypeDef *base,
 
 // SPI
 
+__STATIC_INLINE void spi_wait_until_txe(SPI_TypeDef *base)
+{
+    wait_until_bits_set(base->SR, SPI_SR_TXE);
+}
+
+__STATIC_INLINE void spi_wait_while_bsy(SPI_TypeDef *base)
+{
+    wait_until_bits_clear(base->SR, SPI_SR_BSY);
+}
+
 __STATIC_INLINE void spi_send(SPI_TypeDef *base,
                               uint16_t data)
 {
-    wait_until_bits_set(base->SR, SPI_SR_TXE);
+    spi_wait_until_txe(base);
 
     base->DR = data;
+}
+
+// DMA
+
+__STATIC_INLINE void dma_setup_memory32_to_peripheral32(DMA_Channel_TypeDef *channel,
+                                                        uint32_t *dest,
+                                                        uint32_t *source,
+                                                        uint32_t count)
+{
+    channel->CCR = DMA_CCR_DIR |
+                   DMA_CCR_MINC |
+                   (0b10 << DMA_CCR_PSIZE_Pos) |
+                   (0b10 << DMA_CCR_MSIZE_Pos);
+    channel->CNDTR = count;
+    channel->CMAR = (uint32_t)source;
+    channel->CPAR = (uint32_t)dest;
+}
+
+__STATIC_INLINE bool dma_is_active(DMA_Channel_TypeDef *channel)
+{
+    return (channel->CNDTR != 0);
+}
+
+__STATIC_INLINE void dma_enable(DMA_Channel_TypeDef *channel)
+{
+    set_bits(channel->CCR, DMA_CCR_EN);
+}
+
+__STATIC_INLINE void dma_disable(DMA_Channel_TypeDef *channel)
+{
+    clear_bits(channel->CCR, DMA_CCR_EN);
 }
 
 // ROM
@@ -1494,6 +1808,9 @@ __STATIC_INLINE void spi_send(SPI_TypeDef *base,
 #define TS_CAL2 (*((__I uint16_t *)0x1ffff7c2))
 #define VREFINT_CAL_VALUE (*((__I uint16_t *)0x1ffff7ba))
 #define VREFINT_CAL_VOLTAGE 3.3F
+#define VREFINT_VOLTAGE 1.2F
+#elif defined(STM32F1)
+#define VREFINT_VOLTAGE 1.2F
 #elif defined(STM32G0)
 #define TS_CAL1 (*((__I uint16_t *)0x1fff75a8))
 #define VREFINT_CAL_VALUE (*((__I uint16_t *)0x1fff75aa))

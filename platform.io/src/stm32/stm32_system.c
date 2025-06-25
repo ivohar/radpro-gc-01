@@ -9,14 +9,13 @@
 
 #if defined(STM32)
 
-#include "stm32.h"
-
 #include "../buzzer.h"
 #include "../display.h"
 #include "../events.h"
 #include "../system.h"
 #include "../tube.h"
 
+#include "cstring.h"
 #include "device.h"
 
 typedef struct
@@ -33,9 +32,11 @@ typedef struct
 #define SYSTEM_VECTOR_TABLE ((VectorTable *)0x1fff0000)
 #endif
 
-uint32_t getDeviceId(void)
+void getDeviceId(char *str)
 {
-    return UID0 ^ UID1 ^ UID2;
+    *str = '\0';
+    for (uint32_t i = 0; i < 4 * 3; i++)
+        strcatUInt8Hex(str, ((uint8_t *)(&UID0))[i]);
 }
 
 void startBootloader(void)

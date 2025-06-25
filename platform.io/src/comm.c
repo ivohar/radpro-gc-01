@@ -7,8 +7,6 @@
  * License: MIT
  */
 
-#include <stdbool.h>
-
 #include <stdio.h>
 
 #include "adc.h"
@@ -24,19 +22,13 @@
 
 Comm comm;
 
-void initComm(void)
+void resetComm(bool enabled)
 {
-#if !defined(DATA_MODE)
-    openComm();
-#else
-    if (settings.dataMode)
-        openComm();
-#endif
-}
-
-void enableComm(bool value)
-{
-    comm.enabled = value;
+    comm.state = COMM_RX;
+    strclr(comm.buffer);
+    comm.bufferIndex = 0;
+    comm.enabled = enabled;
+    comm.transmitState = TRANSMIT_DONE;
 }
 
 static bool matchCommCommand(const char *command)
@@ -68,8 +60,7 @@ static char *matchCommCommandWithParameter(const char *command)
     return comm.buffer + strlen(command) + 1;
 }
 
-static bool matchCommCommandWithUint32(const char *command,
-                                       uint32_t *value)
+static bool matchCommCommandWithUint32(const char *command, uint32_t *value)
 {
     char *parameter = matchCommCommandWithParameter(command);
     if (!parameter)
@@ -78,8 +69,7 @@ static bool matchCommCommandWithUint32(const char *command,
     return parseUInt32(parameter, value);
 }
 
-static bool matchCommCommandWithFloat(const char *command,
-                                      float *value)
+static bool matchCommCommandWithFloat(const char *command, float *value)
 {
     char *parameter = matchCommCommandWithParameter(command);
     if (!parameter)
@@ -134,20 +124,20 @@ static void strcatDatalogEntry(char *buffer, const Dose *entry)
 static void startDatalogDump(void)
 {
     sendCommOk();
-
     strcat(comm.buffer, " time,tubePulseCount");
 
-    startDatalogDownload();
-    comm.sendingDatalog = true;
+    comm.transmitState = TRANSMIT_DATALOG;
 
-    transmitComm();
+    startDatalogDownload();
 }
 
 void dispatchCommEvents(void)
 {
-    updateCommController();
+    updateComm();
 
-    if (comm.state == COMM_RX_READY)
+    switch (comm.state)
+    {
+    case COMM_RX_READY:
     {
         uint32_t uint32Value;
         float floatValue;
@@ -156,14 +146,14 @@ void dispatchCommEvents(void)
         {
             sendCommOkWithString(commId);
             strcatChar(comm.buffer, ';');
-            strcatUInt32Hex(comm.buffer, getDeviceId());
+
+            comm.transmitState = TRANSMIT_DEVICEID;
         }
         else if (matchCommCommand("GET deviceBatteryVoltage"))
             sendCommOkWithFloat(getBatteryVoltage(), 3);
         else if (matchCommCommand("GET deviceTime"))
             sendCommOkWithUInt32(getDeviceTime());
-        else if (matchCommCommandWithUint32("SET deviceTime",
-                                            &uint32Value))
+        else if (matchCommCommandWithUint32("SET deviceTime", &uint32Value))
         {
             setDeviceTime(uint32Value);
 
@@ -171,8 +161,7 @@ void dispatchCommEvents(void)
         }
         else if (matchCommCommand("GET deviceTimeZone"))
             sendCommOkWithFloat(getDeviceTimeZone(), 1);
-        else if (matchCommCommandWithFloat("SET deviceTimeZone",
-                                           &floatValue))
+        else if (matchCommCommandWithFloat("SET deviceTimeZone", &floatValue))
         {
             bool success = setDeviceTimeZone(floatValue);
 
@@ -180,8 +169,7 @@ void dispatchCommEvents(void)
         }
         else if (matchCommCommand("GET tubeTime"))
             sendCommOkWithUInt32(getTubeTime());
-        else if (matchCommCommandWithUint32("SET tubeTime",
-                                            &uint32Value))
+        else if (matchCommCommandWithUint32("SET tubeTime", &uint32Value))
         {
             setTubeTime(uint32Value);
 
@@ -189,8 +177,7 @@ void dispatchCommEvents(void)
         }
         else if (matchCommCommand("GET tubePulseCount"))
             sendCommOkWithUInt32(getTubePulseCount());
-        else if (matchCommCommandWithUint32("SET tubePulseCount",
-                                            &uint32Value))
+        else if (matchCommCommandWithUint32("SET tubePulseCount", &uint32Value))
         {
             setTubePulseCount(uint32Value);
 
@@ -207,8 +194,7 @@ void dispatchCommEvents(void)
 #if defined(TUBE_HV_PWM)
         else if (matchCommCommand("GET tubeHVFrequency"))
             sendCommOkWithFloat(getTubeHVFrequency(), 2);
-        else if (matchCommCommandWithFloat("SET tubeHVFrequency",
-                                           &floatValue))
+        else if (matchCommCommandWithFloat("SET tubeHVFrequency", &floatValue))
         {
             bool success = setTubeHVFrequency(floatValue);
 
@@ -216,30 +202,24 @@ void dispatchCommEvents(void)
         }
         else if (matchCommCommand("GET tubeHVDutyCycle"))
             sendCommOkWithFloat(getTubeHVDutyCycle(), 5);
-        else if (matchCommCommandWithFloat("SET tubeHVDutyCycle",
-                                           &floatValue))
+        else if (matchCommCommandWithFloat("SET tubeHVDutyCycle", &floatValue))
         {
             bool success = setTubeHVDutyCycle(floatValue);
 
             sendCommResponse(success);
         }
 #endif
-        else if (matchCommCommandWithUint32("GET datalog",
-                                            &uint32Value))
+        else if (matchCommCommandWithUint32("GET datalog", &uint32Value))
         {
             comm.datalogTimeLimit = uint32Value;
 
             startDatalogDump();
-
-            return;
         }
         else if (matchCommCommand("GET datalog"))
         {
             comm.datalogTimeLimit = 0;
 
             startDatalogDump();
-
-            return;
         }
         else if (matchCommCommand("RESET datalog"))
         {
@@ -263,19 +243,44 @@ void dispatchCommEvents(void)
                 strcatUInt8Hex(comm.buffer, randomData);
             }
         }
+        else if (matchCommCommand("START bootloader"))
+        {
+            sendCommOk();
+
+            comm.transmitState = TRANSMIT_BOOTLOADER;
+        }
         else
             sendCommError();
 
-        strcat(comm.buffer, "\r\n");
+        if ((comm.transmitState == TRANSMIT_DONE) ||
+            (comm.transmitState == TRANSMIT_BOOTLOADER))
+            strcat(comm.buffer, "\r\n");
 
         transmitComm();
-    }
-    else if (comm.state == COMM_TX_READY)
-    {
-        if (comm.sendingDatalog)
-        {
-            strclr(comm.buffer);
 
+        break;
+    }
+
+    case COMM_TX_READY:
+        switch (comm.transmitState)
+        {
+        case TRANSMIT_DEVICEID:
+        {
+            char deviceId[32];
+            getDeviceId(deviceId);
+
+            strcat(comm.buffer, deviceId);
+            strcat(comm.buffer, "\r\n");
+
+            comm.transmitState = TRANSMIT_DONE;
+
+            transmitComm();
+
+            break;
+        }
+
+        case TRANSMIT_DATALOG:
+        {
             uint32_t sentEntriesNum = 0;
             uint32_t checkedEntriesNum = 0;
 
@@ -288,7 +293,7 @@ void dispatchCommEvents(void)
                 {
                     strcat(comm.buffer, "\r\n");
 
-                    comm.sendingDatalog = false;
+                    comm.transmitState = TRANSMIT_DONE;
 
                     break;
                 }
@@ -305,10 +310,30 @@ void dispatchCommEvents(void)
             }
 
             transmitComm();
+
+            break;
         }
-        else
+
+        case TRANSMIT_BOOTLOADER:
+        {
+            startBootloader();
+
+            comm.transmitState = TRANSMIT_DONE;
+
+            break;
+        }
+
+        default:
         {
             comm.state = COMM_RX;
+
+            break;
         }
+
+        break;
+        }
+
+    default:
+        break;
     }
 }

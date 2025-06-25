@@ -9,12 +9,10 @@
 
 #include "display.h"
 #include "events.h"
-#include "init.h"
 #include "keyboard.h"
 #include "measurements.h"
 #include "power.h"
 #include "settings.h"
-#include "system.h"
 #include "view.h"
 
 static struct
@@ -43,17 +41,17 @@ void dispatchViewEvents(void)
         if (event == EVENT_NONE)
             break;
 
-        if (isPowerOffViewActive())
+        if (isPoweredOff())
         {
             if (event == EVENT_KEY_POWER)
-                setPowerOnView();
+                powerOn();
         }
         else
         {
             if (event == EVENT_KEY_POWER)
             {
                 if (!isLockMode())
-                    setPowerOffView();
+                    powerOff();
             }
             else
             {
@@ -77,26 +75,26 @@ void dispatchViewEvents(void)
                     view.currentView->onEvent(view.currentView, event);
 
                 if ((event == EVENT_KEY_TOGGLEBACKLIGHT) &&
-                    isDisplayBacklightActive())
-                    cancelDisplayBacklight();
+                    isBacklightActive())
+                    cancelBacklight();
                 else
-                    requestDisplayBacklightTrigger();
+                    requestBacklightTrigger();
             }
         }
     }
 
     // Pre-draw
-    if (isDisplayBacklightTriggerRequested())
+    if (isBacklightTriggerRequested())
         view.drawUpdate = true;
     else
     {
 #if defined(DISPLAY_MONOCHROME)
-        bool isDisplayActive = !isPowerOffViewActive();
+        bool isDisplayActive = !isPoweredOff();
 #elif defined(DISPLAY_COLOR)
         bool isPulseFlashesActive = settings.pulseDisplayFlash &&
                                     !isPulseThresholdEnabled();
-        bool isDisplayActive = !isPowerOffViewActive() &&
-                               (isDisplayBacklightActive() ||
+        bool isDisplayActive = !isPoweredOff() &&
+                               (isBacklightActive() ||
                                 isPulseFlashesActive);
 #endif
 
@@ -121,8 +119,8 @@ void dispatchViewEvents(void)
         if (!isDisplayEnabled())
             enableDisplay(true);
 
-        if (isDisplayBacklightTriggerRequested())
-            triggerDisplayBacklight();
+        if (isBacklightTriggerRequested())
+            triggerBacklight();
 
         view.currentView->onEvent(view.currentView, EVENT_POST_DRAW);
     }
@@ -132,7 +130,7 @@ void setView(const View *newView)
 {
     view.currentView = newView;
 
-    updateView();
+    requestViewUpdate();
 }
 
 const View *getView(void)
@@ -140,13 +138,29 @@ const View *getView(void)
     return view.currentView;
 }
 
-void updateView(void)
+void requestViewUpdate(void)
 {
     view.drawUpdate = true;
 }
 
-void updateViewPeriod(void)
+void updateView(void)
 {
     view.periodUpdate = true;
     view.drawUpdate = true;
+}
+
+// Lock view
+
+bool systemLockMode;
+
+void setLockMode(bool value)
+{
+    systemLockMode = value;
+
+    triggerVibration();
+}
+
+bool isLockMode(void)
+{
+    return systemLockMode;
 }

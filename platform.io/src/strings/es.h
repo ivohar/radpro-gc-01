@@ -116,7 +116,6 @@
 // Pulses menu items
 #define STRING_SOUND "Sonido"
 #define STRING_VIBRATION "Vibración"
-#define STRING_ALERT_LED "LED de alerta"
 #define STRING_PULSE_LED "LED de pulso"
 #define STRING_DISPLAY_FLASH "Destello de pantalla"
 #define STRING_THRESHOLD "Umbral"
@@ -129,8 +128,9 @@
 // Alarms menu items
 #define STRING_RATE_ALARM "Alarma de tasa"
 #define STRING_DOSE_ALARM "Alarma de dosis"
-#define STRING_OVERRANGE_ALARM "Alarma de rango"
 #define STRING_INDICATION "Indicación"
+#define STRING_VOICE "Voz"
+#define STRING_VOLUME "Volumen"
 
 // Measurements menu items
 #define STRING_UNITS "Unidades"
@@ -240,7 +240,7 @@
 #define STRING_ALKALINE "Alcalina"
 
 // Random generator menu items
-#define STRING_FULL_ASCII "ASCII completo"
+#define STRING_ASCII "ASCII"
 #define STRING_ALPHANUMERIC "Alfanumérico"
 #define STRING_HEXADECIMAL "Hexadecimal"
 #define STRING_DECIMAL "Decimal"

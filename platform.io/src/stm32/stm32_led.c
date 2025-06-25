@@ -7,7 +7,7 @@
  * License: MIT
  */
 
-#if defined(STM32)
+#if defined(STM32) && defined(PULSE_LED)
 
 #include "../led.h"
 
@@ -15,6 +15,7 @@
 
 void initLED(void)
 {
+    // GPIO
 #if defined(PULSE_LED)
     setPulseLED(false);
 #endif

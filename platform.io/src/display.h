@@ -52,17 +52,13 @@ typedef enum
 
 extern const uint32_t menuLineNum;
 
-extern uint16_t displayBrightnessValue[];
-
 void initDisplay(void);
-void initDisplayController(void);
-void initDisplayBacklight(void);
 void resetDisplay(void);
 
 void enableDisplay(bool value);
 bool isDisplayEnabled(void);
 
-void setDisplayBacklight(bool value);
+void setBacklight(bool value);
 
 void updateDisplayContrast(void);
 

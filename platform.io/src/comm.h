@@ -33,6 +33,14 @@ typedef enum
     COMM_TX_READY,
 } CommState;
 
+typedef enum
+{
+    TRANSMIT_DONE,
+    TRANSMIT_DEVICEID,
+    TRANSMIT_DATALOG,
+    TRANSMIT_BOOTLOADER,
+} TransmitState;
+
 typedef struct
 {
     // vvv These settings should remain fixed for SWD communications.
@@ -43,9 +51,10 @@ typedef struct
     char buffer[COMM_BUFFER_SIZE];
     // ^^^ These settings should remain fixed for SWD communications.
 
-    bool enabled;
+    volatile bool enabled;
+    char lastChar;
 
-    bool sendingDatalog;
+    volatile TransmitState transmitState;
     uint32_t datalogTimeLimit;
 } Comm;
 
@@ -57,13 +66,11 @@ void initComm(void);
 
 void openComm(void);
 void closeComm(void);
-bool isCommOpen(void);
-
-void enableComm(bool value);
+void resetComm(bool enabled);
 
 void transmitComm(void);
 
 void dispatchCommEvents(void);
-void updateCommController(void);
+void updateComm(void);
 
 #endif

@@ -116,7 +116,6 @@
 // Pulses menu items
 #define STRING_SOUND "Lyd"
 #define STRING_VIBRATION "Vibrasjon"
-#define STRING_ALERT_LED "Varsel-LED"
 #define STRING_PULSE_LED "Puls-LED"
 #define STRING_DISPLAY_FLASH "Skjermblink"
 #define STRING_THRESHOLD "Terskel"
@@ -129,8 +128,9 @@
 // Alarms menu items
 #define STRING_RATE_ALARM "Ratealarm"
 #define STRING_DOSE_ALARM "Dosealarm"
-#define STRING_OVERRANGE_ALARM "Overområdealarm"
 #define STRING_INDICATION "Indikasjon"
+#define STRING_VOICE "Stemme"
+#define STRING_VOLUME "Volum"
 
 // Measurements menu items
 #define STRING_UNITS "Enheter"
@@ -240,7 +240,7 @@
 #define STRING_ALKALINE "Alkalisk"
 
 // Random generator menu items
-#define STRING_FULL_ASCII "Full ASCII"
+#define STRING_ASCII "ASCII"
 #define STRING_ALPHANUMERIC "Alfanumerisk"
 #define STRING_HEXADECIMAL "Heksadesimal"
 #define STRING_DECIMAL "Desimal"

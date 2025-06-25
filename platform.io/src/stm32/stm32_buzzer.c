@@ -7,7 +7,7 @@
  * License: MIT
  */
 
-#if defined(STM32)
+#if defined(STM32) && defined(BUZZER)
 
 #include "../buzzer.h"
 #include "../events.h"
@@ -16,6 +16,9 @@
 
 void initBuzzer(void)
 {
+    // RCC
+    rcc_enable_tim(BUZZ_TIMER);
+
     // GPIO
     setBuzzer(false);
 
@@ -57,6 +60,7 @@ void initBuzzer(void)
                BUZZ_PIN,
                GPIO_MODE_OUTPUT_2MHZ_AF_PUSHPULL);
 
+    // Timer
     tim_setup_pwm(BUZZ_TIMER,
                   BUZZ_TIMER_CHANNEL);
     tim_set_period(BUZZ_TIMER,

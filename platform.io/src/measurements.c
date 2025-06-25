@@ -16,9 +16,11 @@
 #include "keyboard.h"
 #include "measurements.h"
 #include "menu.h"
+#include "pulsecontrol.h"
 #include "settings.h"
-#include "system.h"
 #include "tube.h"
+#include "view.h"
+#include "voice.h"
 
 #define ALERTZONE1_USVH 1.0E-6F
 #define ALERTZONE2_USVH 1.0E-5F
@@ -29,8 +31,6 @@
 
 #define INSTANTANEOUS_RATE_ALARM_RATE 0
 #define INSTANTANEOUS_RATE_ALARM_RATE_MASK (1 << INSTANTANEOUS_RATE_ALARM_RATE)
-#define INSTANTANEOUS_RATE_ALARM_OVERRANGE 1
-#define INSTANTANEOUS_RATE_ALARM_OVERRANGE_MASK (1 << INSTANTANEOUS_RATE_ALARM_OVERRANGE)
 
 #define PULSE_INDICATION_SENSITIVITY_MAX 600.0F
 #define PULSE_INDICATION_FACTOR_UNIT 0x10000
@@ -173,7 +173,7 @@ static struct
 
         Rate rate;
         float maxValue;
-        uint8_t alarmsState;
+        bool lastAlarm;
         bool alarm;
     } instantaneous;
 
@@ -196,7 +196,7 @@ static struct
     struct
     {
         Dose dose;
-        bool alarmsState;
+        bool lastAlarm;
         bool alarm;
     } cumulativeDose;
 
@@ -242,10 +242,18 @@ static const float averagingConfidences[] = {
     0.0105F, // ±1% confidence
 };
 
+static const View instantaneousRateView;
+static const View averageRateView;
+static const View cumulativeDoseView;
+static const View historyView;
+
 static const Menu alarmsMenu;
 static const Menu rateAlarmMenu;
 static const Menu doseAlarmMenu;
 static const Menu alarmIndicationMenu;
+#if defined(VOICE)
+static const Menu alarmVolumeMenu;
+#endif
 static const Menu measurementsMenu;
 static const Menu unitsMenu;
 static const Menu instantaneousMenu;
@@ -263,7 +271,7 @@ static void resetHistory(void);
 
 // Measurements
 
-const View *const measurementViews[] = {
+static const View *const measurementViews[] = {
     &instantaneousRateView,
     &averageRateView,
     &cumulativeDoseView,
@@ -284,6 +292,10 @@ void resetMeasurements(void)
 
     updateMeasurementUnits();
 
+#if defined(PULSE_CONTROL)
+    updatePulseControl();
+#endif
+
     selectMenuItem(&alarmsMenu,
                    0,
                    0);
@@ -296,6 +308,11 @@ void resetMeasurements(void)
     selectMenuItem(&alarmIndicationMenu,
                    0,
                    0);
+#if defined(VOICE)
+    selectMenuItem(&alarmVolumeMenu,
+                   settings.alarmVolume,
+                   ALARM_VOLUME_NUM);
+#endif
 
     selectMenuItem(&measurementsMenu,
                    0,
@@ -312,6 +329,18 @@ void resetMeasurements(void)
 }
 
 // Measurement events
+
+typedef struct
+{
+    const char *name;
+    float scale;
+} Unit;
+
+typedef struct
+{
+    Unit rate;
+    Unit dose;
+} Units;
 
 Units units[] = {
     {{getString(STRING_SVH), (60 * 1E-6F)},
@@ -343,6 +372,16 @@ void updateMeasurementUnits(void)
         measurements.instantaneous.pulseIndicationFactor = PULSE_INDICATION_FACTOR_UNIT;
     else
         measurements.instantaneous.pulseIndicationFactor = (PULSE_INDICATION_FACTOR_UNIT * PULSE_INDICATION_SENSITIVITY_MAX) / sensitivity;
+}
+
+float getCurrentRateFactor(void)
+{
+    return units[settings.units].rate.scale;
+}
+
+float getCurrentDoseFactor(void)
+{
+    return units[settings.units].dose.scale;
 }
 
 static float getDeadTimeCompensationFactor(float value)
@@ -406,7 +445,10 @@ void disableMeasurements(void)
 
 void onMeasurementTick(uint32_t pulseCount)
 {
-    if (measurements.enabled && pulseCount)
+    if (!measurements.enabled)
+        return;
+
+    if (pulseCount)
     {
         measurements.tube.dose.pulseCount += pulseCount;
 
@@ -429,12 +471,12 @@ void onMeasurementTick(uint32_t pulseCount)
 
 void onMeasurementPeriod(void)
 {
-    if (measurements.enabled)
-    {
-        measurements.period.snapshotTick = getTick();
-        measurements.period.snapshotMeasurement = measurements.period.measurement;
-        measurements.period.measurement.pulseCount = 0;
-    }
+    if (!measurements.enabled)
+        return;
+
+    measurements.period.snapshotTick = getTick();
+    measurements.period.snapshotMeasurement = measurements.period.measurement;
+    measurements.period.measurement.pulseCount = 0;
 }
 
 uint8_t getHistoryValue(float value)
@@ -550,23 +592,18 @@ void updateMeasurements(void)
 
     setPulseThreshold(svH < rateAlarmsSvH[settings.pulseThreshold]);
 
-    // Trigger alarm
-    uint8_t instantaneousRateAlarmsState = 0;
+    bool instantaneousRateAlarm = false;
     if (isInstantaneousRateConfidenceAcceptable())
     {
         if (settings.rateAlarm)
-            instantaneousRateAlarmsState |= (svH >= rateAlarmsSvH[settings.rateAlarm]) << INSTANTANEOUS_RATE_ALARM_RATE;
-        if (settings.overrangeAlarm)
-            instantaneousRateAlarmsState |= (measurements.period.snapshotMeasurement.pulseCount >= getOverrangeRate()) << INSTANTANEOUS_RATE_ALARM_OVERRANGE;
+            instantaneousRateAlarm |= (svH >= rateAlarmsSvH[settings.rateAlarm]) << INSTANTANEOUS_RATE_ALARM_RATE;
     }
 
-    uint8_t instantanteousRateAlarmsActivated = (instantaneousRateAlarmsState ^ measurements.instantaneous.alarmsState) &
-                                                instantaneousRateAlarmsState;
-    if (instantanteousRateAlarmsActivated)
-        measurements.instantaneous.alarm = true;
-    else if (!instantaneousRateAlarmsState)
-        measurements.instantaneous.alarm = false;
-    measurements.instantaneous.alarmsState = instantaneousRateAlarmsState;
+    if (measurements.instantaneous.lastAlarm != instantaneousRateAlarm)
+    {
+        measurements.instantaneous.lastAlarm = instantaneousRateAlarm;
+        measurements.instantaneous.alarm = instantaneousRateAlarm;
+    }
 
     // Average rate
     if ((measurements.average.rate.time < UINT32_MAX) &&
@@ -626,18 +663,18 @@ void updateMeasurements(void)
                    compensatedMeasurement.pulseCount);
     }
 
-    float cumulativeDoseAlarmsState = false;
+    bool cumulativeDoseAlarm = false;
     if (settings.doseAlarm)
     {
         float doseSv = units[UNITS_SIEVERTS].dose.scale *
                        measurements.cumulativeDose.dose.pulseCount;
-        cumulativeDoseAlarmsState = (doseSv >= doseAlarmsSv[settings.doseAlarm]);
+        cumulativeDoseAlarm = (doseSv >= doseAlarmsSv[settings.doseAlarm]);
     }
 
-    if (measurements.cumulativeDose.alarmsState != cumulativeDoseAlarmsState)
+    if (measurements.cumulativeDose.lastAlarm != cumulativeDoseAlarm)
     {
-        measurements.cumulativeDose.alarmsState = cumulativeDoseAlarmsState;
-        measurements.cumulativeDose.alarm = cumulativeDoseAlarmsState;
+        measurements.cumulativeDose.lastAlarm = cumulativeDoseAlarm;
+        measurements.cumulativeDose.alarm = cumulativeDoseAlarm;
     }
 
     // History
@@ -668,6 +705,11 @@ void updateMeasurements(void)
                 historyState->bufferIndex = 0;
         }
     }
+
+    // Pulse control
+#if defined(PULSE_CONTROL)
+    updatePulseControl();
+#endif
 
     // Alarms
     if (isAlarm())
@@ -781,7 +823,7 @@ static void onInstantaneousRateViewEvent(const View *view,
         if (measurements.instantaneousTabIndex >= INSTANTANEOUS_TAB_NUM)
             measurements.instantaneousTabIndex = 0;
 
-        updateView();
+        requestViewUpdate();
 
         break;
 
@@ -795,10 +837,17 @@ static void onInstantaneousRateViewEvent(const View *view,
             else
                 resetInstantaneousRate();
 
-            updateView();
+            requestViewUpdate();
         }
 
         break;
+
+#if defined(VOICE)
+    case EVENT_KEY_PLAY:
+        playVoiceInstantaneousRate();
+
+        break;
+#endif
 
     case EVENT_DRAW:
     {
@@ -825,9 +874,7 @@ static void onInstantaneousRateViewEvent(const View *view,
         }
         else if (measurements.instantaneous.alarm)
         {
-            stateString = (measurements.instantaneous.alarmsState & INSTANTANEOUS_RATE_ALARM_OVERRANGE_MASK)
-                              ? getString(STRING_INFO_OVER)
-                              : getString(STRING_INFO_ALARM);
+            stateString = getString(STRING_INFO_ALARM);
 
             style = MEASUREMENTSTYLE_ALARM;
         }
@@ -920,7 +967,7 @@ static void onInstantaneousRateViewEvent(const View *view,
     }
 }
 
-const View instantaneousRateView = {
+static const View instantaneousRateView = {
     onInstantaneousRateViewEvent,
     NULL,
 };
@@ -932,6 +979,11 @@ static void resetAverageRate(void)
     memset(&measurements.average,
            0,
            sizeof(measurements.average));
+}
+
+float getAverageRate(void)
+{
+    return measurements.average.timedRate.value;
 }
 
 static void onAverageRateViewEvent(const View *view,
@@ -947,7 +999,7 @@ static void onAverageRateViewEvent(const View *view,
         if (measurements.averageTabIndex >= AVERAGE_TAB_NUM)
             measurements.averageTabIndex = 0;
 
-        updateView();
+        requestViewUpdate();
 
         break;
 
@@ -958,10 +1010,17 @@ static void onAverageRateViewEvent(const View *view,
 
             resetAverageRate();
 
-            updateView();
+            requestViewUpdate();
         }
 
         break;
+
+#if defined(VOICE)
+    case EVENT_KEY_PLAY:
+        playVoiceAverageRate();
+
+        break;
+#endif
 
     case EVENT_DRAW:
     {
@@ -1070,7 +1129,7 @@ static void onAverageRateViewEvent(const View *view,
     }
 }
 
-const View averageRateView = {
+static const View averageRateView = {
     onAverageRateViewEvent,
     NULL,
 };
@@ -1117,7 +1176,7 @@ static void onCumulativeDoseViewEvent(const View *view,
         if (measurements.cumulativeDoseTabIndex >= CUMULATIVE_TAB_NUM)
             measurements.cumulativeDoseTabIndex = 0;
 
-        updateView();
+        requestViewUpdate();
 
         break;
 
@@ -1131,10 +1190,17 @@ static void onCumulativeDoseViewEvent(const View *view,
             else
                 resetCumulativeDose();
 
-            updateView();
+            requestViewUpdate();
         }
 
         break;
+
+#if defined(VOICE)
+    case EVENT_KEY_PLAY:
+        playVoiceCumulativeDose();
+
+        break;
+#endif
 
     case EVENT_DRAW:
     {
@@ -1231,7 +1297,7 @@ static void onCumulativeDoseViewEvent(const View *view,
     }
 }
 
-const View cumulativeDoseView = {
+static const View cumulativeDoseView = {
     onCumulativeDoseViewEvent,
     NULL,
 };
@@ -1279,7 +1345,7 @@ static void onHistoryViewEvent(const View *view, Event event)
         if (measurements.history.tabIndex >= HISTORY_NUM)
             measurements.history.tabIndex = 0;
 
-        updateView();
+        requestViewUpdate();
 
         break;
 
@@ -1290,10 +1356,17 @@ static void onHistoryViewEvent(const View *view, Event event)
 
             resetHistory();
 
-            updateView();
+            requestViewUpdate();
         }
 
         break;
+
+#if defined(VOICE)
+    case EVENT_KEY_PLAY:
+        playVoiceInstantaneousRate();
+
+        break;
+#endif
 
     case EVENT_DRAW:
     {
@@ -1326,7 +1399,7 @@ static void onHistoryViewEvent(const View *view, Event event)
     }
 }
 
-const View historyView = {
+static const View historyView = {
     onHistoryViewEvent,
     NULL,
 };
@@ -1432,13 +1505,16 @@ static const View doseAlarmMenuView = {
 // Alarm indication menu
 
 static const char *const alarmIndicationMenuOptions[] = {
+#if defined(BUZZER) || defined(VOICE)
     getString(STRING_SOUND),
+#endif
+#if defined(VOICE)
+    getString(STRING_VOICE),
+#endif
 #if defined(VIBRATION)
     getString(STRING_VIBRATION),
 #endif
-#if defined(ALERT_LED)
-    getString(STRING_ALERT_LED),
-#elif defined(PULSE_LED)
+#if defined(PULSE_LED) || defined(ALERT_LED) || defined(PULSE_CONTROL)
     getString(STRING_PULSE_LED),
 #endif
     getString(STRING_DISPLAY_FLASH),
@@ -1446,8 +1522,8 @@ static const char *const alarmIndicationMenuOptions[] = {
 };
 
 static const char *onAlarmIndicationMenuGetOption(const Menu *menu,
-                                                 uint32_t index,
-                                                 MenuStyle *menuStyle)
+                                                  uint32_t index,
+                                                  MenuStyle *menuStyle)
 {
     *menuStyle = (settings.alarmIndication >> index) & 1;
 
@@ -1474,6 +1550,53 @@ static const View alarmIndicationMenuView = {
     &alarmIndicationMenu,
 };
 
+// Alarm volume menu
+
+#if defined(VOICE)
+
+static const char *const alarmVolumeMenuOptions[] = {
+    getString(STRING_VERY_LOW),
+    getString(STRING_LOW),
+    getString(STRING_MEDIUM),
+    getString(STRING_HIGH),
+    NULL,
+};
+
+static const char *onAlarmVolumeMenuGetOption(const Menu *menu,
+                                              uint32_t index,
+                                              MenuStyle *menuStyle)
+{
+    *menuStyle = (index == settings.alarmVolume);
+
+    return alarmVolumeMenuOptions[index];
+}
+
+static void onAlarmVolumeMenuSelect(const Menu *menu)
+{
+    uint32_t index = menu->state->selectedIndex;
+
+    settings.alarmVolume = index;
+
+    updateVoiceVolume();
+}
+
+static MenuState alarmVolumeMenuState;
+
+static const Menu alarmVolumeMenu = {
+    getString(STRING_VOLUME),
+    &alarmVolumeMenuState,
+    onAlarmVolumeMenuGetOption,
+    onAlarmVolumeMenuSelect,
+    onAlarmsSubMenuBack,
+};
+
+const View alarmVolumeMenuView = {
+    onMenuEvent,
+    &alarmVolumeMenu,
+};
+
+#endif
+
 // Alarms menu
 
 bool isAlarmEnabled(void)
@@ -1488,11 +1611,23 @@ bool isAlarm(void)
             measurements.period.faultAlarm);
 }
 
+bool isInstantaneousRateAlarm(void)
+{
+    return measurements.instantaneous.alarm;
+}
+
+bool isCumulativeDoseAlarm(void)
+{
+    return measurements.cumulativeDose.alarm;
+}
+
 static const OptionView alarmsMenuOptions[] = {
     {getString(STRING_RATE_ALARM), &rateAlarmMenuView},
     {getString(STRING_DOSE_ALARM), &doseAlarmMenuView},
-    {getString(STRING_OVERRANGE_ALARM), NULL},
     {getString(STRING_INDICATION), &alarmIndicationMenuView},
+#if defined(VOICE)
+    {getString(STRING_VOLUME), &alarmVolumeMenuView},
+#endif
     {NULL},
 };
 
@@ -1502,10 +1637,7 @@ static const char *onAlarmsMenuGetOption(const Menu *menu,
 {
     const OptionView *optionView = &alarmsMenuOptions[index];
 
-    if (optionView->view)
-        *menuStyle = MENUSTYLE_SUBMENU;
-    else
-        *menuStyle = settings.overrangeAlarm;
+    *menuStyle = MENUSTYLE_SUBMENU;
 
     return optionView->option;
 }
@@ -1514,10 +1646,7 @@ static void onAlarmsMenuSelect(const Menu *menu)
 {
     const OptionView *optionView = &alarmsMenuOptions[menu->state->selectedIndex];
 
-    if (optionView->view)
-        setView(optionView->view);
-    else
-        settings.overrangeAlarm = !settings.overrangeAlarm;
+    setView(optionView->view);
 }
 
 static MenuState alarmsMenuState;

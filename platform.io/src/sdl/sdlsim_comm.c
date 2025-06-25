@@ -21,21 +21,20 @@ const char *const commId = "Rad Pro simulator;Rad Pro " FIRMWARE_VERSION;
 #include <sercomm/sercomm.h>
 
 #define COMM_SERIAL_BAUDRATE 115200
-#define COMM_BUFFER_SIZE 64
 
-static struct
+static ser_t *sercomm;
+
+void initComm(Void)
 {
-    ser_t *sercomm;
-    char lastChar;
-} commController;
+}
 
 void openComm(void)
 {
-    if (commController.sercomm)
+    if (comm.enabled)
         return;
 
-    commController.sercomm = ser_create();
-    if (commController.sercomm == NULL)
+    sercomm = ser_create();
+    if (sercomm == NULL)
     {
         printf("Could not create serial port instance.\n");
 
@@ -51,29 +50,29 @@ void openComm(void)
         {0, 0},
     };
 
-    int32_t result = ser_open(commController.sercomm, &options);
+    int32_t result = ser_open(sercomm, &options);
     if (result)
     {
         printf("Could not open serial port: %s\n", sererr_last());
 
-        ser_destroy(commController.sercomm);
-        commController.sercomm = NULL;
+        ser_destroy(sercomm);
+        sercomm = NULL;
 
         return;
     }
+
+    resetComm(true);
 }
 
 void closeComm(void)
 {
-    ser_close(commController.sercomm);
-    ser_destroy(commController.sercomm);
+    if (!comm.enabled)
+        return;
 
-    commController.sercomm = NULL;
-}
+    ser_close(sercomm);
+    ser_destroy(sercomm);
 
-bool isCommOpen(void)
-{
-    return (commController.sercomm != NULL);
+    resetComm(false);
 }
 
 void transmitComm(void)
@@ -81,22 +80,22 @@ void transmitComm(void)
     comm.state = COMM_TX;
 }
 
-void updateCommController(void)
+void updateComm(void)
 {
-    if (commController.sercomm == NULL)
-        return;
-
     char receiveBuffer[COMM_BUFFER_SIZE];
     size_t receivedBytes = 0;
 
-    ser_read(commController.sercomm,
+    ser_read(sercomm,
              receiveBuffer,
              COMM_BUFFER_SIZE,
              &receivedBytes);
 
-    if (comm.enabled &&
-        (comm.state == COMM_RX))
+    if (!comm.enabled)
+        return;
+
+    switch (comm.state)
     {
+    case COMM_RX:
         for (int32_t i = 0;
              i < receivedBytes;
              i++)
@@ -108,7 +107,7 @@ void updateCommController(void)
                 comm.buffer[comm.bufferIndex++] = c;
             else if ((c == '\r') ||
                      ((c == '\n') &&
-                      (commController.lastChar != '\r')))
+                      (comm.lastChar != '\r')))
             {
                 comm.buffer[comm.bufferIndex] = '\0';
 
@@ -116,62 +115,63 @@ void updateCommController(void)
                 comm.state = COMM_RX_READY;
             }
 
-            commController.lastChar = c;
+            comm.lastChar = c;
         }
-    }
 
-    if (comm.state == COMM_TX)
+        break;
+
+    case COMM_TX:
     {
         char *sendBuffer = comm.buffer + comm.bufferIndex;
         size_t sentBytes = 0;
 
-        ser_write(commController.sercomm,
+        ser_write(sercomm,
                   sendBuffer,
                   strlen(sendBuffer),
                   &sentBytes);
 
         comm.bufferIndex += sentBytes;
 
-        if ((comm.bufferIndex > 0) &&
-            (comm.buffer[comm.bufferIndex - 1] == '\n'))
+        if (comm.buffer[comm.bufferIndex] == '\0')
         {
+            strclr(comm.buffer);
             comm.bufferIndex = 0;
-            comm.state = COMM_RX;
+
+            if (comm.transmitState == TRANSMIT_DONE)
+                comm.state = COMM_RX;
+            else
+                comm.state = COMM_TX_READY;
         }
-        else if (comm.buffer[comm.bufferIndex] == '\0')
-        {
-            comm.bufferIndex = 0;
-            comm.state = COMM_TX_READY;
-        }
+
+        break;
+    }
     }
 }
 
 #else
 
-#include <stdbool.h>
-
-static bool commControllerStarted = false;
-
 void openComm(void)
 {
-    commControllerStarted = true;
+    resetComm(true);
 }
 
 void closeComm(void)
 {
-    commControllerStarted = false;
-}
-
-bool isCommOpen(void)
-{
-    return commControllerStarted;
+    resetComm(false);
 }
 
 void transmitComm(void)
 {
+    strclr(comm.buffer);
+    comm.bufferIndex = 0;
+
+    if (comm.transmitState == TRANSMIT_DONE)
+        comm.state = COMM_RX;
+    else
+        comm.state = COMM_TX_READY;
 }
 
-void updateCommController(void)
+void updateComm(void)
 {
 }
 

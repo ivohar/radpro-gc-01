@@ -19,11 +19,11 @@
 #include "events.h"
 #include "flash.h"
 #include "game.h"
-#include "init.h"
 #include "keyboard.h"
 #include "led.h"
 #include "menu.h"
 #include "power.h"
+#include "pulsecontrol.h"
 #include "rng.h"
 #include "rtc.h"
 #include "settings.h"
@@ -31,6 +31,7 @@
 #include "tube.h"
 #include "vibration.h"
 #include "view.h"
+#include "voice.h"
 
 #if SIMULATOR
 bool updateSDLTicks();
@@ -52,15 +53,23 @@ int main(void)
     // System initialization
     initSystem();
     initEvents();
+    initPower();
     initFlash();
     initSettings();
-    initPower();
     initADC();
     initTube();
     initComm();
     initKeyboard();
     initDisplay();
+#if defined(PULSE_CONTROL)
+    initPulseControl();
+#endif
+#if defined(VOICE)
+    initVoice();
+#endif
+#if defined(BUZZER)
     initBuzzer();
+#endif
 #if defined(VIBRATION)
     initVibration();
 #endif
@@ -73,11 +82,20 @@ int main(void)
     runTestMode();
 #endif
 
-#if !defined(KEYBOARD_POWERON_NOSLEEP)
-    sleep(1000);
+#if defined(START_POWERON)
+    powerOn();
+#else
+    // if (isPowerKeyDown())
+    // {
+        sleep(1000);
+        powerOn();
+    // }
+    // else
+    // {
+    //     setView(&powerOffView);
+    //     requestBacklightTrigger();
+    // }
 #endif
-
-    setPowerOnView();
 
     // Main loop
 #if SIMULATOR

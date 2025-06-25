@@ -116,7 +116,6 @@
 // Pulses menu items
 #define STRING_SOUND "소리"
 #define STRING_VIBRATION "진동"
-#define STRING_ALERT_LED "경고 LED"
 #define STRING_PULSE_LED "펄스 LED"
 #define STRING_DISPLAY_FLASH "디스플레이 플래시"
 #define STRING_THRESHOLD "임계값"
@@ -129,8 +128,9 @@
 // Alarms menu items
 #define STRING_RATE_ALARM "비율 알람"
 #define STRING_DOSE_ALARM "선량 알람"
-#define STRING_OVERRANGE_ALARM "초과 알람"
 #define STRING_INDICATION "표시"
+#define STRING_VOICE "음성"
+#define STRING_VOLUME "볼륨"
 
 // Measurements menu items
 #define STRING_UNITS "단위"
@@ -240,7 +240,7 @@
 #define STRING_ALKALINE "알카라인"
 
 // Random generator menu items
-#define STRING_FULL_ASCII "전체 ASCII"
+#define STRING_ASCII "ASCII"
 #define STRING_ALPHANUMERIC "알파벳+숫자"
 #define STRING_HEXADECIMAL "16진수"
 #define STRING_DECIMAL "10진수"
