@@ -69,6 +69,9 @@ void initKeyboardHardware(void);
 
 void getKeyboardState(bool *);
 
+bool isPowerKeyDown(void);
+void waitLongKeyPress(void);
+
 void setKeyboardMode(KeyboardMode mode);
 
 void onKeyboardTick(void);

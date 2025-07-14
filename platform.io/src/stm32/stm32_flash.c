@@ -31,6 +31,16 @@ const uint32_t flashWordSize = FLASH_WORD_SIZE;
 
 // Flash
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+__asm__(".section .comment\n"
+        ".string \"FLASH_BASE: " TOSTRING(FLASH_BASE) "\"\n"
+        ".string \"FLASH_SIZE: " TOSTRING(FLASH_SIZE) "\"\n"
+        ".string \"FIRMWARE_BASE: " TOSTRING(FIRMWARE_BASE) "\"\n"
+        ".string \"FIRMWARE_SIZE: " TOSTRING(FIRMWARE_SIZE) "\"\n"
+        ".section .text\n");
+
 void initFlash(void)
 {
 }

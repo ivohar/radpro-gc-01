@@ -21,9 +21,10 @@ extern const View datalogMenuView;
 void resetDatalog(void);
 
 void openDatalog(void);
+void closeDatalog(void);
+
 void updateDatalog(void);
 void writeDatalogReset(void);
-void closeDatalog(void);
 
 void startDatalogDownload(void);
 bool getDatalogDownloadEntry(Dose *dose);

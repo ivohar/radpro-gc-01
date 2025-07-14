@@ -9,12 +9,12 @@
 
 #include <stdio.h>
 
-#include "adc.h"
 #include "comm.h"
 #include "cstring.h"
 #include "display.h"
 #include "events.h"
 #include "measurements.h"
+#include "power.h"
 #include "rng.h"
 #include "rtc.h"
 #include "system.h"
@@ -22,12 +22,12 @@
 
 Comm comm;
 
-void resetComm(bool enabled)
+void resetComm(bool open)
 {
     comm.state = COMM_RX;
     strclr(comm.buffer);
     comm.bufferIndex = 0;
-    comm.enabled = enabled;
+    comm.open = open;
     comm.transmitState = TRANSMIT_DONE;
 }
 

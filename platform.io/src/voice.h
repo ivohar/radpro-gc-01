@@ -10,15 +10,17 @@
 #if !defined(VOICE_H)
 #define VOICE_H
 
-void initVoice(void);
-void updateVoice(void);
+#include <stdint.h>
 
-void updateVoiceVolume(void);
+void initVoice(void);
+void resetVoice(void);
+void onVoiceTick(void);
+
+void setVoiceVolume(void);
 
 void playVoiceInstantaneousRate(void);
 void playVoiceAverageRate(void);
 void playVoiceCumulativeDose(void);
-
 void playVoiceAlarm(void);
 
 #endif

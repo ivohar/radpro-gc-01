@@ -32,11 +32,11 @@ void initEventsHardware(void)
     iwdg_unlock();
     wait_until_bits_clear(IWDG->SR, IWDG_SR_PVU);
     IWDG->PR = 0b110;
-
+    
     iwdg_unlock();
     wait_until_bits_clear(IWDG->SR, IWDG_SR_RVU);
     IWDG->RLR = (LSI_FREQUENCY / 256) - 1;
-
+    
     iwdg_start();
 }
 

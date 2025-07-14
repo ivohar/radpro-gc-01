@@ -10,6 +10,7 @@
 #if defined(SIMULATOR)
 
 #include <stdio.h>
+#include <string.h>
 
 #include "../system.h"
 #include "../voice.h"
@@ -38,17 +39,21 @@ void updatePulseControl(void)
 {
 }
 
+void onPulseControlTick(void)
+{
+}
+
 // Voice
 
 void initVoice(void)
 {
 }
 
-void updateVoice(void)
+void onVoiceTick(void)
 {
 }
 
-void updateVoiceVolume(uint32_t value)
+void setVoiceVolume(void)
 {
 }
 

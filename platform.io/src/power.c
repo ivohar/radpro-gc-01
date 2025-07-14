@@ -24,23 +24,20 @@
 #include "settings.h"
 #include "system.h"
 #include "tube.h"
+#include "voice.h"
+
+Power power;
 
 // Power on
 
-typedef enum
-{
-    POWERON_VIEW_FLASHFAILURE,
-    POWERON_VIEW_SPLASH,
-} PowerOnViewState;
-
-static PowerOnViewState powerOnViewState;
+static void resetBattery();
 
 static void onPowerOnViewEvent(const View *view, Event event)
 {
     switch (event)
     {
     case EVENT_DRAW:
-        if (powerOnViewState == POWERON_VIEW_FLASHFAILURE)
+        if (power.onViewState == POWERON_VIEW_FLASHFAILURE)
             drawNotification(getString(STRING_NOTIFICATION_WARNING),
                              getString(STRING_NOTIFICATION_FIRMWARE_CHECKSUM_FAILURE));
         else
@@ -50,19 +47,19 @@ static void onPowerOnViewEvent(const View *view, Event event)
         break;
 
     case EVENT_POST_DRAW:
-        if (powerOnViewState == POWERON_VIEW_SPLASH)
+        if (power.onViewState == POWERON_VIEW_SPLASH)
             initRTC();
 
         break;
 
     case EVENT_PERIOD:
-        if (powerOnViewState == POWERON_VIEW_FLASHFAILURE)
-            powerOnViewState = POWERON_VIEW_SPLASH;
+        if (power.onViewState == POWERON_VIEW_FLASHFAILURE)
+            power.onViewState = POWERON_VIEW_SPLASH;
         else
         {
             // Start measurements
             setTubeHV(true);
-            enableMeasurements();
+            setMeasurements(true);
 #if defined(DATA_MODE)
             if (settings.dataMode)
                 openComm();
@@ -87,27 +84,10 @@ const View powerOnView = {
 
 void powerOn(void)
 {
-    // Power on
     setPower(true);
 
-    if (!verifyFlash())
-    {
-        powerOnViewState = POWERON_VIEW_FLASHFAILURE;
-
-        triggerAlarm();
-    }
-    else
-        powerOnViewState = POWERON_VIEW_SPLASH;
-
-    requestBacklightTrigger();
-    BuzzerAndVibration();
-#if defined(PULSE_CONTROL)
-    updatePulseControl();
-#endif
-
-    // Reset
     resetEvents();
-    resetPower();
+    resetBattery();
     resetSettings();
     resetMeasurements();
     resetTube();
@@ -119,14 +99,58 @@ void powerOn(void)
     resetGame();
 #endif
 
-    // Set view
+#if defined(PULSE_CONTROL)
+    setPulseControl(true);
+#endif
+
+    if (!verifyFlash())
+    {
+        power.onViewState = POWERON_VIEW_FLASHFAILURE;
+
+        triggerAlarm();
+    }
+    else
+        power.onViewState = POWERON_VIEW_SPLASH;
+
+    requestBacklightTrigger();
+    BuzzerAndVibration();
+
     setView(&powerOnView);
 }
 
 // Power off
 
+#define POWEROFF_DISPLAY_TIME 5
+
 static void onPowerOffViewEvent(const View *view, Event event)
 {
+    switch (event)
+    {
+    case EVENT_KEY_TOGGLEBACKLIGHT:
+        power.offDisplayTimer = POWEROFF_DISPLAY_TIME;
+        resetEvents();
+        requestBacklightTrigger();
+
+        break;
+
+    case EVENT_DRAW:
+        drawPowerOff(power.offDisplayTimer != 0);
+
+        break;
+
+    case EVENT_PERIOD:
+        if (power.offDisplayTimer)
+        {
+            power.offDisplayTimer--;
+            if (!power.offDisplayTimer)
+                cancelBacklight();
+        }
+
+        break;
+
+    default:
+        break;
+    }
 }
 
 const View powerOffView = {
@@ -134,31 +158,54 @@ const View powerOffView = {
     NULL,
 };
 
-void powerOff(void)
+void powerOff(bool displayEnabled)
 {
-    // Set view
-    setView(&powerOffView);
-
-    // Power off
-    writeSettings();
-    closeDatalog();
-    closeComm();
-    disableMeasurements();
-    setTubeHV(false);
-#if defined(PULSE_CONTROL)
-    updatePulseControl();
+    resetEvents();
+    if (isPowered())
+    {
+        writeSettings();
+        setTubeHV(false);
+        closeDatalog();
+        closeComm();
+        setKeyboardMode(KEYBOARD_MODE_MEASUREMENT);
+#if defined(VOICE)
+        resetVoice();
 #endif
-    cancelBacklight();
+    }
+    else
+        updateBattery();
+    if (displayEnabled)
+    {
+        power.offDisplayTimer = POWEROFF_DISPLAY_TIME;
+        requestBacklightTrigger();
+    }
+    else
+    {
+        power.offDisplayTimer = 0;
+        cancelBacklight();
+    }
+    setMeasurements(false);
+#if defined(PULSE_CONTROL)
+    setPulseControl(false);
+#endif
+
+    setView(&powerOffView);
 
     setPower(false);
 }
 
-bool isPoweredOff(void)
+bool isPowered(void)
 {
-    return (getView() == &powerOffView);
+    return power.enabled;
 }
 
 // Battery
+
+// First order filter (n: time constant in taps): k = exp(-1 / n)
+// For n = 100 (seconds):
+#define BATTERY_VOLTAGE_FILTER_CONSTANT 0.99F
+
+#define BATTERY_LEVEL_HYSTERESIS 0.01F
 
 #if defined(BATTERY_REMOVABLE)
 static const float batteryLevelThresholds[2][BATTERY_LEVEL_NUM - 1] = {
@@ -168,17 +215,33 @@ static const float batteryLevelThresholds[2][BATTERY_LEVEL_NUM - 1] = {
     // Alkaline
     {1.159F, 1.220F, 1.283F, 1.358F},
 };
+
+static const float batteryLowThreshold[2] = {
+    1.0F,
+    0.8F,
+};
+
+static const Menu batteryTypeMenu;
 #else
 static const float batteryLevelThresholds[BATTERY_LEVEL_NUM - 1] =
     // Li-Ion
     {3.527F, 3.646F, 3.839F, 3.982F};
+
+static const float batteryLowThreshold =
+    3.0F;
 #endif
 
-#if defined(BATTERY_REMOVABLE)
-static const Menu batteryTypeMenu;
-#endif
+struct
+{
+    float voltage;
+    float filteredVoltage;
 
-void resetPower()
+    uint8_t level;
+
+    bool lastUSBPowered;
+} battery;
+
+static void resetBattery()
 {
 #if defined(BATTERY_REMOVABLE)
     selectMenuItem(&batteryTypeMenu,
@@ -187,26 +250,67 @@ void resetPower()
 #endif
 }
 
-uint8_t getBatteryLevel(void)
+void updateBattery(void)
 {
+    // Battery voltage
+    battery.voltage = readBatteryVoltage();
+
+    // Battery level
+    if (battery.filteredVoltage == 0.0F)
+        battery.filteredVoltage = battery.voltage;
+    else
+        battery.filteredVoltage = battery.voltage + BATTERY_VOLTAGE_FILTER_CONSTANT * (battery.filteredVoltage - battery.voltage);
+
 #if defined(BATTERY_REMOVABLE)
     const float *selectedBatteryLevelThresholds = batteryLevelThresholds[settings.batteryType];
 #else
     const float *selectedBatteryLevelThresholds = batteryLevelThresholds;
 #endif
 
-    float voltage = getFilteredBatteryVoltage();
+    uint8_t level = 0;
 
     for (uint32_t i = 0; i < (BATTERY_LEVEL_NUM - 1); i++)
     {
-        if (voltage < selectedBatteryLevelThresholds[i])
-            return i;
+        float thresholdVoltage = selectedBatteryLevelThresholds[i];
+
+        if (i >= battery.level)
+            thresholdVoltage += BATTERY_LEVEL_HYSTERESIS;
+
+        if (battery.filteredVoltage >= thresholdVoltage)
+            level = i + 1;
     }
 
-    return (BATTERY_LEVEL_NUM - 1);
+    battery.level = level;
+
+    // Low battery
+#if defined(BATTERY_REMOVABLE)
+    bool lowBattery = battery.filteredVoltage < batteryLowThreshold[settings.batteryType];
+#else
+    bool lowBattery = battery.filteredVoltage < batteryLowThreshold;
+#endif
+
+    if (lowBattery && isPowered())
+        powerOff(true);
+
+    // USB power state
+    bool usbPowered = isUSBPowered();
+    if (!battery.lastUSBPowered && usbPowered)
+    {
+        requestBacklightTrigger();
+        triggerVibration();
+    }
+    battery.lastUSBPowered = usbPowered;
 }
 
-// Battery type menu
+uint8_t getBatteryLevel(void)
+{
+    return battery.level;
+}
+
+float getBatteryVoltage(void)
+{
+    return getBatteryNum() * battery.voltage;
+}
 
 #if defined(BATTERY_REMOVABLE)
 

@@ -9,12 +9,14 @@
 
 #if defined(GMC800)
 
+#include "../cmath.h"
 #include "../display.h"
 #include "../events.h"
 #include "../flash.h"
 #include "../keyboard.h"
 #include "../measurements.h"
 #include "../power.h"
+#include "../pulsecontrol.h"
 #include "../settings.h"
 #include "../system.h"
 
@@ -280,6 +282,15 @@ void refreshDisplay(void)
 
 // Pulse control
 
+#define PULSE_LENGTH 0.0008F
+#define PULSESTRETCHERFIX_MINRATE (1.0F / PULSE_LENGTH)
+
+static struct {
+    bool enabled;
+
+    volatile bool stretcherFix;
+} pulseControl;
+
 void initPulseControl(void)
 {
     gpio_set(BUZZ_EN_PORT, BUZZ_EN_PIN);
@@ -292,9 +303,9 @@ void initPulseControl(void)
                GPIO_MODE_OUTPUT_2MHZ_PUSHPULL);
 }
 
-void updatePulseControl()
+static void setPulseControlClicks(bool value)
 {
-    if (settings.pulseSound && !isPoweredOff())
+    if (value)
         gpio_setup(BUZZ_EN_PORT,
                    BUZZ_EN_PIN,
                    GPIO_MODE_INPUT_PULLUP);
@@ -302,13 +313,37 @@ void updatePulseControl()
         gpio_setup(BUZZ_EN_PORT,
                    BUZZ_EN_PIN,
                    GPIO_MODE_OUTPUT_50MHZ_PUSHPULL);
+}
+
+void setPulseControl(bool value)
+{
+    pulseControl.enabled = value;
+
+    updatePulseControl();
+}
+
+void updatePulseControl(void)
+{
+    pulseControl.stretcherFix =
+        pulseControl.enabled &&
+        settings.pulseSound &&
+        (getInstantaneousRate() >= PULSESTRETCHERFIX_MINRATE);
+
+    if (!pulseControl.stretcherFix)
+        setPulseControlClicks(pulseControl.enabled && settings.pulseSound);
 
     gpio_modify(PULSE_GREEN_EN_PORT,
                 PULSE_GREEN_EN_PIN,
-                settings.pulseLED && !isAlarm() && !isPoweredOff());
+                pulseControl.enabled && settings.pulseLED && !isAlarm());
     gpio_modify(PULSE_RED_EN_PORT,
                 PULSE_RED_EN_PIN,
-                settings.pulseLED && isAlarm() && !isPoweredOff());
+                pulseControl.enabled && settings.pulseLED && isAlarm());
+}
+
+void onPulseControlTick(void)
+{
+    if (pulseControl.stretcherFix)
+        setPulseControlClicks(getRandomBit());
 }
 
 #endif

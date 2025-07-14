@@ -10,11 +10,17 @@
 #if defined(SIMULATOR)
 
 #include <stdio.h>
+#include <string.h>
 
 #include "../comm.h"
+#include "../cstring.h"
 #include "../system.h"
 
 const char *const commId = "Rad Pro simulator;Rad Pro " FIRMWARE_VERSION;
+
+void initComm(void)
+{
+}
 
 #if defined(SIMULATE_COMM)
 
@@ -24,13 +30,9 @@ const char *const commId = "Rad Pro simulator;Rad Pro " FIRMWARE_VERSION;
 
 static ser_t *sercomm;
 
-void initComm(Void)
-{
-}
-
 void openComm(void)
 {
-    if (comm.enabled)
+    if (comm.open)
         return;
 
     sercomm = ser_create();
@@ -66,7 +68,7 @@ void openComm(void)
 
 void closeComm(void)
 {
-    if (!comm.enabled)
+    if (!comm.open)
         return;
 
     ser_close(sercomm);
@@ -85,12 +87,13 @@ void updateComm(void)
     char receiveBuffer[COMM_BUFFER_SIZE];
     size_t receivedBytes = 0;
 
-    ser_read(sercomm,
-             receiveBuffer,
-             COMM_BUFFER_SIZE,
-             &receivedBytes);
+    if (sercomm)
+        ser_read(sercomm,
+                 receiveBuffer,
+                 COMM_BUFFER_SIZE,
+                 &receivedBytes);
 
-    if (!comm.enabled)
+    if (!comm.open)
         return;
 
     switch (comm.state)

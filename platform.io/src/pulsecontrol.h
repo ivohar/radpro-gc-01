@@ -10,8 +10,13 @@
 #if !defined(PULSECONTROL_H)
 #define PULSECONTROL_H
 
+#include <stdbool.h>
+
 void initPulseControl(void);
 
-void updatePulseControl();
+void setPulseControl(bool value);
+void updatePulseControl(void);
+
+void onPulseControlTick(void);
 
 #endif

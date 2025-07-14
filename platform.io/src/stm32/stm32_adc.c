@@ -13,16 +13,8 @@
 
 #include "device.h"
 
-// ADC constants
-
 #define ADC_VDD 3.3F
 #define ADC_VALUE_MAX ((1 << 12) - 1)
-
-// Battery voltage
-
-// First order filter (n: time constant in taps): k = exp(-1 / n)
-// For n = 100 (seconds):
-#define BATTERY_VOLTAGE_FILTER_CONSTANT 0.99F
 
 static struct
 {
@@ -45,8 +37,6 @@ void initADC(void)
     adc_calibrate(ADC1);
 
     adc.initialized = true;
-
-    updateADC();
 }
 
 static void startADC(void)
@@ -74,11 +64,14 @@ static void stopADC(void)
 #endif
 }
 
-static float readBatteryVoltage(void)
+float readBatteryVoltage(void)
 {
-    float value;
+    if (!adc.initialized)
+        return 0.0F;
 
     startADC();
+
+    float value;
 
 #if (defined(STM32F0) && !defined(GD32)) || defined(STM32G0) || defined(STM32L4)
     value = (VREFINT_CAL_VOLTAGE * PWR_BAT_SCALE_FACTOR / ADC_VALUE_MAX) *
@@ -86,39 +79,16 @@ static float readBatteryVoltage(void)
             readADC(PWR_BAT_CHANNEL) /
             readADC(ADC_VREF_CHANNEL);
 #else
-    value = (VREFINT_VOLTAGE * PWR_BAT_SCALE_FACTOR) *
-            readADC(PWR_BAT_CHANNEL) /
-            readADC(ADC_VREF_CHANNEL);
-    // value = ((ADC_VDD * PWR_BAT_SCALE_FACTOR / ADC_VALUE_MAX)) *
-    //         readADC(PWR_BAT_CHANNEL);
+    value = ((ADC_VDD * PWR_BAT_SCALE_FACTOR / ADC_VALUE_MAX)) *
+            readADC(PWR_BAT_CHANNEL);
+    // value = (VREFINT_VOLTAGE * PWR_BAT_SCALE_FACTOR) *
+    //         readADC(PWR_BAT_CHANNEL) /
+    //         readADC(ADC_VREF_CHANNEL);
 #endif
 
     stopADC();
 
     return value;
-}
-
-void updateADC(void)
-{
-    if (!adc.initialized)
-        return;
-
-    adc.batteryVoltage = readBatteryVoltage();
-
-    if (adc.filteredBatteryVoltage == 0.0F)
-        adc.filteredBatteryVoltage = adc.batteryVoltage;
-    else
-        adc.filteredBatteryVoltage = adc.batteryVoltage + BATTERY_VOLTAGE_FILTER_CONSTANT * (adc.filteredBatteryVoltage - adc.batteryVoltage);
-}
-
-float getBatteryVoltage(void)
-{
-    return PWR_BAT_NUM * adc.batteryVoltage;
-}
-
-float getFilteredBatteryVoltage(void)
-{
-    return adc.filteredBatteryVoltage;
 }
 
 #endif

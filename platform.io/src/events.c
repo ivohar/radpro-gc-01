@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 
-#include "adc.h"
 #include "buzzer.h"
 #include "cmath.h"
 #include "comm.h"
@@ -21,6 +20,7 @@
 #include "keyboard.h"
 #include "led.h"
 #include "measurements.h"
+#include "power.h"
 #include "pulsecontrol.h"
 #include "rng.h"
 #include "settings.h"
@@ -118,8 +118,9 @@ static uint32_t pulseSoundTicks[] = {
 
 void initEvents(void)
 {
-    events.periodTimer = SYSTICK_FREQUENCY;
     events.keyboardTimer = KEY_TICKS;
+
+    events.periodTimer = SYSTICK_FREQUENCY;
 
     initEventsHardware();
 }
@@ -127,8 +128,10 @@ void initEvents(void)
 void resetEvents(void)
 {
     events.deadTimeCount = PULSE_MEASUREMENT_FREQUENCY;
+
     events.periodTimer = SYSTICK_FREQUENCY;
-    events.keyboardTimer = KEY_TICKS;
+    events.periodUpdate = 0;
+    events.lastPeriodUpdate = 0;
 
     selectMenuItem(&pulsesMenu,
                    0,
@@ -167,7 +170,7 @@ void onTick(void)
     uint32_t pulseCount = 0;
     uint32_t pulseTimeCount;
 
-    while (getTubePulse(&pulseTimeCount))
+    while (getTubePulseTime(&pulseTimeCount))
     {
         onRNGPulse(pulseTimeCount);
 
@@ -187,6 +190,7 @@ void onTick(void)
 
     onMeasurementTick(pulseCount);
 
+    // Period
     if (updateTimer(&events.periodTimer) == TIMER_ELAPSED)
     {
         events.periodTimer = SYSTICK_FREQUENCY;
@@ -206,6 +210,16 @@ void onTick(void)
     // Display
     if (updateTimer(&events.backlightTimer) == TIMER_ELAPSED)
         setBacklight(false);
+
+    // Pulse control
+#if defined(PULSE_CONTROL)
+    onPulseControlTick();
+#endif
+
+    // Voice
+#if defined(VOICE)
+    onVoiceTick();
+#endif
 
     // Buzzer
 #if defined(BUZZER)
@@ -242,27 +256,22 @@ void onTick(void)
     }
 #endif
 
-#if defined(PULSE_LED)
-    // Pulse LED
-    if (updateTimer(&events.pulseLEDTimer) == TIMER_ELAPSED)
-        setPulseLED(false);
-#endif
-
-#if defined(ALERT_LED)
-    // Alert LED
-    if (updateTimer(&events.alertLEDTimer) == TIMER_ELAPSED)
-        setAlertLED(false);
-#endif
-
-#if defined(VIBRATION)
     // Vibration
+#if defined(VIBRATION)
     if (updateTimer(&events.vibrationTimer) == TIMER_ELAPSED)
         setVibration(false);
 #endif
 
-#if defined(VOICE)
-    // Voice
-    updateVoice();
+    // Pulse LED
+#if defined(PULSE_LED)
+    if (updateTimer(&events.pulseLEDTimer) == TIMER_ELAPSED)
+        setPulseLED(false);
+#endif
+
+    // Alert LED
+#if defined(ALERT_LED)
+    if (updateTimer(&events.alertLEDTimer) == TIMER_ELAPSED)
+        setAlertLED(false);
 #endif
 }
 
@@ -290,8 +299,8 @@ void dispatchEvents(void)
         events.lastPeriodUpdate = periodUpdate;
 
         updateMeasurements();
-        updateADC();
         updateView();
+        updateBattery();
     }
 
     updateDatalog();

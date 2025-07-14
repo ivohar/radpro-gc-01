@@ -27,7 +27,7 @@ void initComm(void)
 
 void openComm(void)
 {
-    if (comm.enabled)
+    if (comm.open)
         return;
 
     // RCC
@@ -70,7 +70,7 @@ void openComm(void)
 
 void closeComm(void)
 {
-    if (!comm.enabled)
+    if (!comm.open)
         return;
 
     // USART
@@ -105,15 +105,11 @@ void closeComm(void)
 void updateComm(void)
 {
 #if !defined(DATA_MODE) && defined(PWR_USB)
-    bool commShouldBeEnabled = isUSBPowered() &&
-                               !isPoweredOff();
-    if (commShouldBeEnabled != comm.enabled)
-    {
-        if (commShouldBeEnabled)
-            openComm();
-        else
-            closeComm();
-    }
+    bool commShouldBeEnabled = isPowered() && isUSBPowered();
+    if (!comm.open && commShouldBeEnabled)
+        openComm();
+    else if (comm.open && !commShouldBeEnabled)
+        closeComm();
 #endif
 }
 
@@ -454,7 +450,7 @@ static void onUSBData(usbd_device *dev,
     else
         receivedBytes = 0;
 
-    if (!comm.enabled)
+    if (!comm.open)
         return;
 
     switch (comm.state)
@@ -597,7 +593,7 @@ void initComm(void)
 
 void openComm(void)
 {
-    if (comm.enabled)
+    if (comm.open)
         return;
 
     resetComm(true);
@@ -605,7 +601,7 @@ void openComm(void)
 
 void closeComm(void)
 {
-    if (!comm.enabled)
+    if (!comm.open)
         return;
 
     resetComm(false);
