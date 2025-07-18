@@ -466,6 +466,7 @@ static const mr_color_t displayColors[][4] = {
 {mr_get_color(0xADADAD), mr_get_color(0x0D0F0D), mr_get_color(0x343900), mr_get_color(0xC0E0C0)},
 {mr_get_color(0x474647), mr_get_color(0xE6E6E6), mr_get_color(0x7C7C00), mr_get_color(0x98C898)},
 {mr_get_color(0x7C7C7C), mr_get_color(0x9C9C9C), mr_get_color(0x686700), mr_get_color(0x80C080)},
+{mr_get_color(0x358C35), mr_get_color(0x138A00), mr_get_color(0x396E00), mr_get_color(0x101C10)},
 {mr_get_color(0xC72B2B), mr_get_color(0xE52626), mr_get_color(0x7F000C), mr_get_color(0xF86CD8)},
 {mr_get_color(0xFFFFFF), mr_get_color(0x333233), mr_get_color(0x000000), mr_get_color(0xF8FCF8)},
 {mr_get_color(0xA8ACB2), mr_get_color(0x3C5275), mr_get_color(0x005B2D), mr_get_color(0x80D8F8)},
@@ -905,7 +906,7 @@ static void drawBatteryIcon(const mr_rectangle_t *rectangle,
 {
     bool chargingBattery = isBatteryCharging();
 
-    mr_color_t color;
+    Color color;
     uint8_t level = getBatteryLevel();
 
     if (isUSBPowered() || chargingBattery)
