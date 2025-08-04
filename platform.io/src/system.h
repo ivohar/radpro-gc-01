@@ -19,7 +19,7 @@
 #define FIRMWARE_NAME "Rad Pro GC-01"
 #define FIRMWARE_VERSION "2.2beta5-iha-c1"
 
-extern const View statisticsView;
+extern View statisticsView;
 
 void initSystem(void);
 
