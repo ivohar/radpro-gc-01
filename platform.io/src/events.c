@@ -482,7 +482,7 @@ void togglePulseSound(void)
 
 void BuzzerAndVibration(void)
 {
-    syncTimerThread();
+    syncTick();
 
 #if defined(BUZZER)    
     setBuzzerTimer(POWERON_TEST_TICKS, 1);

@@ -479,16 +479,19 @@ static const mr_color_t displayColors[][4] = {
 {mr_get_color(0x474647), mr_get_color(0xE6E6E6), mr_get_color(0x7C7C00), mr_get_color(0x98C898)},
 {mr_get_color(0x7C7C7C), mr_get_color(0x9C9C9C), mr_get_color(0x686700), mr_get_color(0x80C080)},
 {mr_get_color(0x358C35), mr_get_color(0x138A00), mr_get_color(0x396E00), mr_get_color(0x101C10)},
+{mr_get_color(0xEF9500), mr_get_color(0xF69400), mr_get_color(0x865F00), mr_get_color(0xB05000)},
 {mr_get_color(0xC72B2B), mr_get_color(0xE52626), mr_get_color(0x7F000C), mr_get_color(0xF86CD8)},
 {mr_get_color(0xFFFFFF), mr_get_color(0x333233), mr_get_color(0x000000), mr_get_color(0xF8FCF8)},
 {mr_get_color(0xA8ACB2), mr_get_color(0x3C5275), mr_get_color(0x005B2D), mr_get_color(0x80D8F8)},
 {mr_get_color(0x232426), mr_get_color(0xF2F0F2), mr_get_color(0x7C7C00), mr_get_color(0xB05CC0)},
 {mr_get_color(0x7E7F7E), mr_get_color(0xA3A4A3), mr_get_color(0x7C7B00), mr_get_color(0x98D098)},
+#if defined(GAME)
 {mr_get_color(0x446894), mr_get_color(0x5779A2), mr_get_color(0x3E6952), mr_get_color(0x805C90)},
 {mr_get_color(0xAD937C), mr_get_color(0xB89070), mr_get_color(0x505000), mr_get_color(0xC04080)},
 {mr_get_color(0xBDA88D), mr_get_color(0xD0B088), mr_get_color(0x646400), mr_get_color(0x80C040)},
 {mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000)},
 {mr_get_color(0xFFFFFF), mr_get_color(0xFFFFFF), mr_get_color(0x7C7C00), mr_get_color(0xF8FCF8)}
+#endif
 };    
 #else
 static const mr_color_t displayColors[][3] = {    
