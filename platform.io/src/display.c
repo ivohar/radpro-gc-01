@@ -1013,7 +1013,11 @@ static void setupBatteryIcon(char *buffer)
     ColorIndex colorIndex;
     uint8_t level = getBatteryLevel();
 
+#if defined(GC01)
+    if (isUSBPowered(getBatteryVoltage()) && isBatteryCharging())
+#else    
     if (isUSBPowered() || isBatteryCharging())
+#endif
     {
         colorIndex = COLOR_RUNNING;
         level = chargingIcons[level];

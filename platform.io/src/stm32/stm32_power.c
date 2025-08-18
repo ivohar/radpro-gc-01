@@ -167,6 +167,12 @@ bool isBatteryCharging(void)
 #endif
 }
 
+#if defined(GC01)
+bool isUSBPowered(float voltage)
+{
+    return (voltage > PWR_CHRG_THR_VOLTAGE);
+}
+#else
 bool isUSBPowered(void)
 {
 #if defined(PWR_USB_PORT)
@@ -176,6 +182,7 @@ bool isUSBPowered(void)
     return false;
 #endif
 }
+#endif
 
 uint32_t getBatteryNum(void)
 {

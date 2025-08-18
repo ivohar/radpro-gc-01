@@ -301,7 +301,11 @@ void updateBattery(void)
     battery.level = level;
 
     // Power state
+#if defined(GC01)
+    bool usbPowered = isUSBPowered(battery.voltage);
+#else    
     bool usbPowered = isUSBPowered();
+#endif
 
     if (!usbPowered)
     {

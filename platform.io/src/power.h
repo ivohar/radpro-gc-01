@@ -28,7 +28,11 @@ void setPower(bool value);
 bool isPowered(void);
 bool isPowerOnReset(void);
 bool isBatteryCharging(void);
+#if defined(GC01)
+bool isUSBPowered(float voltage);
+#else
 bool isUSBPowered(void);
+#endif
 uint32_t getBatteryNum(void);
 
 void powerOn(bool isBoot);

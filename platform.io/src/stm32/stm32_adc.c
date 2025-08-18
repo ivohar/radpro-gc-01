@@ -53,6 +53,7 @@ float readBatteryVoltage(void)
 #else
     uint32_t batteryValue = readADC(PWR_BAT_CHANNEL);
 
+#if !defined(GC01)     
     adc_enable_temperature_vref_channel(ADC1);
     uint32_t vrefValue = readADC(ADC_VREF_CHANNEL);
     adc_disable_temperature_vref_channel(ADC1);
@@ -60,6 +61,10 @@ float readBatteryVoltage(void)
     float value = (VREFINT_VOLTAGE * PWR_BAT_SCALE_FACTOR) *
                   batteryValue /
                   vrefValue;
+   
+#else
+    float value = (ADC_VDD * PWR_BAT_SCALE_FACTOR / ADC_VALUE_MAX) *  batteryValue;
+#endif                  
 #endif
 
     adc_disable(ADC1);
