@@ -18,7 +18,12 @@
 void initPower(void)
 {
     // GPIO
-    setPower(false);
+    setPowerEnabled(false);
+
+#if defined(PWR_VCC)
+    gpio_set(PWR_VCC_PORT,
+             PWR_VCC_PIN);
+#endif
 
 #if defined(STM32F0) || defined(STM32G0) || defined(STM32L4)
 
@@ -123,7 +128,7 @@ void initPower(void)
 #endif
 }
 
-void setPower(bool value)
+void setPowerEnabled(bool value)
 {
 #if defined(PWR_EN_ACTIVE_LOW)
     gpio_modify(PWR_EN_PORT,
@@ -132,12 +137,6 @@ void setPower(bool value)
 #else
     gpio_modify(PWR_EN_PORT,
                 PWR_EN_PIN,
-                value);
-#endif
-
-#if defined(PWR_VCC_PORT)
-    gpio_modify(PWR_VCC_PORT,
-                PWR_VCC_PIN,
                 value);
 #endif
 }

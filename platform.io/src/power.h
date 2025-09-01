@@ -24,7 +24,7 @@ extern View batteryTypeMenuView;
 
 void initPower(void);
 
-void setPower(bool value);
+void setPowerEnabled(bool value);
 bool isPowerOnReset(void);
 bool isBatteryCharging(void);
 #if defined(GC01)
