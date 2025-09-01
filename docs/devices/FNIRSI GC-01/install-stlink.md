@@ -8,8 +8,8 @@ This guide explains how to install the Rad Pro firmware on an FNIRSI GC-01 or JO
 ## What you'll need
 
 * **ST-LINK V2 USB dongle** (or compatible clone): Available on [Amazon](https://www.amazon.com/s?k=st-link+v2).
-* **4-pin header** for SWD connection.
-* **Philips screwdriver** to open the device.
+* **4-pin header**: For the SWD connection.
+* **Philips screwdriver:** For opening the device.
 * **Optional:** Soldering iron and solder for a secure connection.
 * **Windows users:** [ST-LINK driver](https://www.st.com/en/development-tools/stsw-link009.html)
 
@@ -20,9 +20,9 @@ This guide explains how to install the Rad Pro firmware on an FNIRSI GC-01 or JO
 1. Power off the device.
 2. Unscrew the back case and carefully open the device.
 3. Identify the microprocessor type (square chip), which should be CH32F103R8T6 (WCH) or APM32F103RBT6 (Geehy). **Warning:** Rad Pro is not compatible with devices using unmarked chips.
-4. Identify the Geiger-Müller tube (marked on the glass as J305, J321, J613, J614, or M4011). For unmarked tubes:
-   * 55 mm tubes: Assume J614.
-   * 65 mm tubes: Assume J613.
+4. Identify the Geiger-Müller tube, marked as **J305**, **J321**, **J613**, **J614**, or **M4011**. For unmarked tubes:
+   * **55 mm tubes:** Assume J614.
+   * **65 mm tubes:** Assume J613.
 5. Reassemble the device.
 
 ## Step 2: Connect the programmer
@@ -52,7 +52,7 @@ Now, follow these steps:
 ## Step 3: Flash the firmware
 
 1. Windows users: install the [ST-LINK driver](https://www.st.com/en/development-tools/stsw-link009.html).
-2. Download and extract the latest `radpro-flashtool-[version].zip` from [Rad Pro releases](https://github.com/Gissio/radpro/releases).
+2. Download and extract the latest `radpro-[version].zip` from [Rad Pro releases](https://github.com/Gissio/radpro/releases).
 3. Navigate to the `fnirsi-gc01_[microprocessor]` folder and run the appropriate script:
   * Windows: Double click `install.bat`.
   * Linux: Run `install.sh` in a terminal.

@@ -9,7 +9,7 @@
 
 #if defined(STM32)
 
-#if defined(BUZZER) || defined(VOICE)
+#if defined(BUZZER) || defined(SOUND_EN) || defined(VOICE)
 #include "../events.h"
 #include "../sound.h"
 
@@ -69,10 +69,8 @@ void initBuzzer(void)
                GPIO_MODE_OUTPUT_2MHZ_AF_PUSHPULL);
 
     // Timer
-    tim_setup_pwm(BUZZ_TIMER,
-                  BUZZ_TIMER_CHANNEL);
-    tim_set_period(BUZZ_TIMER,
-                   BUZZ_TIMER_PERIOD);
+    tim_setup_pwm(BUZZ_TIMER, BUZZ_TIMER_CHANNEL);
+    tim_set_period(BUZZ_TIMER, BUZZ_TIMER_PERIOD);
     setBuzzer(false);
     tim_enable(BUZZ_TIMER);
 
@@ -83,20 +81,28 @@ void setBuzzer(bool value)
 {
 #if !defined(BUZZ_TIMER)
 
+#if defined(BUZZ_ACTIVE_LOW)
     gpio_modify(BUZZ_PORT,
                 BUZZ_PIN,
-#if defined(BUZZ_ACTIVE_LOW)
-                !
-#endif
+                !value);
+#else
+    gpio_modify(BUZZ_PORT,
+                BUZZ_PIN,
                 value);
+#endif
 
 #if defined(BUZZ2_PORT)
+
+#if defined(BUZZ_ACTIVE_LOW)
     gpio_modify(BUZZ2_PORT,
                 BUZZ2_PIN,
-#if defined(BUZZ_ACTIVE_LOW)
-                !
-#endif
+                !value);
+#else
+    gpio_modify(BUZZ2_PORT,
+                BUZZ2_PIN,
                 value);
+#endif
+
 #endif
 
 #else
@@ -281,7 +287,7 @@ void initVoice(void)
 //     sleep(30);
 // }
 
-static void enableVoice(void)
+static void setVoiceEnabled(void)
 {
     // RCC
     rcc_enable_tim(VOICE_TX_TIMER);
@@ -289,8 +295,7 @@ static void enableVoice(void)
 
     // Timer
     tim_setup_dma(VOICE_TX_TIMER);
-    tim_set_period(VOICE_TX_TIMER,
-                   VOICE_TX_TIMER_PERIOD);
+    tim_set_period(VOICE_TX_TIMER, VOICE_TX_TIMER_PERIOD);
     tim_enable(VOICE_TX_TIMER);
 
     voice.transmitting = true;
@@ -359,7 +364,7 @@ void onVoiceTick(void)
         voice.sequenceIndex = 0;
 
         if (!voice.transmitting)
-            enableVoice();
+            setVoiceEnabled();
 
         voice.requestedSequenceUpdate = false;
     }
@@ -584,6 +589,20 @@ void playVoiceTest(void)
     pushVoiceQueue(VOICE_ONE);
     pushVoiceQueue(VOICE_TWO);
     pushVoiceQueue(VOICE_THREE);
+    sendVoiceQueue();
+}
+
+void playNumber(uint32_t value)
+{
+    clearVoiceAlert();
+
+    clearVoiceQueue();
+    pushVoiceQueue(VOICE_STOP);
+    pushVoiceQueue(voiceVolume[settings.soundVoiceVolume]);
+    if (value == 0)
+        pushVoiceQueue(VOICE_ZERO);
+    else
+        pushVoiceQueueNumber(value);
     sendVoiceQueue();
 }
 

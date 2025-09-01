@@ -1,7 +1,7 @@
 
 ## Introduction
 
-Rad Pro is an advanced custom firmware designed to enhance the functionality of various commercially available Geiger counters, including the [FS2011](https://www.amazon.com/s?k=fs2011), [YT-203B](https://www.amazon.com/s?k=yt203b), [Bosean FS-600](https://bosean.net/products/nuclear_radiation_detector.html), [Bosean FS-1000](https://bosean.net/products/FS-1000_nuclear_radiation_detector.html), [Bosean FS-5000](https://bosean.net/FS-5000-Nuclear-Radiation-Detector-2.html), [FNIRSI GC-01](https://www.fnirsi.com/products/gc-01) and [JOY-IT JT-RAD01](https://joy-it.net/products/JT-RAD01).
+Rad Pro is an advanced custom firmware designed to enhance the functionality of various commercially available Geiger counters, including the [FS2011](https://www.amazon.com/s?k=fs2011), [YT-203B](https://www.amazon.com/s?k=yt203b), [Bosean FS-600](https://bosean.net/products/nuclear_radiation_detector.html), [Bosean FS-1000](https://bosean.net/products/FS-1000_nuclear_radiation_detector.html), [Bosean FS-5000](https://bosean.net/FS-5000-Nuclear-Radiation-Detector-2.html), [FNIRSI GC-01](https://www.fnirsi.com/products/gc-01), [JOY-IT JT-RAD01](https://joy-it.net/products/JT-RAD01) and [GQ GMC-800](https://www.gqelectronicsllc.com/comersus/store/comersus_viewItem.asp?idProduct=5859).
 
 This fork more or less tracks the original [Gissio/radpro](https://github.com/Gissio/radpro) repo, but is oriented to customizations for older FNIRSI GC-01 HW, specifically the versions with ch32f103r8 and not-so-high quality display. Currently, it addresses the display deficiencies by slightly changing the color space, and adds some bug-fixes to other parts of the code. 
 

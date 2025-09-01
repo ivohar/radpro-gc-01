@@ -14,6 +14,7 @@
 #include "flash.h"
 #include "game.h"
 #include "keyboard.h"
+#include "led.h"
 #include "measurements.h"
 #include "power.h"
 #include "rng.h"
@@ -24,6 +25,14 @@
 #include "tube.h"
 
 #define BATTERY_LEVEL_NUM 5
+
+// First order filter (n: time constant in taps): k = exp(-1 / n)
+// For n = 100 (seconds):
+#define BATTERY_VOLTAGE_FILTER_CONSTANT 0.99F
+
+#define BATTERY_LEVEL_HYSTERESIS 0.01F
+
+#define POWEROFF_DISPLAY_TIME 5
 
 typedef enum
 {
@@ -40,7 +49,7 @@ static struct
 
 // Power on
 
-static void resetBattery();
+static void resetBattery(void);
 
 static void onPowerOnViewEvent(Event event)
 {
@@ -48,26 +57,33 @@ static void onPowerOnViewEvent(Event event)
     {
     case EVENT_DRAW:
         if (power.onViewState == POWERON_VIEW_FLASHFAILURE)
-            drawNotification(getString(STRING_NOTIFICATION_WARNING),
-                             getString(STRING_NOTIFICATION_FIRMWARE_CHECKSUM_FAILURE));
+            drawSplash(getString(STRING_SPLASH_FIRMWARE_CHECKSUM_FAILURE));
         else
-            drawNotification(getString(STRING_APP_NAME),
-                             FIRMWARE_VERSION);
+            drawSplash(getString(STRING_APP_NAME) "\n\n" FIRMWARE_VERSION);
 
         break;
 
     case EVENT_POST_DRAW:
         if (power.onViewState == POWERON_VIEW_SPLASH)
+        {
             initRTC();
+            loadHistory();
+        }
 
         break;
 
-    case EVENT_PERIOD:
+    case EVENT_HEARTBEAT:
         if (power.onViewState == POWERON_VIEW_FLASHFAILURE)
             power.onViewState = POWERON_VIEW_SPLASH;
         else
         {
             // Start measurements
+#if defined(SOUND_EN)
+            updateSound(true);
+#endif
+#if defined(PULSE_LED) || defined(ALERT_LED) || defined(PULSE_LED_EN) || defined(ALERT_LED_EN)
+            updateLED(true);
+#endif
             setTubeHV(true);
             setMeasurements(true);
             openDatalogWrite();
@@ -91,11 +107,14 @@ void powerOn(bool isBoot)
 #if !defined(START_POWERON)
     if (isBoot)
     {
+        updateBattery();
+
         bool powerKeyDown = isPowerKeyDown();
 
         if (isPowerOnReset() &&
             !powerKeyDown)
         {
+            setView(&powerOffView);
             powerOff(true);
 
             return;
@@ -139,8 +158,6 @@ void powerOn(bool isBoot)
 
 // Power off
 
-#define POWEROFF_DISPLAY_TIME 5
-
 static void onPowerOffViewEvent(Event event)
 {
     switch (event)
@@ -157,7 +174,7 @@ static void onPowerOffViewEvent(Event event)
 
         break;
 
-    case EVENT_PERIOD:
+    case EVENT_HEARTBEAT:
         if (!isBacklightActive())
             setPower(false);
 
@@ -180,13 +197,21 @@ View powerOffView = {
     NULL,
 };
 
-void powerOff(bool isBootOrLowBattery)
+void powerOff(bool showBatteryIndicator)
 {
     resetEvents();
 
-    if (isPowered())
+    setMeasurements(false);
+
+    if (!isInPowerOffView())
     {
         writeSettings();
+#if defined(SOUND_EN)
+        updateSound(false);
+#endif
+#if defined(PULSE_LED) || defined(ALERT_LED) || defined(PULSE_LED_EN) || defined(ALERT_LED_EN)
+        updateLED(false);
+#endif
         setTubeHV(false);
         closeDatalogWrite();
         setKeyboardMode(KEYBOARD_MODE_MEASUREMENT);
@@ -194,12 +219,8 @@ void powerOff(bool isBootOrLowBattery)
         stopVoice();
 #endif
     }
-    else
-        updateBattery();
 
-    setMeasurements(false);
-
-    if (isBootOrLowBattery)
+    if (showBatteryIndicator)
     {
         power.displayTimer = POWEROFF_DISPLAY_TIME;
         requestBacklightTrigger();
@@ -214,18 +235,12 @@ void powerOff(bool isBootOrLowBattery)
     setView(&powerOffView);
 }
 
-bool isDeviceOff(void)
+bool isInPowerOffView(void)
 {
     return (getView() == &powerOffView);
 }
 
 // Battery
-
-// First order filter (n: time constant in taps): k = exp(-1 / n)
-// For n = 100 (seconds):
-#define BATTERY_VOLTAGE_FILTER_CONSTANT 0.99F
-
-#define BATTERY_LEVEL_HYSTERESIS 0.01F
 
 #if defined(BATTERY_REMOVABLE)
 static const float batteryLevels[2][BATTERY_LEVEL_NUM - 1] = {
@@ -263,7 +278,7 @@ struct
     bool lastUSBPowered;
 } battery;
 
-static void resetBattery()
+static void resetBattery(void)
 {
 #if defined(BATTERY_REMOVABLE)
     selectMenuItem(&batteryTypeMenu,
@@ -309,10 +324,9 @@ void updateBattery(void)
 
     if (!usbPowered)
     {
-        bool lowBattery = (battery.filteredVoltage < batteryLow[settings.batteryType]) &&
-                          (battery.filteredVoltage > 0.8F);
+        bool lowBattery = (battery.filteredVoltage < batteryLow[settings.batteryType]);
 
-        if (!isDeviceOff() && lowBattery)
+        if (!isInPowerOffView() && lowBattery)
             powerOff(true);
     }
 

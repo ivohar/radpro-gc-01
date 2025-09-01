@@ -182,7 +182,7 @@ void initDisplay(void)
     updateDisplayTitle();
 }
 
-void enableDisplay(bool value)
+void setDisplayEnable(bool value)
 {
     mr_sdl_set_display(&mr_sdl, value);
 
@@ -243,7 +243,7 @@ void updateDisplay(void)
 
 extern volatile uint32_t eventsTick;
 
-bool updateSDLTicks()
+bool updateSDLTicks(void)
 {
     int32_t deltaTicks = SDL_GetTicks() - eventsTick;
     eventsTick++;
