@@ -111,7 +111,6 @@ void powerOn(bool isBoot)
         updateBattery();
 
         bool powerKeyDown = isPowerKeyDown();
-
         if (isPowerOnReset() &&
             !powerKeyDown)
         {

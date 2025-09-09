@@ -96,7 +96,9 @@ board = stm32l431rc
 build_flags =
     ${base.build_flags}
     -DFS5000
+    -DSTM32_SYNC_PERIPHERALS
     -DBOOTLOADER
+    -DPWR_VCC
     -DPWR_USB
     -DKEYBOARD_3_KEYS
     -DDISPLAY_COLOR
@@ -176,6 +178,7 @@ board = gd32f303rc
 build_flags =
     ${base.build_flags}
     -DGMC800
+    -DSTM32_SYNC_PERIPHERALS
     -DBOOTLOADER
     -DPWR_USB
     -DTUBE_HV_PWM

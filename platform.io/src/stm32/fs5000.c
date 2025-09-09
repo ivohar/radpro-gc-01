@@ -22,6 +22,11 @@
 
 void initSystem(void)
 {
+    // Set SP and VTOR for bootloader
+    __set_MSP(*((uint32_t *)FIRMWARE_BASE));
+    NVIC_DisableAllIRQs();
+    SCB->VTOR = FIRMWARE_BASE;
+
     // Enable HSI
     set_bits(RCC->CR, RCC_CR_HSION);
     wait_until_bits_set(RCC->CR, RCC_CR_HSIRDY);
@@ -47,8 +52,8 @@ void initSystem(void)
                 FLASH_ACR_LATENCY_3WS);
 
     // Configure AHB, APB1, APB2
-    RCC->CFGR = RCC_CFGR_SW_HSI |     // Set HSI
-                RCC_CFGR_HPRE_DIV1 |  // Set AHB clock: 64 MHz / 1 = 64 MHz
+    RCC->CFGR = RCC_CFGR_SW_HSI |      // Set HSI
+                RCC_CFGR_HPRE_DIV1 |   // Set AHB clock: 64 MHz / 1 = 64 MHz
                 RCC_CFGR_PPRE1_DIV16 | // Set APB1 clock: 64 MHz / 16 = 4 MHz
                 RCC_CFGR_PPRE2_DIV16;  // Set APB2 clock: 64 MHz / 16 = 4 MHz
 
@@ -97,6 +102,7 @@ void startBootloader(void)
 
     // Enable MSI
     set_bits(RCC->CR, RCC_CR_MSION);
+    wait_until_bits_set(RCC->CR, RCC_CR_MSIRDY);
 
     // Set MSI as system clock
     modify_bits(RCC->CFGR,
@@ -108,8 +114,7 @@ void startBootloader(void)
 
     // Disable PLL
     clear_bits(RCC->CR, RCC_CR_PLLON);
-    wait_until_bits_clear(RCC->CR,
-                          RCC_CR_PLLRDY);
+    wait_until_bits_clear(RCC->CR, RCC_CR_PLLRDY);
 
     // Reset RCC
     RCC->CFGR = 0;

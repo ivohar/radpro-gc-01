@@ -1,5 +1,11 @@
 # Releases
 
+## 3.0.2 "Icebreaker"
+
+* Fixed web installer update for the Bosean FS-5000.
+* Resolved a problem causing devices to become unresponsive after software updates.
+* Corrected a bug on the GQ GMC-800 that prevented alerts and voice output from functioning properly.
+
 ## 3.0.1 "The glow fix"
 
 * Removed the charging indicator on the FNIRSI GC-01 due to hardware limitations preventing differentiation between USB disconnected and USB charging states.
