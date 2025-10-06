@@ -329,12 +329,19 @@ def download_datalog(io,
         log_warning(f'could not write {path}')
 
 
-def send_http_request(url, method='get', json=None):
+def send_http_request(url, method='get', json=None, data=None):
+    headers = {'User-Agent': 'radpro-tool/' + radpro_tool_version}
+
     try:
         if method == 'get':
-            requests.get(url=url, timeout=60)
+            requests.get(url=url, timeout=60, headers=headers)
         elif method == 'post':
-            requests.post(url=url, json=json, timeout=60)
+            if json is not None:
+                requests.post(url=url, json=json, timeout=60, headers=headers)
+            elif data is not None:
+                requests.post(url=url, data=data, timeout=60, headers=headers)
+            else:
+                requests.post(url=url, timeout=60, headers=headers)
     except Exception as e:
         log_warning(f'could not submit HTTP data: url "{url}": {e}')
 
@@ -387,12 +394,14 @@ def stream_datalog(io, args):
             prev_timestamp = curr_timestamp
             prev_pulsecount = curr_pulsecount
 
+            curr_datetime = datetime.fromtimestamp(curr_timestamp)
+
             if args.pulsedata_file != None and curr_pulsecount != None:
-                curr_datetime = str(datetime.fromtimestamp(curr_timestamp))
+                curr_datetime_str = str(curr_datetime)
                 if cpm != None:
-                    line = f'{curr_timestamp},{curr_datetime},{curr_pulsecount},{cpm:.1f},{uSvH:.3f}\n'
+                    line = f'{curr_timestamp},{curr_datetime_str},{curr_pulsecount},{cpm:.1f},{uSvH:.3f}\n'
                 else:
-                    line = f'{curr_timestamp},{curr_datetime},{curr_pulsecount},,\n'
+                    line = f'{curr_timestamp},{curr_datetime_str},{curr_pulsecount},,\n'
 
                 try:
                     open(args.pulsedata_file, 'at').write(line)
@@ -405,7 +414,8 @@ def stream_datalog(io, args):
                     f'?AID={args.submit_gmcmap[0]}' + f'&GID={args.submit_gmcmap[1]}' + \
                     f'&CPM={cpm:.0f}' + f'&ACPM={cpm:.3f}' + \
                     f'&uSV={uSvH:.3f}'
-                send_http_request(url)
+                send_http_request(url, 'get')
+                print(f'GMCMap submission: {curr_datetime} CPM:{cpm:.3f} uSv/h:{uSvH:.3f}')
 
             if args.submit_radmon != None and cpm != None:
                 url = 'https://radmon.org/radmon.php?function=submit' + \
@@ -413,6 +423,7 @@ def stream_datalog(io, args):
                     f'&password={args.submit_radmon[1]}' + \
                     f'&value={cpm:.3f}' + '&unit=CPM'
                 send_http_request(url)
+                print(f'Radmon submission: {curr_datetime} CPM:{cpm:.3f} uSv/h:{uSvH:.3f}')
 
             if args.submit_safecast != None and cpm != None:
                 url = 'https://api.safecast.org/measurements.json?api_key=' + \
@@ -422,11 +433,12 @@ def stream_datalog(io, args):
                     'unit': 'cpm',
                     'device_id': args.submit_safecast[1],
                     'captured_at': f'"{curr_datetime.isoformat()}"',
-                    'latitude': '0',
-                    'longitude': '0',
-                    'height': '0',
+                    'latitude': str(args.safecast_latitude),
+                    'longitude': str(args.safecast_longitude),
+                    'height': str(args.safecast_height),
                 }
-                send_http_request(url, 'post', json)
+                send_http_request(url, 'post', json=json)
+                print(f'Safecast submission: {curr_datetime} CPM:{cpm:.3f} uSv/h:{uSvH:.3f}')
 
         # Wait for next measurement
         next_event += args.period
@@ -473,7 +485,7 @@ def main():
                         help='download only data log records older than a certain ISO 8601 date and time (e.g. "2000-01-01" or "2000-01-01T12:00:00")')
     parser.add_argument('--download-datalog-max-record-num',
                         dest='datalog_max_record_num',
-                        help='limi the number of data log records to download')
+                        help='limit the number of data log records to download')
     parser.add_argument('--log-pulsedata',
                         dest='pulsedata_file',
                         help='log live pulse data to a .csv file')
@@ -498,6 +510,18 @@ def main():
                         metavar=('API_KEY', 'DEVICE_ID'),
                         action='store',
                         help='submit live data to https://safecast.org')
+    parser.add_argument('--safecast-latitude',
+                        type=float,
+                        default=0.0,
+                        help='decimal latitude for Safecast submissions (default: 0.0)')
+    parser.add_argument('--safecast-longitude',
+                        type=float,
+                        default=0.0,
+                        help='decimal longitude for Safecast submissions (default: 0.0)')
+    parser.add_argument('--safecast-height',
+                        type=float,
+                        default=0.0,
+                        help='height (altitude) in meters for Safecast submissions (default: 0.0)')
     parser.add_argument('--log-randomdata',
                         dest='randomdata_file',
                         help='log live randomly generated data to a binary file')
