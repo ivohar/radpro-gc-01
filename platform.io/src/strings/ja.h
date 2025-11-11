@@ -80,9 +80,9 @@
 #define STRING_NOTIFICATION_DATALOG_RESET_SUCCESS "成功\n\nデータログ\tが\tリセット\tされました。"
 
 // Measurement view UI heading strings
-#define STRING_INSTANTANEOUS "瞬間"
-#define STRING_AVERAGE "平均"
-#define STRING_CUMULATIVE "累積"
+#define STRING_INSTANTANEOUS "瞬間線量率"
+#define STRING_AVERAGE "平均線量率"
+#define STRING_CUMULATIVE "累積線量"
 #define STRING_HISTORY "履歴"
 
 // Measurement history view time periods
@@ -99,12 +99,11 @@
 #define STRING_RATE "線量率"
 #define STRING_DOSE "線量"
 
-// Measurement view info strings (upper case, up to 5 letters)
+// Measurement view info strings
 #define STRING_ALERT_ALARM "アラーム"
 #define STRING_ALERT_WARNING "警告"
 #define STRING_ALERT_FAULT "故障"
 #define STRING_ALERT_MAX "最大"
-#define STRING_ALERT_OVERFLOW "オーバー"
 #define STRING_ALERT_DONE "完了"
 
 // Settings menu items
