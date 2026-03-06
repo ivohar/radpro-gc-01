@@ -26,6 +26,84 @@
 // Online color blender: https://pinetools.com/blend-colors
 // Online RGB565 color picker: https://rgbcolorpicker.com/565
 
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES)
+static const mr_color_t displayColors[][4] = {
+    // Element active
+{mr_get_color(0x313131), mr_get_color(0xE9E9E9), mr_get_color(0xD39387), mr_get_color(0xF87CF8)},
+
+    // Element neutral
+{mr_get_color(0x656565), mr_get_color(0xB0B0B0), mr_get_color(0xA58D79), mr_get_color(0x984C98)},
+
+    // Container background [global background]
+{mr_get_color(0xF0F0F0), mr_get_color(0x1F1F1F), mr_get_color(0x000000), mr_get_color(0xB8DCB8)},
+
+    // Container global [title bar background]
+{mr_get_color(0xF9F9F9), mr_get_color(0x2E2E2E), mr_get_color(0x000000), mr_get_color(0xE0F0E0)},
+
+    // Container global shadow
+{mr_get_color(0xB8B8B8), mr_get_color(0x161616), mr_get_color(0x000000), mr_get_color(0x482448)},
+
+    // Amplified enabled background [menu item selected background]
+{mr_get_color(0xB9C6F9), mr_get_color(0x2B3849), mr_get_color(0x163225), mr_get_color(0x5078E0)},
+
+    // On flat active [menu item selected foreground]
+{mr_get_color(0x313131), mr_get_color(0xE9E9E9), mr_get_color(0xD39387), mr_get_color(0xF87CF8)},
+
+    // Running (green)
+{mr_get_color(0x008A00), mr_get_color(0x198100), mr_get_color(0x008D00), mr_get_color(0x000C00)},
+
+    // Warning (orange)
+{mr_get_color(0xFD951E), mr_get_color(0xFA7D00), mr_get_color(0xCB8B00), mr_get_color(0xF05098)},
+
+    // Alarm (red)
+{mr_get_color(0xCD0027), mr_get_color(0xDB0007), mr_get_color(0xD12550), mr_get_color(0x1800C8)},
+
+    // Instrument frame primary
+{mr_get_color(0xFFFFFF), mr_get_color(0x363636), mr_get_color(0x000000), mr_get_color(0xF8FCF8)},
+
+    // Instrument frame tertiary
+{mr_get_color(0xB1B1B1), mr_get_color(0x5E5E5E), mr_get_color(0x8B815F), mr_get_color(0xF0F8F0)},
+
+    // Instrument tick mark label secondary
+{mr_get_color(0x7C7C7C), mr_get_color(0x8C8C8C), mr_get_color(0x8F8969), mr_get_color(0x80C080)},
+
+    // Instrument enhanced secondary
+{mr_get_color(0x40658F), mr_get_color(0x84B3EF), mr_get_color(0x6E938C), mr_get_color(0x685058)},
+
+    // Instrument enhanced tertiary
+{mr_get_color(0x9BB3ED), mr_get_color(0x3D526D), mr_get_color(0x285141), mr_get_color(0xE004A8)},
+
+    // Instrument enhanced secondary warning
+{mr_get_color(0xFD951E), mr_get_color(0xFA7D00), mr_get_color(0xCB8B00), mr_get_color(0xF05098)},
+
+    // Instrument enhanced tertiary warning
+{mr_get_color(0xFFC0A7), mr_get_color(0x7A3D00), mr_get_color(0x6A3200), mr_get_color(0xF85078)},
+
+    // Instrument enhanced secondary alarm
+{mr_get_color(0xCD0027), mr_get_color(0xE1000E), mr_get_color(0xD12550), mr_get_color(0x1800C8)},
+
+    // Instrument enhanced tertiary alarm
+{mr_get_color(0xFFB1AA), mr_get_color(0x7A020A), mr_get_color(0x7B0000), mr_get_color(0xF8F498)},
+
+#if defined(GAME)
+    // Selected enabled background [game square selected]
+{mr_get_color(0x40658F), mr_get_color(0x4C6C9A), mr_get_color(0x4B7667), mr_get_color(0x685058)},
+
+    // Game square black
+{mr_get_color(0xAD937C), mr_get_color(0xB89070), mr_get_color(0x6A573C), mr_get_color(0xC04080)},
+
+    // Game square white
+{mr_get_color(0xBDA88D), mr_get_color(0xD0B088), mr_get_color(0x7C694D), mr_get_color(0x80C040)},
+
+    // Game piece black
+{mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000)},
+
+    // Game piece white
+{mr_get_color(0xFFFFFF), mr_get_color(0xFFFFFF), mr_get_color(0xA58D79), mr_get_color(0xF8FCF8)},
+#endif
+};
+#else
+
 static const mr_color_t displayColors[][3] = {
     // Element active
     {mr_get_color(0x1f1f1f),
@@ -149,6 +227,7 @@ static const mr_color_t displayColors[][3] = {
      mr_get_color(0xc78842)},
 #endif
 };
+#endif
 
 #endif
 
@@ -355,7 +434,11 @@ void drawRightAlignedText(const char *s, const mr_rectangle_t *rectangle, const 
 
 void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *message)
 {
+#if defined(GC01)     
+    setFont(font_medium);
+#else
     setFont(font_small);
+#endif
     setStrokeColor(COLOR_ELEMENT_ACTIVE);
 
     const uint8_t *lineStarts[CONTENT_MULTILINE_MAX];
@@ -419,13 +502,21 @@ void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *mess
     mr_rectangle_t lineRectangle;
     mr_point_t lineOffset;
 
+#if defined(GC01)     
+    uint32_t linesTop = (rectangle->height - lineNum * FONT_MEDIUM_LINE_HEIGHT) / 2;
+#else
     uint32_t linesTop = (rectangle->height - lineNum * FONT_SMALL_LINE_HEIGHT) / 2;
+#endif
 
     uint32_t y = rectangle->y;
 
     for (uint32_t i = 0; i < lineNum; i++)
     {
+#if defined(GC01)         
+        lineRectangle = (mr_rectangle_t){rectangle->x, y, rectangle->width, FONT_MEDIUM_LINE_HEIGHT};
+#else
         lineRectangle = (mr_rectangle_t){rectangle->x, y, rectangle->width, FONT_SMALL_LINE_HEIGHT};
+#endif
         lineOffset = (mr_point_t){rectangle->width / 2, 0};
 
         if (i == 0)
@@ -445,7 +536,11 @@ void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *mess
             setStrokeColor(COLOR_ELEMENT_NEUTRAL);
         drawCenteredText(buffer, &lineRectangle, &lineOffset);
 
+#if defined(GC01) 
+        y += FONT_MEDIUM_LINE_HEIGHT;
+#else
         y += FONT_SMALL_LINE_HEIGHT;
+#endif
     }
 }
 

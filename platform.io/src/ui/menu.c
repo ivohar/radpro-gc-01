@@ -81,7 +81,7 @@ void drawMenu()
         }
 
         // Text
-#if defined(DISPLAY_MONOCHROME)
+#if defined(DISPLAY_MONOCHROME) || defined(GC01)
         setFont(font_medium);
 #elif defined(DISPLAY_COLOR)
         setFont(font_small);

@@ -80,6 +80,9 @@ static cstring displayThemeMenuOptions[] = {
     STRING_THEME_DAY,
     STRING_THEME_DUSK,
     STRING_THEME_NIGHT,
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
+    STRING_THEME_FNIRSI_BARBIE,
+#endif        
 };
 
 static const char *onDisplayThemeMenuGetOption(menu_size_t index, MenuStyle *menuStyle)

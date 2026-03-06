@@ -17,8 +17,6 @@
 #define FIRMWARE_NAME "Rad Pro GC-01"
 #define FIRMWARE_VERSION "3.1beta2-iha-c1"
 
-extern View statisticsView;
-
 void initSystem(void);
 
 void setFastSystemClock(bool value);
