@@ -1,7 +1,7 @@
 # Rad Pro
 # Builds Rad Pro fonts
 #
-# (C) 2022-2025 Gissio
+# (C) 2022-2026 Gissio
 #
 # License: MIT
 #
@@ -43,7 +43,7 @@ def run_fontconv(source,
     if cap_height:
         args += ['-c', str(cap_height)]
     args += [get_radpro_path() + 'fonts/' + source]
-    args += [get_radpro_path() + 'platform.io/src/fonts/' + dest]
+    args += [get_radpro_path() + 'platform.io/src/ui/fonts/' + dest]
     sys.argv[1:] = args
     fontconv.main()
 
@@ -63,7 +63,7 @@ def get_codepoint_set(text, codepoint_set=''):
 # Codepoint sets
 CODEPOINT_SET_SYMBOLS_MONOCHROME = '0x30-0x3e,0x41-0x46,0x49-0x4e,0x50-0x56'
 CODEPOINT_SET_SYMBOLS_COLOR = '0x30-0x3e,0x41-0x46'
-CODEPOINT_SET_SYMBOLS_COLOR_1BPP = '0x30-0x34,0x38-0x3e'
+CODEPOINT_SET_SYMBOLS_COLOR_LOW = '0x30-0x3e'
 CODEPOINT_SET_LARGE = '0x2e,0x30-0x39,0x2012'
 
 # Common fonts
@@ -77,7 +77,13 @@ run_fontconv('RadPro-Symbols.ttf',
              'font_symbols',
              pixels=24)
 run_fontconv('RadPro-Symbols.ttf',
-             CODEPOINT_SET_SYMBOLS_COLOR_1BPP,
+             CODEPOINT_SET_SYMBOLS_COLOR_LOW,
+             'font_symbols_color_2bpp.h',
+             'font_symbols',
+             pixels=24,
+             bpp=2)
+run_fontconv('RadPro-Symbols.ttf',
+             CODEPOINT_SET_SYMBOLS_COLOR_LOW,
              'font_symbols_color_1bpp.h',
              'font_symbols',
              pixels=24,
@@ -102,6 +108,13 @@ run_fontconv('NotoSans-SemiBold.ttf',
              cap_height=82)
 run_fontconv('NotoSans-SemiBold.ttf',
              CODEPOINT_SET_LARGE,
+             'font_large_color_115_2bpp.h',
+             'font_large',
+             pixels=115,
+             bpp=2,
+             cap_height=82)
+run_fontconv('NotoSans-SemiBold.ttf',
+             CODEPOINT_SET_LARGE,
              'font_large_color_84.h',
              'font_large',
              pixels=84,
@@ -109,14 +122,13 @@ run_fontconv('NotoSans-SemiBold.ttf',
 
 
 # Languages
-for language_file in Path('../platform.io/src/strings').glob('*.h'):
+for language_file in Path('../platform.io/src/system/strings').glob('*.h'):
     language = language_file.stem
 
     # Get codepoint sets using textproc
     language_text = open(language_file, 'rt', encoding='utf-8').readlines()
 
-    font_medium_matches = [
-        'STRING_ELLIPSIS',
+    font_medium_1bpp_matches = [
         'STRING_NANO',
         'STRING_MICRO',
         'STRING_MILLI',
@@ -130,15 +142,25 @@ for language_file in Path('../platform.io/src/strings').glob('*.h'):
         'STRING_CPM',
         'STRING_CPS',
         'STRING_COUNT',
-        'STRING_COUNTS',
+        'STRING_COUNTS'
+    ]
+
+    font_medium_matches = font_medium_1bpp_matches.copy() + [
+        'STRING_VOLT_PER_METER_UNIT',
+        'STRING_TESLA_UNIT',
+        'STRING_GAUSS_UNIT',
     ]
 
     medium_text = [line for line in language_text
                    if any(match in line for match in font_medium_matches)]
 
+    medium_1bpp_text = [line for line in language_text
+                        if any(match in line for match in font_medium_1bpp_matches)]
+    
     codepoint_set_small = get_codepoint_set(language_text, '0x20-0x7e')
     codepoint_set_monochrome_medium = get_codepoint_set(language_text)
     codepoint_set_color_medium = get_codepoint_set(medium_text)
+    codepoint_set_color_medium_1bpp = get_codepoint_set(medium_1bpp_text)
 
     # Set font paths based on language
     if language == 'ja':
@@ -173,6 +195,11 @@ for language_file in Path('../platform.io/src/strings').glob('*.h'):
         font_small_color_21_descent = None
         font_small_color_21_cap_height = None
 
+    if language in ['en']:
+        bpp_low = 2
+    else:
+        bpp_low = 1
+
     # Language-specific fonts
     run_fontconv(font_medium_monochrome,
                  codepoint_set_monochrome_medium,
@@ -192,11 +219,11 @@ for language_file in Path('../platform.io/src/strings').glob('*.h'):
                  descent=font_medium_color_32_descent,
                  cap_height=font_medium_color_32_cap_height)
     run_fontconv(font_color,
-                 codepoint_set_color_medium,
-                 f'font_medium_{language}_color_32_1bpp.h',
+                 codepoint_set_color_medium_1bpp,
+                 f'font_medium_{language}_color_32_{bpp_low}bpp.h',
                  'font_medium',
                  pixels=32,
-                 bpp=1,
+                 bpp=bpp_low,
                  ascent=font_medium_color_32_ascent,
                  descent=font_medium_color_32_descent,
                  cap_height=font_medium_color_32_cap_height)
@@ -220,10 +247,10 @@ for language_file in Path('../platform.io/src/strings').glob('*.h'):
                  cap_height=font_small_color_21_cap_height)
     run_fontconv(font_color,
                  codepoint_set_small,
-                 f'font_small_{language}_color_21_1bpp.h',
+                 f'font_small_{language}_color_21_{bpp_low}bpp.h',
                  'font_small',
                  pixels=21,
-                 bpp=1,
+                 bpp=bpp_low,
                  ascent=font_small_color_21_ascent,
                  descent=font_small_color_21_descent,
                  cap_height=font_small_color_21_cap_height)

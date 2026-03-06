@@ -32,28 +32,6 @@ The protocol operates on a request-response model, with commands sent as ASCII t
   OK FS2011 (STM32F051C8);Rad Pro 2.0/en;b5706d937087f975b5812810
   ```
 
-### Get device power
-- **Request**: `GET devicePower\r\n`
-- **Response**: `OK [value]\r\n`
-- **Description**: Returns the device's power state (`0`: off, `1`: on).
-- **Example**:
-
-  ```
-  GET devicePower
-  OK 0
-  ```
-
-### Set device power
-- **Request**: `SET devicePower [value]\r\n`
-- **Response**: `OK\r\n`
-- **Description**: Sets the device's power state (`0`: off, `1`: on).
-- **Example**:
-
-  ```
-  SET devicePower 1
-  OK
-  ```
-
 ### Get device battery voltage
 - **Request**: `GET deviceBatteryVoltage\r\n`
 - **Response**: `OK [value]\r\n`
@@ -239,6 +217,28 @@ The protocol operates on a request-response model, with commands sent as ASCII t
   ```
   SET tubeHVDutyCycle 0.05
   OK
+  ```
+
+### Get electric field (supported devices)
+- **Request**: `GET electricField\r\n`
+- **Response**: `OK [value]\r\n`
+- **Description**: Returns the electric field in volts per meter, with three decimal places.
+- **Example**:
+
+  ```
+  GET electricField
+  OK 16.231
+  ```
+
+### Get magnetic field (supported devices)
+- **Request**: `GET magneticField\r\n`
+- **Response**: `OK [value]\r\n`
+- **Description**: Returns the magnetic field in Tesla, with nine decimal places.
+- **Example**:
+
+  ```
+  GET magneticField
+  OK 0.000000025
   ```
 
 ### Retrieve data log

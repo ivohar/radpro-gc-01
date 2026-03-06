@@ -1,8 +1,8 @@
 /*
  * Rad Pro
- * STM32 Main module
+ * Main module
  *
- * (C) 2022-2025 Gissio
+ * (C) 2022-2026 Gissio
  *
  * License: MIT
  */
@@ -11,37 +11,35 @@
 #include <emscripten.h>
 #endif
 
-#include "adc.h"
-#include "comm.h"
-#include "debug.h"
-#include "display.h"
-#include "events.h"
-#include "flash.h"
-#include "game.h"
-#include "keyboard.h"
-#include "led.h"
-#include "menu.h"
-#include "power.h"
-#include "rng.h"
-#include "rtc.h"
-#include "settings.h"
-#include "sound.h"
-#include "system.h"
-#include "tube.h"
-#include "vibration.h"
-#include "view.h"
+#include "extras/game.h"
+#include "measurements/datalog.h"
+#include "peripherals/adc.h"
+#include "peripherals/comm.h"
+#include "peripherals/display.h"
+#include "peripherals/emf.h"
+#include "peripherals/flash.h"
+#include "peripherals/keyboard.h"
+#include "peripherals/led.h"
+#include "peripherals/sound.h"
+#include "peripherals/tube.h"
+#include "peripherals/vibrator.h"
+#include "system/events.h"
+#include "system/power.h"
+#include "system/settings.h"
+#include "system/system.h"
+#include "ui/view.h"
 
 #if defined(SIMULATOR)
-bool updateSDLTicks();
+bool onSDLTick();
 
 static void simulateFrame(void)
 {
-    while (updateSDLTicks())
+    while (onSDLTick())
     {
 #if defined(GAME)
-        dispatchGameEvents();
+        updateGame();
 #endif
-        dispatchEvents();
+        updateEvents();
     }
 }
 #endif
@@ -56,22 +54,22 @@ int main(void)
     initSettings();
     initADC();
     initTube();
+#if defined(EMFMETER)
+    initEMFMeter();
+#endif
+    initDatalog();
     initComm();
     initKeyboard();
     initDisplay();
     initView();
-#if defined(BUZZER) || defined(SOUND_EN) || defined(VOICE)
+#if defined(SOUND)
     initSound();
 #endif
-#if defined(VIBRATION)
-    initVibration();
+#if defined(VIBRATOR)
+    initVibrator();
 #endif
-#if defined(PULSE_LED) || defined(ALERT_LED) || defined(PULSE_LED_EN) || defined(ALERT_LED_EN)
+#if defined(PULSE_LED) || defined(PULSE_LED_EN)
     initLED();
-#endif
-
-#if defined(TEST_MODE)
-    runTestMode();
 #endif
 
     powerOn(true);
@@ -90,9 +88,9 @@ int main(void)
         sleep(1);
 
 #if defined(GAME)
-        dispatchGameEvents();
+        updateGame();
 #endif
-        dispatchEvents();
+        updateEvents();
     }
 #endif
 }

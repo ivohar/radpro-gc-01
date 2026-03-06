@@ -2,43 +2,31 @@
  * Rad Pro
  * STM32 flash
  *
- * (C) 2022-2025 Gissio
+ * (C) 2022-2026 Gissio
  *
  * License: MIT
  */
 
 #if defined(STM32)
 
-#include "../flash.h"
-#include "../cstring.h"
-
-#include "device.h"
-
-// Flash memory
-
-#define SETTINGS_PAGE_BEGIN ((FIRMWARE_BASE - FLASH_BASE + FIRMWARE_SIZE) / FLASH_PAGE_SIZE)
-#define SETTINGS_PAGE_END (SETTINGS_PAGE_BEGIN + 1)
-#define DATALOG_PAGE_BEGIN SETTINGS_PAGE_END
-#define DATALOG_PAGE_END (FLASH_SIZE / FLASH_PAGE_SIZE)
-
-FlashRegion flashSettingsRegion = {SETTINGS_PAGE_BEGIN, SETTINGS_PAGE_END};
-FlashRegion flashDatalogRegion = {DATALOG_PAGE_BEGIN, DATALOG_PAGE_END};
-
-const uint32_t flashPageDataSize = FLASH_PAGE_SIZE - FLASH_WORD_SIZE;
-const uint32_t flashWordSize = FLASH_WORD_SIZE;
+#include "../peripherals/flash.h"
+#include "../system/cstring.h"
+#include "../stm32/device.h"
 
 #define FIRMWARE_CRC (*(uint32_t *)(FIRMWARE_BASE + FIRMWARE_SIZE - 0x4))
-
-// Flash
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
 __asm__(".section .comment\n"
-        ".string \"FLASH_BASE: " TOSTRING(FLASH_BASE) "\"\n"
-        ".string \"FLASH_SIZE: " TOSTRING(FLASH_SIZE) "\"\n"
+        ".string \"FLASH_BASE: " TOSTRING(FLASH_BASE_) "\"\n"
+        ".string \"FLASH_SIZE: " TOSTRING(FLASH_SIZE_) "\"\n"
         ".string \"FIRMWARE_BASE: " TOSTRING(FIRMWARE_BASE) "\"\n"
         ".string \"FIRMWARE_SIZE: " TOSTRING(FIRMWARE_SIZE) "\"\n"
+        ".string \"STATES_BASE: " TOSTRING(STATES_BASE) "\"\n"
+        ".string \"STATES_SIZE: " TOSTRING(STATES_SIZE) "\"\n"
+        ".string \"DATALOG_BASE: " TOSTRING(DATALOG_BASE) "\"\n"
+        ".string \"DATALOG_SIZE: " TOSTRING(DATALOG_SIZE) "\"\n"
         ".section .text\n");
 
 void initFlash(void)
@@ -60,39 +48,44 @@ bool verifyFlash(void)
     return (crc == FIRMWARE_CRC);
 }
 
-uint8_t *getFlashPage(PageIndex pageIndex)
+const uint8_t *readFlash(uint32_t source, uint32_t count)
 {
-    return (uint8_t *)(FLASH_BASE + pageIndex * FLASH_PAGE_SIZE);
+    return (uint8_t *)source;
 }
 
-void eraseFlashPage(PageIndex pageIndex)
+bool writeFlash(uint32_t dest,
+                const uint8_t *source,
+                uint32_t count)
 {
     flash_unlock();
 
-    flash_erase_page(pageIndex);
+    bool success = true;
+
+    for (uint32_t i = 0; i < count; i += FLASH_WORD_SIZE)
+    {
+        // Try twice
+        for (uint32_t j = 0; j < 2; j++)
+        {
+            success = flash_program((uint8_t *)dest + i, source + i);
+
+            if (success)
+                break;
+        }
+
+        if (!success)
+            break;
+    }
 
     flash_lock();
+
+    return success;
 }
 
-void writeFlash(PageIndex pageIndex,
-                uint32_t index,
-                uint8_t *source,
-                uint32_t size)
+void eraseFlash(uint32_t dest)
 {
-    uint8_t *dest = (uint8_t *)(FLASH_BASE + pageIndex * FLASH_PAGE_SIZE + index);
-
     flash_unlock();
 
-    for (uint32_t i = 0; i < size; i += FLASH_WORD_SIZE)
-    {
-        if (!flash_program(dest + i, source + i) &&
-            (index == 0))
-        {
-            flash_erase_page(pageIndex);
-
-            flash_program(dest + i, source + i);
-        }
-    }
+    flash_erase(dest);
 
     flash_lock();
 }

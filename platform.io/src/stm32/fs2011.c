@@ -1,61 +1,48 @@
 /*
  * Rad Pro
- * FS2011 specifics
+ * FS2011 driver
  *
- * (C) 2022-2025 Gissio
+ * (C) 2022-2026 Gissio
  *
  * License: MIT
  */
 
 #if defined(FS2011)
 
-#include "../display.h"
-#include "../events.h"
-#include "../keyboard.h"
-#include "../settings.h"
-#include "../system.h"
-
-#include "device.h"
-
 #include "mcu-renderer-st7565.h"
+
+#include "../peripherals/display.h"
+#include "../peripherals/keyboard.h"
+#include "../stm32/device.h"
+#include "../system/events.h"
+#include "../system/settings.h"
+#include "../system/system.h"
 
 // System
 
 void initSystem(void)
 {
+    // Set system clock
     setFastSystemClock(false);
 
 #if defined(STM32F0)
     // Enable GPIOA, GPIOB, GPIOF
-    set_bits(RCC->AHBENR,
-             RCC_AHBENR_GPIOAEN |
-                 RCC_AHBENR_GPIOBEN |
-                 RCC_AHBENR_GPIOFEN);
+    set_bits(RCC->AHBENR, RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOFEN);
 #elif defined(STM32F1)
     // Disable JTAG, TIM3 partial remap
     rcc_enable_afio();
-    modify_bits(AFIO->MAPR,
-                AFIO_MAPR_SWJ_CFG_Msk |
-                    AFIO_MAPR_TIM3_REMAP_Msk,
-                AFIO_MAPR_SWJ_CFG_JTAGDISABLE |
-                    AFIO_MAPR_TIM3_REMAP_1);
+    modify_bits(AFIO->MAPR, AFIO_MAPR_SWJ_CFG_Msk | AFIO_MAPR_TIM3_REMAP_Msk, AFIO_MAPR_SWJ_CFG_JTAGDISABLE | AFIO_MAPR_TIM3_REMAP_1);
 
     // Enable GPIOA, GPIOB
-    set_bits(RCC->APB2ENR,
-             RCC_APB2ENR_IOPAEN |
-                 RCC_APB2ENR_IOPBEN);
+    set_bits(RCC->APB2ENR, RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN);
 #endif
 }
 
 void setFastSystemClock(bool value)
 {
     // Set HSI as system clock
-    modify_bits(RCC->CFGR,
-                RCC_CFGR_SW_Msk,
-                RCC_CFGR_SW_HSI);
-    wait_until_bits_value(RCC->CFGR,
-                          RCC_CFGR_SWS_Msk,
-                          RCC_CFGR_SWS_HSI);
+    modify_bits(RCC->CFGR, RCC_CFGR_SW_Msk, RCC_CFGR_SW_HSI);
+    wait_until_bits_value(RCC->CFGR, RCC_CFGR_SWS_Msk, RCC_CFGR_SWS_HSI);
 
     // Disable PLL
     clear_bits(RCC->CR, RCC_CR_PLLON);
@@ -65,8 +52,7 @@ void setFastSystemClock(bool value)
     if (value)
     {
         // Set 1 wait states for flash
-        set_bits(FLASH->ACR,
-                 FLASH_ACR_LATENCY_Msk);
+        set_bits(FLASH->ACR, FLASH_ACR_LATENCY_Msk);
 
         // Configure SW, AHB, APB, PLL
         RCC->CFGR = RCC_CFGR_SW_HSI |          // Select HSI as system clock
@@ -80,12 +66,8 @@ void setFastSystemClock(bool value)
         wait_until_bits_set(RCC->CR, RCC_CR_PLLRDY);
 
         // Set PLL as system clock
-        modify_bits(RCC->CFGR,
-                    RCC_CFGR_SW_Msk,
-                    RCC_CFGR_SW_PLL);
-        wait_until_bits_value(RCC->CFGR,
-                              RCC_CFGR_SWS_Msk,
-                              RCC_CFGR_SWS_PLL);
+        modify_bits(RCC->CFGR, RCC_CFGR_SW_Msk, RCC_CFGR_SW_PLL);
+        wait_until_bits_value(RCC->CFGR, RCC_CFGR_SWS_Msk, RCC_CFGR_SWS_PLL);
 
         // Update sys tick
         SysTick->LOAD = SysTick->LOAD << 2;
@@ -93,8 +75,7 @@ void setFastSystemClock(bool value)
     else
     {
         // Set 0 wait states for flash
-        clear_bits(FLASH->ACR,
-                   FLASH_ACR_LATENCY_Msk);
+        clear_bits(FLASH->ACR, FLASH_ACR_LATENCY_Msk);
 
         // Configure SW, AHB, APB
         RCC->CFGR = RCC_CFGR_SW_HSI |    // Select HSI as system clock
@@ -108,9 +89,7 @@ void setFastSystemClock(bool value)
     if (value)
     {
         // Set 2 wait states for flash
-        modify_bits(FLASH->ACR,
-                    FLASH_ACR_LATENCY_Msk,
-                    FLASH_ACR_LATENCY_2WS);
+        modify_bits(FLASH->ACR, FLASH_ACR_LATENCY_Msk, FLASH_ACR_LATENCY_2WS);
 
         // Configure SW, AHB, APB1, APB2, PLL
         RCC->CFGR = RCC_CFGR_SW_HSI |          // Select HSI as system clock
@@ -125,12 +104,8 @@ void setFastSystemClock(bool value)
         wait_until_bits_set(RCC->CR, RCC_CR_PLLRDY);
 
         // Set PLL as system clock
-        modify_bits(RCC->CFGR,
-                    RCC_CFGR_SW_Msk,
-                    RCC_CFGR_SW_PLL);
-        wait_until_bits_value(RCC->CFGR,
-                              RCC_CFGR_SWS_Msk,
-                              RCC_CFGR_SWS_PLL);
+        modify_bits(RCC->CFGR, RCC_CFGR_SW_Msk, RCC_CFGR_SW_PLL);
+        wait_until_bits_value(RCC->CFGR, RCC_CFGR_SWS_Msk, RCC_CFGR_SWS_PLL);
 
         // Update sys tick
         SysTick->LOAD = SysTick->LOAD << 2;
@@ -138,8 +113,7 @@ void setFastSystemClock(bool value)
     else
     {
         // Set 0 wait states for flash
-        clear_bits(FLASH->ACR,
-                   FLASH_ACR_LATENCY_Msk);
+        clear_bits(FLASH->ACR, FLASH_ACR_LATENCY_Msk);
 
         // Configure SW, AHB, APB1, APB2
         RCC->CFGR = RCC_CFGR_SW_HSI |     // Select HSI as system clock
@@ -151,18 +125,6 @@ void setFastSystemClock(bool value)
         SysTick->LOAD = SysTick->LOAD >> 2;
     }
 #endif
-}
-
-void startBootloader(void)
-{
-    // Disable interrupts
-    NVIC_DisableAllIRQs();
-    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk;
-    SysTick->VAL = 0;
-
-    // Jump to bootloader
-    __set_MSP(SYSTEM_VECTOR_TABLE->sp);
-    SYSTEM_VECTOR_TABLE->onReset();
 }
 
 // Communications
@@ -181,59 +143,46 @@ void initKeyboardHardware(void)
 {
     // GPIO
 #if defined(STM32F0)
-    gpio_setup_input(KEY_PLAYPAUSE_PORT,
-                     KEY_PLAYPAUSE_PIN,
-                     GPIO_PULL_PULLUP);
-    gpio_setup_input(KEY_MENUOK_PORT,
-                     KEY_MENUOK_PIN,
-                     GPIO_PULL_PULLUP);
-    gpio_setup_input(KEY_UP_PORT,
-                     KEY_UP_PIN,
-                     GPIO_PULL_PULLUP);
-    gpio_setup_input(KEY_DOWN_PORT,
-                     KEY_DOWN_PIN,
-                     GPIO_PULL_PULLUP);
-    gpio_setup_input(KEY_POWER_PORT,
-                     KEY_POWER_PIN,
-                     GPIO_PULL_PULLUP);
+    gpio_setup_input(KEY_PLAYPAUSE_PORT, KEY_PLAYPAUSE_PIN, GPIO_PULL_PULLUP);
+    gpio_setup_input(KEY_MENUOK_PORT, KEY_MENUOK_PIN, GPIO_PULL_PULLUP);
+    gpio_setup_input(KEY_UP_PORT, KEY_UP_PIN, GPIO_PULL_PULLUP);
+    gpio_setup_input(KEY_DOWN_PORT, KEY_DOWN_PIN, GPIO_PULL_PULLUP);
+    gpio_setup_input(KEY_POWER_PORT, KEY_POWER_PIN, GPIO_PULL_PULLUP);
 #elif defined(STM32F1)
-    gpio_setup(KEY_PLAYPAUSE_PORT,
-               KEY_PLAYPAUSE_PIN,
-               GPIO_MODE_INPUT_PULLUP);
-    gpio_setup(KEY_MENUOK_PORT,
-               KEY_MENUOK_PIN,
-               GPIO_MODE_INPUT_PULLUP);
-    gpio_setup(KEY_UP_PORT,
-               KEY_UP_PIN,
-               GPIO_MODE_INPUT_PULLUP);
-    gpio_setup(KEY_DOWN_PORT,
-               KEY_DOWN_PIN,
-               GPIO_MODE_INPUT_PULLUP);
-    gpio_setup(KEY_POWER_PORT,
-               KEY_POWER_PIN,
-               GPIO_MODE_INPUT_PULLUP);
+    gpio_setup(KEY_PLAYPAUSE_PORT, KEY_PLAYPAUSE_PIN, GPIO_MODE_INPUT_PULLUP);
+    gpio_setup(KEY_MENUOK_PORT, KEY_MENUOK_PIN, GPIO_MODE_INPUT_PULLUP);
+    gpio_setup(KEY_UP_PORT, KEY_UP_PIN, GPIO_MODE_INPUT_PULLUP);
+    gpio_setup(KEY_DOWN_PORT, KEY_DOWN_PIN, GPIO_MODE_INPUT_PULLUP);
+    gpio_setup(KEY_POWER_PORT, KEY_POWER_PIN, GPIO_MODE_INPUT_PULLUP);
 #endif
 }
 
-void getKeyboardState(bool *isKeyDown)
+void onKeyboardTick(void)
 {
+    for (uint32_t i = 0; i < KEY_NUM; i++)
+        keyboardKeyDown[i] <<= 1;
+
 #if defined(KEYBOARD_2lKEYS)
-    isKeyDown[KEY_LEFT] = !gpio_get(KEY_PLAYPAUSE_PORT, KEY_PLAYPAUSE_PIN);
-    isKeyDown[KEY_RIGHT] = !gpio_get(KEY_POWER_PORT, KEY_POWER_PIN);
+    keyboardKeyDown[KEY_LEFT] |= !gpio_get(KEY_PLAYPAUSE_PORT, KEY_PLAYPAUSE_PIN);
+    keyboardKeyDown[KEY_RIGHT] |= !gpio_get(KEY_POWER_PORT, KEY_POWER_PIN);
 #elif defined(KEYBOARD_5_KEYS)
-    isKeyDown[KEY_LEFT] = !gpio_get(KEY_PLAYPAUSE_PORT, KEY_PLAYPAUSE_PIN);
-    isKeyDown[KEY_RIGHT] = !gpio_get(KEY_MENUOK_PORT, KEY_MENUOK_PIN);
-    isKeyDown[KEY_UP] = !gpio_get(KEY_UP_PORT, KEY_UP_PIN);
-    isKeyDown[KEY_DOWN] = !gpio_get(KEY_DOWN_PORT, KEY_DOWN_PIN);
-    isKeyDown[KEY_OK] = !gpio_get(KEY_POWER_PORT, KEY_POWER_PIN);
+    keyboardKeyDown[KEY_LEFT] |= !gpio_get(KEY_PLAYPAUSE_PORT, KEY_PLAYPAUSE_PIN);
+    keyboardKeyDown[KEY_RIGHT] |= !gpio_get(KEY_MENUOK_PORT, KEY_MENUOK_PIN);
+    keyboardKeyDown[KEY_UP] |= !gpio_get(KEY_UP_PORT, KEY_UP_PIN);
+    keyboardKeyDown[KEY_DOWN] |= !gpio_get(KEY_DOWN_PORT, KEY_DOWN_PIN);
+    keyboardKeyDown[KEY_OK] |= !gpio_get(KEY_POWER_PORT, KEY_POWER_PIN);
 #endif
+}
+
+void updateKeyboardState(void)
+{
 }
 
 // Display
 
 extern mr_t mr;
 
-bool displayEnabled;
+static bool displayEnabled;
 
 static uint8_t displayFramebuffer[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8];
 
@@ -252,9 +201,7 @@ static void onDisplaySleep(uint32_t value)
 
 static void onDisplaySetReset(bool value)
 {
-    gpio_modify(DISPLAY_RSTB_PORT,
-                DISPLAY_RSTB_PIN,
-                !value);
+    gpio_modify(DISPLAY_RSTB_PORT, DISPLAY_RSTB_PIN, !value);
 }
 
 static void onDisplaySetChipselect(bool value)
@@ -263,9 +210,7 @@ static void onDisplaySetChipselect(bool value)
 
 static void onDisplaySetCommand(bool value)
 {
-    gpio_modify(DISPLAY_A0_PORT,
-                DISPLAY_A0_PIN,
-                !value);
+    gpio_modify(DISPLAY_A0_PORT, DISPLAY_A0_PIN, !value);
 }
 
 static void onDisplaySend(uint16_t value)
@@ -281,7 +226,7 @@ static void onDisplaySend(uint16_t value)
     DISPLAY_E_PORT->BRR = get_bitvalue(DISPLAY_E_PIN);
 }
 
-static GPIO_TypeDef *const displayPortSetup[] = {
+static GPIO_TypeDef *const displayPort[] = {
     DISPLAY_RSTB_PORT,
     DISPLAY_A0_PORT,
     DISPLAY_RW_PORT,
@@ -296,7 +241,7 @@ static GPIO_TypeDef *const displayPortSetup[] = {
     DISPLAY_D7_PORT,
 };
 
-static const uint8_t displayPinSetup[] = {
+static const uint8_t displayPin[] = {
     DISPLAY_RSTB_PIN,
     DISPLAY_A0_PIN,
     DISPLAY_RW_PIN,
@@ -316,18 +261,12 @@ void initDisplay(void)
     // GPIO
     gpio_set(DISPLAY_RSTB_PORT, DISPLAY_RSTB_PIN);
 
-    for (uint32_t i = 0; i < sizeof(displayPinSetup); i++)
+    for (uint32_t i = 0; i < sizeof(displayPin); i++)
     {
 #if defined(STM32F0)
-        gpio_setup_output(displayPortSetup[i],
-                          displayPinSetup[i],
-                          GPIO_OUTPUTTYPE_PUSHPULL,
-                          GPIO_OUTPUTSPEED_50MHZ,
-                          GPIO_PULL_FLOATING);
+        gpio_setup_output(displayPort[i], displayPin[i], GPIO_OUTPUTTYPE_PUSHPULL, GPIO_OUTPUTSPEED_50MHZ, GPIO_PULL_FLOATING);
 #elif defined(STM32F1)
-        gpio_setup(displayPortSetup[i],
-                   displayPinSetup[i],
-                   GPIO_MODE_OUTPUT_50MHZ_PUSHPULL);
+        gpio_setup(displayPort[i], displayPin[i], GPIO_MODE_OUTPUT_50MHZ_PUSHPULL);
 #endif
     }
 
@@ -350,7 +289,7 @@ void initDisplay(void)
     initBacklight();
 }
 
-void setDisplayEnable(bool value)
+void setDisplayEnabled(bool value)
 {
     mr_st7565_set_display(&mr, value);
 
