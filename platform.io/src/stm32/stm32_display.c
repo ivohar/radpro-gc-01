@@ -42,7 +42,7 @@ void initBacklight(void)
 void setBacklight(bool value)
 {
     uint32_t onTime = DISPLAY_BACKLIGHT_TIMER_PERIOD -
-                      (value ? ((displayBrightnessValue[settings.displayBrightness] * DISPLAY_BACKLIGHT_TIMER_PERIOD) >> 16) : 0);
+                      (value ? ((displayBrightnessValue[settings.displayBrightness] * DISPLAY_BACKLIGHT_TIMER_PERIOD) >> 15) : 0);
 
     tim_set_ontime(DISPLAY_BACKLIGHT_TIMER, DISPLAY_BACKLIGHT_TIMER_CHANNEL, onTime);
 }
