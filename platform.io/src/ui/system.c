@@ -9,6 +9,7 @@
 
 #include "../measurements/measurements.h"
 #include "../peripherals/rtc.h"
+#include "../system/power.h"
 #include "../system/settings.h"
 #include "../ui/draw.h"
 #include "../ui/system.h"
@@ -62,6 +63,20 @@ void drawTitleBar(const char *title)
 
         setFont(font_small);
         setStrokeColor(COLOR_ELEMENT_ACTIVE);
+        drawRowRight(buffer, &rectangle);
+
+        // Battery voltage (e.g. "3.58V")
+        strclr(buffer);
+        strcatFloat(buffer, getBatteryVoltage(), 2);
+        strcatChar(buffer, 'V');
+
+        setFont(font_small);
+        if (isBatteryCharging() || isUSBPowered())
+            setStrokeColor(COLOR_RUNNING);
+        else if (getBatteryLevel() == 0)
+            setStrokeColor(COLOR_ALARM);
+        else
+            setStrokeColor(COLOR_ELEMENT_NEUTRAL);
         drawRowRight(buffer, &rectangle);
     }
 
