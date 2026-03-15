@@ -9,6 +9,7 @@
 
 #if defined(GC01)
 
+#include <string.h>
 #include "mcu-renderer-st7789.h"
 
 #include "../peripherals/display.h"

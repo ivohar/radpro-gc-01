@@ -32,7 +32,11 @@
 
 #define BATTERY_LEVEL_NUM 5
 
+#if !defined(GC01)
 #define BATTERY_HYSTERESIS_RANGE 0.005F
+#else
+#define BATTERY_HYSTERESIS_RANGE 0.012F
+#endif
 #define BATTERY_HYSTERESIS (BATTERY_HYSTERESIS_RANGE / 2)
 
 #define POWEROFF_DISPLAY_TIME 5
@@ -315,12 +319,14 @@ void updatePowerState(void)
     power.batteryVoltage = readBatteryVoltage();
 
     const float *batteryLevel = batteryLevels[settings.powerBatteryType];
+    uint8_t previousLevel = power.batteryLevel;
     uint8_t level = 0;
+
     for (uint32_t i = 0; i < (BATTERY_LEVEL_NUM - 1); i++)
     {
         float thresholdVoltage = batteryLevel[i];
 
-        if (i >= level)
+        if (previousLevel <= i)
             thresholdVoltage += BATTERY_HYSTERESIS_RANGE;
 
         if (power.batteryVoltage >= thresholdVoltage)

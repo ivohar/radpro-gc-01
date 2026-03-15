@@ -65,12 +65,12 @@ void drawTitleBar(const char *title)
         setStrokeColor(COLOR_ELEMENT_ACTIVE);
         drawRowRight(buffer, &rectangle);
 
+#if defined(BATTERY_LEVEL_DEBUG)
         // Battery voltage (e.g. "3.58V")
         strclr(buffer);
-        strcatFloat(buffer, getBatteryVoltage(), 2);
+        strcatFloat(buffer, getBatteryVoltage(), 3);
         strcatChar(buffer, 'V');
 
-        setFont(font_small);
         if (isBatteryCharging() || isUSBPowered())
             setStrokeColor(COLOR_RUNNING);
         else if (getBatteryLevel() == 0)
@@ -78,6 +78,7 @@ void drawTitleBar(const char *title)
         else
             setStrokeColor(COLOR_ELEMENT_NEUTRAL);
         drawRowRight(buffer, &rectangle);
+#endif
     }
 
     // Battery icon

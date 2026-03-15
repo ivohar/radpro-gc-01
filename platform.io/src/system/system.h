@@ -15,7 +15,7 @@
 
 #define FIRMWARE_AUTHOR "Gissio"
 #define FIRMWARE_NAME "Rad Pro GC-01"
-#define FIRMWARE_VERSION "3.1beta2-iha-c1exp"
+#define FIRMWARE_VERSION "3.1beta2-iha-gc1"
 
 void initSystem(void);
 
