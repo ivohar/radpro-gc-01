@@ -17,6 +17,8 @@
 
 #define SETTINGS_VERSION 3
 
+//#define BATTERY_LEVEL_DEBUG
+
 enum
 {
     RATE_OFF,
