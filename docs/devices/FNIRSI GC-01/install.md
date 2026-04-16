@@ -1,128 +1,204 @@
-# Installing Rad Pro on FNIRSI GC-01/JOY-IT JT-RAD01 Geiger counters
+# Installing Rad Pro on the FNIRSI GC-01/JOY-IT JT-RAD01
 
-This guide explains how to install the Rad Pro firmware on FNIRSI GC-01 and JOY-IT JT-RAD01 Geiger counters.
+This guide explains how to install **Rad Pro** on FNIRSI GC-01 and JOY-IT JT-RAD01 Geiger counters.
 
-## What you'll need
+## What You'll Need
 
-* **USB data cable:** Must support data transfer, not just charging.
-* **Philips screwdriver:** For opening the device.
+Make sure you have:
 
-## Step 1: Open the device
+* A **USB data cable** (charging-only cables will not work)
+* A **Phillips screwdriver**
+* A **computer** running Windows 10 or Windows 11
 
-![FNIRSI GC-01 circuit board types](img/gc-01-board-type.jpg)
+### Important Warning
+
+⚠️ **DO NOT attempt installation from macOS or Linux.** These operating systems are **not supported** and can brick your device. You will need a Windows 10/11 computer to recover it if something goes wrong.
+
+## Step 1: Download the Firmware
+
+1. Go to the Rad Pro releases page: https://github.com/Gissio/radpro/releases
+2. Download the latest `radpro-[version].zip`.
+3. Extract it on your computer.
+
+## Step 2: Identify the Hardware
+
+![FNIRSI GC-01 circuit board](img/gc-01-board-type.jpg)
+
+To select the correct firmware and settings, you'll need to identify two components inside the device.
+
+### Open the Device
 
 1. Power off the device.
-2. Unscrew the back case and carefully open the device.
-3. Identify the microprocessor (square chip): either **CH32F103R8T6 (WCH)** or **APM32F103RBT6 (Geehy)**. If unmarked, proceed to the next step.
-4. Identify the Geiger-Müller tube, marked as **J305**, **J321**, **J613**, **J614**, or **M4011**. For unmarked tubes:
-   * **55 mm tubes:** Assume J614.
-   * **65 mm tubes:** Assume J613.
-5. Reassemble the device.
+2. Unscrew the back case.
+3. Carefully open the enclosure.
 
-## Step 2: Flash the firmware
+### Identify the Microprocessor
 
-1. Download and extract the latest `radpro-[version].zip` from [Rad Pro releases](https://github.com/Gissio/radpro/releases).
-2. Connect the device to a **Windows computer** using a **USB 2.0 port** and the USB data cable. **Note:** Installation may fail on macOS, Linux, or USB 3.0 ports.
-3. Power on the device. A USB drive should appear on your computer. If it does not, the device may be incompatible with Rad Pro.
-4. If you identified the microprocessor, navigate to the `fnirsi-gc01_[micropreocessor]/install` folder. Select the appropriate firmware file: `radpro-fnirsi-gc01_[microprocessor]-[language]-x.y.z-install.bin`.
-   * `[microprocessor]`: `ch32f103r8t6` or `apm32f103rbt6`.
-   * `[language]` Two-letter code for your preferred language (e.g., `en` for English).
-5. If the microprocessor is unmarked, try `apm32f103rbt6` firmware first. If a **Drive full** error occurs, disconnect the device, then retry with `ch32f103r8t6`.
-6. Copy the selected firmware file to the USB drive. The device should restart automatically with Rad Pro installed.
+Look for the square chip on the board. It should be one of:
 
-**Note:**
+* CH32F103R8T6 (WCH)
+* APM32F103RBT6 (Geehy)
 
-* Some devices require holding the **OK/Power** button from power-on until the firmware is copied and the device restarts.
-* Others may need the **Right/Settings** and **OK/Power** keys pressed together to make the USB drive available.
-* Some users report that it is necessary to copy the file to the USB drive twice.
-* Some also report that it is necessary to briefly press the **reset switch** (next to the USB connector) after plugging in the USB connector.
+If the chip is unmarked or unclear, don't worry—proceed to the next step.
 
-**Troubleshooting:**
+### Identify the Geiger Tube
 
-* If the installation fails, press the **reset switch** (next to the USB connector) and repeat the process.
-* To restore the original firmware, copy the [original firmware](firmware) to the USB drive.
-* For persistent issues, follow the [FNIRSI GC-01 alternative installation instructions](install-stlink.md).
+Look for markings on the tube:
 
-## Step 3: Configure the device
+* **J305**, **J321**, **J613**, **HH614**, or **M4011**
 
-Use the following controls to operate your device:
+If the tube is unmarked:
 
-* **Power on/off:** Press and hold the OK/Power key.
-* **Switch measurement mode:** Use the Up or Down key.
-* **Switch secondary measurement view:** Press the Left/Back key.
-* **Reset measurement/dismiss alert:** Press and hold the Left/Back key.
-* **Toggle pulse sound (measurement view only):** Press and hold the Right/Settings key.
-* **Sleep display (measurement view only):** Press the OK/Power key.
-* **Access settings:** Press the Right/Settings key.
-* **Navigate options:** Use the Up or Down key.
-* **Select option:** Press the OK/Power or Right/Settings key.
-* **Go back:** Press the Left/Back key.
-* **Toggle lock mode:** Press and hold both the Left/Back and OK/Power keys.
+* ~55 mm or ~65 mm → assume **HH614**
 
-To configure the device:
+### Reassemble the Device
 
-1. Go to **Settings > Geiger tube > Sensitivity** and select the option that matches your Geiger-Müller tube.
-2. Go to **Geiger tube > HV Profile** and select:
-  * **Energy-saving:** Lowest power use, best for background radiation.
-  * **Accuracy:** Higher power use, ideal for elevated radiation levels.
-  * **Factory default:** Highest power use, matches original firmware settings.
-3. If the device registers unintended key presses, select the **Energy-saving** HV profile or configure a custom HV profile to resolve the issue.
+Once identified, close the device and screw it back together.
 
-## Step 4: Support Rad Pro
+## Step 3: Flash Rad Pro
 
-If you find Rad Pro useful:
+### Connect the Device
 
-* Watch the [Rad Pro GitHub repository](https://github.com/Gissio/radpro) for release updates.
-* Star the project to show your support.
+1. Connect the device to your computer.
+2. A **USB drive** should appear.
 
-## Hardware-specific notes
+   > If no drive appears, your device may be incompatible.
 
-### FNIRSI GC-01/JOY-IT JT-RAD01 with CH32F103R8 (WCH) microprocessor
+3. Open the extracted firmware folder: `fnirsi-gc01_[microprocessor]/firmware/` and choose the correct firmware file: `radpro-fnirsi-gc01_[microprocessor]-[language]-x.y.z-install.bin`
+   * `[microprocessor]` is `ch32f103r8t6` or `apm32f103rbt6`
+   * `[language]` is a two-letter code (e.g., `en`, `es`)
+   * Not sure about the microprocessor? Start with `apm32f103rbt6`. If you get a **Drive full** error, disconnect the device and retry using `ch32f103r8t6`.
+4. Copy the file to the USB drive.
 
-* Enable **Data Mode** in the settings to establish a USB data connection. Disable when not in use to save power.
+The device will automatically reboot when the transfer completes.
+
+After reboot, **Rad Pro is installed**.
+
+### Troubleshooting
+
+**Device does not reboot after copying:**
+
+* Safely eject the drive and reconnect
+* Try copying the file again
+
+**Device not detected:**
+
+* Check your USB cable (must support data)
+* Try another USB port
+
+**Want to go back to stock firmware?**
+
+* Copy the original firmware (in the [firmware](firmware) folder) to the device using the same process
+
+**Still no joy?**
+
+* Try the alternative installation instructions: [install-stlink.md](install-stlink.md)
+
+<!--
+If installation fails, try the following:
+
+* Hold **OK/Power** while powering on and keep holding during the process
+* Hold **Right/Settings + OK/Power** to expose the USB drive
+* Press the **reset switch** (near the USB connector) after plugging in
+* Copy the file **twice**
+
+If needed:
+
+* Press the reset switch and retry the full process
+* Use the alternative method: `install-stlink.md` 
+-->
+
+## Step 4: Basic Controls
+
+Once installed, here are the essential controls:
+
+### Navigation
+
+* **Press Up / Down:** Change measurement mode / navigate menus
+* **Press Right:** Select / open settings
+* **Press Left:** Go back
+
+### System
+
+* **Hold OK:** Power on/off
+* **Hold Left + OK:** Toggle lock mode
+
+### Measurement Screen
+
+* **Press Left:** Switch secondary display
+* **Hold Left:** Reset measurement / dismiss alerts
+* **Hold Right:** Toggle pulse sound
+* **Press OK:** Turn off display
+
+### Random generator
+
+* **Press Right:** Restart random generator
+
+## Step 5: First Configuration
+
+* Open **Settings > Geiger tube > Tube type**.
+* Select the tube you identified earlier.
+
+## Step 6: Finish Up
+
+* 📖 **Read the documentation**:
+  * [Rad Pro user's manual](../../users-manual.md) – Easy guide to using Rad Pro
+  * [Rad Pro reference manual](../../reference-manual.md) – Technical reference for Rad Pro
+  * [Ionizing radiation field guide](https://github.com/Gissio/ionizing-radiation-field-guide) – Learn about ionizing radiation
+* ⭐ **Support the project** by starring the repository: [https://github.com/Gissio/radpro](https://github.com/Gissio/radpro)
+* 👥 **Help us grow** — share Rad Pro on social networks, forums, or with fellow enthusiasts!
+
+## Hardware Notes
+
+### CH32F103R8 (WCH) Devices
 
 <!-- Calculated as follows:
 
-* With 1-byte differential values: [5 pages * (1 timestamp record/page [10 bytes] + 1012 differential records/page [1 byte each])] = 5065 records
-* With 2-byte differential values: [5 pages * (1 timestamp record/page [10 bytes] + 506 differential records/page [2 byte each])] = 2535 records
+* With 1-byte differential values: [5 pages * (1 timestamp record/page [10 bytes] + 1014 differential records/page [1 byte each])] = 5075 records
+* With 2-byte differential values: [5 pages * (1 timestamp record/page [10 bytes] + 507 differential records/page [2 byte each])] = 2540 records
 
 * 60-minute and 10-minute intervals require 2-byte differential values.
 * 1-minute intervals and less require 1-byte differential values.
 
  -->
 
-* **Data storage:** Stores up to 6,078 data points. At 20 cpm (normal radiation levels), this supports:
-  * 105 days at 60-minute intervals
-  * 17 days at 10-minute intervals
-  * 84 hours at 1-minute intervals
-  * 14 hours at 10-second intervals
-  * 84 minutes at 1-second intervals
+#### Data Storage Capacity
 
-* **HV profile settings:**
-  * Factory default: 9.207 kHz frequency, 75% duty cycle.
-  * Energy-saving: 5 kHz frequency, 1.5% duty cycle.
+Rad Pro stores up to **5,075 measurements**.
 
-### FNIRSI GC-01/JOY-IT JT-RAD01 with APM32F103R8 (Geehy) processor
+At typical background radiation (~20 CPM), this corresponds to:
 
-* The USB data connection is always available.
+* **60-minute interval:** ~105 days
+* **10-minute interval:** ~17 days
+* **1-minute interval:** ~84 hours
+* **10-second interval:** ~14 hours
+* **1-second interval:** ~84 minutes
+
+#### High Voltage (HV) Profiles
+
+* **Factory default:**
+  9.207 kHz frequency, 75% duty cycle
+
+### APM32F103R8 (Geehy) Devices
 
 <!-- Calculated as follows:
 
-* With 1-byte differential values: [73 pages * (1 timestamp record/page [10 bytes] + 1012 differential records/page [1 byte each])] = 73949 records
-* With 2-byte differential values: [73 pages * (1 timestamp record/page [10 bytes] + 506 differential records/page [2 byte each])] = 37011 records
+* With 1-byte differential values: [71 pages * (1 timestamp record/page [10 bytes] + 1014 differential records/page [1 byte each])] = 72065 records
+* With 2-byte differential values: [71 pages * (1 timestamp record/page [10 bytes] + 507 differential records/page [2 byte each])] = 36068 records
 
 * 60-minute and 10-minute intervals require 2-byte differential values.
 * 1-minute intervals and less require 1-byte differential values.
 
  -->
 
-* **Data storage:** Stores up to 67,871 data points. At 20 cpm (normal radiation levels), this supports:
-  * 1542 days at 60-minute intervals
-  * 257 days at 10-minute intervals
-  * 51 days at 1-minute intervals
-  * 8 days at 10-second intervals
-  * 20 hours at 1-second intervals
+#### Data Storage Capacity
 
-* **HV profile settings:**
-  * Factory default: 47.058 kHz frequency, 50% duty cycle.
-  * Energy-saving: 5 kHz frequency, 1.5% duty cycle.
+Rad Pro stores up to **72,065 measurements**.
+
+At typical background radiation (~20 CPM), this corresponds to:
+
+* **60-minute interval:** ~1502 days
+* **10-minute interval:** ~250 days
+* **1-minute interval:** ~50 days
+* **10-second interval:** ~8 days
+* **1-second interval:** ~20 hours

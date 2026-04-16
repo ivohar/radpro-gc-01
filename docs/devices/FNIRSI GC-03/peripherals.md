@@ -21,8 +21,8 @@
 * PB11 (Input, USART3): USART_RX
 * PB12 (Output): (low)
 * PB13 (AF): DISPLAY_BACKLIGHT
-* PB14 (Output): EMFMETER_EN (inverted)
-* PB15 (Output): PULSE_LED
+* PB14 (Output): ALERT_LED (inverted)
+* PB15 (Output): PULSE_LED (inverted)
 
 * PC0 (Analog): PWR_BAT (divided by 2)
 * PC2 (Analog): EMFMETER_E
@@ -31,4 +31,5 @@
 * PC5 (Output): DISPLAY_RESX
 * PC6 (Input, pull-up): PWR_USB (inverted)
 * PC7 (Input, pull-up): PWR_CHRG (inverted)
+* PC8 (Output): STATUS_LED (inverted)
 * PC11 (AF): BUZZ

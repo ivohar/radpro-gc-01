@@ -34,20 +34,23 @@ static const mr_color_t displayColors[][4] = {
     // Element neutral
 {mr_get_color(0x656565), mr_get_color(0xB0B0B0), mr_get_color(0xA58D79), mr_get_color(0x984C98)},
 
-    // Container background [global background]
-{mr_get_color(0xF0F0F0), mr_get_color(0x1F1F1F), mr_get_color(0x000000), mr_get_color(0xB8DCB8)},
-
-    // Container global [title bar background]
+    // Container global (title bar background)
 {mr_get_color(0xF9F9F9), mr_get_color(0x2E2E2E), mr_get_color(0x000000), mr_get_color(0xE0F0E0)},
 
     // Container global shadow
 {mr_get_color(0xB8B8B8), mr_get_color(0x161616), mr_get_color(0x000000), mr_get_color(0x482448)},
 
-    // Amplified enabled background [menu item selected background]
-{mr_get_color(0xB9C6F9), mr_get_color(0x2B3849), mr_get_color(0x163225), mr_get_color(0x5078E0)},
+    // Container background (content background)
+{mr_get_color(0xF0F0F0), mr_get_color(0x1F1F1F), mr_get_color(0x000000), mr_get_color(0xB8DCB8)},
 
-    // On flat active [menu item selected foreground]
+    // On flat active (menu item foreground)
 {mr_get_color(0x313131), mr_get_color(0xE9E9E9), mr_get_color(0xD39387), mr_get_color(0xF87CF8)},
+
+    // Amplified enabled background (selected menu item background)
+{mr_get_color(0xA9BCF4), mr_get_color(0x3B4F69), mr_get_color(0x285141), mr_get_color(0x903CC8)},
+
+    // On amplified active (selected menu item foreground)
+{mr_get_color(0x2E5075), mr_get_color(0xCAE4FF), mr_get_color(0x84A690), mr_get_color(0xE8F038)},
 
     // Running (green)
 {mr_get_color(0x008A00), mr_get_color(0x198100), mr_get_color(0x008D00), mr_get_color(0x000C00)},
@@ -90,10 +93,10 @@ static const mr_color_t displayColors[][4] = {
 {mr_get_color(0x40658F), mr_get_color(0x4C6C9A), mr_get_color(0x4B7667), mr_get_color(0x685058)},
 
     // Game square black
-{mr_get_color(0xAD937C), mr_get_color(0xB89070), mr_get_color(0x6A573C), mr_get_color(0xC04080)},
+{mr_get_color(0xAD937C), mr_get_color(0xB89070), mr_get_color(0x7C694D), mr_get_color(0xC04080)},
 
     // Game square white
-{mr_get_color(0xBDA88D), mr_get_color(0xD0B088), mr_get_color(0x7C694D), mr_get_color(0x80C040)},
+{mr_get_color(0xBDA88D), mr_get_color(0xD0B088), mr_get_color(0x8B815F), mr_get_color(0x80C040)},
 
     // Game piece black
 {mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000)},
@@ -115,12 +118,7 @@ static const mr_color_t displayColors[][3] = {
      mr_get_color(0xb0b0b0),
      mr_get_color(0xc78842)},
 
-    // Container background [global background]
-    {mr_get_color(0xf7f7f7),
-     mr_get_color(0x1f1f1f),
-     mr_get_color(0x000000)},
-
-    // Container global [title bar background]
+    // Container global (title bar background)
     {mr_get_color(0xfcfcfc),
      mr_get_color(0x2e2e2e),
      mr_get_color(0x000000)},
@@ -130,15 +128,25 @@ static const mr_color_t displayColors[][3] = {
      mr_get_color(0x161616),
      mr_get_color(0x000000)},
 
-    // Amplified enabled background [menu item selected background]
-    {mr_get_color(0xcadefc),
-     mr_get_color(0x2b3849),
-     mr_get_color(0x09140f)},
+    // Container background (content background)
+    {mr_get_color(0xf7f7f7),
+     mr_get_color(0x1f1f1f),
+     mr_get_color(0x000000)},
 
-    // On flat active [menu item selected foreground]
+    // On flat active (menu item foreground)
     {mr_get_color(0x1f1f1f),
      mr_get_color(0xe9e9e9),
      mr_get_color(0xeaa75e)},
+
+    // Amplified enabled background (selected menu item background)
+    {mr_get_color(0xb2cff9),
+     mr_get_color(0x3b4f69),
+     mr_get_color(0x10211a)},
+
+    // On amplified active (selected menu item foreground)
+    {mr_get_color(0x1d3c67),
+     mr_get_color(0xcae4ff),
+     mr_get_color(0x58c8a2)},
 
     // Running (green)
     {mr_get_color(0x008300),
@@ -172,7 +180,7 @@ static const mr_color_t displayColors[][3] = {
 
     // Instrument enhanced secondary
     {mr_get_color(0x2d548b),
-     mr_get_color(0x84b3ef), 
+     mr_get_color(0x84b3ef),
      mr_get_color(0x38a784)},
 
     // Instrument enhanced tertiary
@@ -209,12 +217,12 @@ static const mr_color_t displayColors[][3] = {
     // Game square black
     {mr_get_color(0xb89070),
      mr_get_color(0xb89070),
-     mr_get_color(0x352618)},
+     mr_get_color(0x48341f)},
 
     // Game square white
     {mr_get_color(0xd0b088),
      mr_get_color(0xd0b088),
-     mr_get_color(0x48341f)},
+     mr_get_color(0x78532c)},
 
     // Game piece black
     {mr_get_color(0x000000),

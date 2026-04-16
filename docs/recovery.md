@@ -1,4 +1,4 @@
-# Device recovery
+# Device Recovery
 
 This guide provides recovery instructions for various Geiger counter models. Follow the specific steps for your device to ensure proper recovery.
 
@@ -17,6 +17,10 @@ To recover your Bosean FS-5000 Geiger counter, follow the [installation instruct
 ## FNIRSI GC-01
 
 To recover your FNIRSI GC-01 Geiger counter, follow the [installation instructions](devices/FNIRSI_GC-01/install.md).
+
+## FNIRSI GC-03
+
+To recover your FNIRSI GC-03 Geiger counter, follow the [installation instructions](devices/FNIRSI_GC-03/install.md).
 
 ## GQ GMC-800
 

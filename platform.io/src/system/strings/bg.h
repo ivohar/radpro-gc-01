@@ -16,7 +16,7 @@
 #define STRING_ELLIPSIS "..."
 #define STRING_PLUSMINUS "±"
 #define STRING_PERCENT "%"
-#define STRING_NONE "-"
+#define STRING_NOVALUE "‒"
 #define STRING_LESSTHAN "< "
 
 // Units
@@ -26,16 +26,16 @@
 #define STRING_KILO "к"
 #define STRING_MEGA "М"
 #define STRING_GIGA "Г"
-#define STRING_SIEVERT "Зиверт"
-#define STRING_SV "Зв"
-#define STRING_SVH "Зв/ч"
+#define STRING_SIEVERT "Сиверт"
+#define STRING_SV "Св"
+#define STRING_SVH "Св/ч"
 #define STRING_REM "рем"
 #define STRING_REMH "рем/ч"
 #define STRING_CPM "имп/мин"
 #define STRING_CPS "имп/с"
-#define STRING_CPMUSVH "(имп/мин)/(мкЗв/ч)"
+#define STRING_CPMUSVH "(имп/мин)/(мкСв/ч)"
 #define STRING_MICROSECONDS "мкс"
-#define STRING_KHZ "кГц"
+#define STRING_KHZ "кХц"
 #define STRING_VOLT_UNIT "В"
 #define STRING_VOLT_PER_METER_UNIT "В/м"
 #define STRING_TESLA "Тесла"
@@ -141,25 +141,25 @@
 #define STRING_MAGNETIC_FIELD_ALARM "Аларма М-поле"
 
 // Measurements menu items
-#define STRING_SOURCE "Източник"
+#define STRING_SOURCE_COMPENSATION "Комп. на източника"
 #define STRING_DOSE_UNITS "Единици за доза"
 #define STRING_SECONDARY_DOSE_UNITS "Вторични единици за доза"
 #define STRING_MAGNETIC_FIELD_UNITS "Единици за магнитно поле"
 
-// Source menu items
-#define STRING_CS137 "По подразб.: Cs-137 (γ)"
-#define STRING_CO60 "Co-60 (γ)"
-#define STRING_TC99M "Tc-99m (γ)"
-#define STRING_I131 "I-131 (γ)"
-#define STRING_LU177 "Lu-177 (γ)"
-#define STRING_AM241 "Am-241 (γ)"
-#define STRING_RADIUM "Радий (γ)"
-#define STRING_URANIUM_ORE "Уранова руда (γ)"
-#define STRING_URANIUM_GLASS "Ураново стъкло (γ)"
-#define STRING_DEPLETED_URANIUM "Обеднен уран (γ)"
-#define STRING_THORIUM_ORE "Ториeва руда (γ)"
+// Source menu compensation items
+#define STRING_CS137 "Няма (Cs-137)"
+#define STRING_CO60 "Co-60"
+#define STRING_TC99M "Tc-99m"
+#define STRING_I131 "I-131"
+#define STRING_LU177 "Lu-177"
+#define STRING_AM241 "Am-241"
+#define STRING_RADIUM "Радий"
+#define STRING_URANIUM_ORE "Уранова руда"
+#define STRING_URANIUM_GLASS "Ураново стъкло"
+#define STRING_DEPLETED_URANIUM "Обеднен уран"
+#define STRING_THORIUM_ORE "Ториeва руда"
 #define STRING_XRAYS "Рентген (60 kV)"
-#define STRING_K40 "K-40 (γ)"
+#define STRING_K40 "K-40"
 #define STRING_BACKGROUND_RADIATION "Фонова радиация"
 
 // Instantaneous menu items
@@ -177,7 +177,7 @@
 
 // Geiger tube menu items
 #define STRING_TUBE_TYPE "Тип на тръбата"
-#define STRING_SENSITIVITY "Чувствителност (Cs-137)"
+#define STRING_SENSITIVITY "Чувствителност"
 #define STRING_DEAD_TIME_COMPENSATION "Комп. на мъртво време"
 #define STRING_HVPROFILE "HV профил"
 
@@ -233,6 +233,8 @@
 #define STRING_ALWAYS_ON "Винаги включен"
 
 // Sound menu items
+#define STRING_PULSESTYLE "Стил на импулса"
+#define STRING_PULSEVOLUME "Сила на звука на импулса"
 #define STRING_ALERTSTYLE "Стил на сигнала"
 #define STRING_ALERTVOLUME "Сила на звука на сигнала"
 #define STRING_VOICEVOLUME "Сила на гласа"

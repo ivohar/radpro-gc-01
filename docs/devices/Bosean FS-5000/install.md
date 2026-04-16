@@ -1,105 +1,164 @@
-# Installing Rad Pro on Bosean FS-5000 Geiger counters
+# Installing Rad Pro on the Bosean FS-5000
 
-This guide explains how to install the Rad Pro firmware on Bosean FS-5000 Geiger counters.
+This guide explains how to install **Rad Pro** on Bosean FS-5000 Geiger counters.
 
-To update the firmware, use the [Rad Pro web installer](https://gissio.github.io/radpro-installer/).
+If Rad Pro is already installed on your device, you can upgrade using the [Rad Pro web installer](https://gissio.github.io/radpro-installer/).
 
-## What you'll need
+## What You'll Need
 
-* **ST-LINK V2 USB dongle** (or compatible clone): Available on [Amazon](https://www.amazon.com/s?k=st-link+v2).
-* **4-pin header**: For the SWD connection.
-* **Philips screwdriver:** For opening the device.
-* **Optional:** Soldering iron and solder for a secure connection.
-* **Windows users:** [ST-LINK driver](https://www.st.com/en/development-tools/stsw-link009.html)
+Make sure you have:
 
-## Step 1: Open the device
+* An **ST-LINK V2 programmer** (or compatible clone)
+* A **4-pin header** or jumper wires (for SWD connection)
+* A **Phillips screwdriver**
+* A **computer** (Windows, Linux, or macOS)
+
+Optional:
+
+* Soldering iron + solder
+
+Windows only:
+
+* Install the ST-LINK driver:
+  [https://www.st.com/en/development-tools/stsw-link009.html](https://www.st.com/en/development-tools/stsw-link009.html)
+
+## Step 1: Download the Firmware
+
+1. Go to the Rad Pro releases page: https://github.com/Gissio/radpro/releases
+2. Download the latest `radpro-[version].zip`.
+3. Extract it on your computer.
+
+## Step 2: Identify the Hardware
 
 ![Bosean FS-5000 circuit board](img/fs5000-board.jpg)
 
-1. Power off the device.
-2. Unscrew the back case and carefully open the device.
-3. Confirm the circuit board matches the image above (Geiger-Müller tube may vary). If it differs, you may have a different hardware revision, and Rad Pro may not work correctly. Report issues on the [Rad Pro GitHub issues page](https://github.com/Gissio/radpro/issues).
-4. Identify the Geiger-Müller tube, marked as **J305**, **J321**, **J613**, **J614**, or **M4011**. For unmarked tubes:
-   * **55 mm tubes:** Assume J614.
-   * **65 mm tubes:** Assume J613.
+To select the correct settings, you'll need to identify the Geiger tube inside the device.
 
-## Step 2: Connect the programmer
+### Open the Device
+
+1. Power off the device.
+2. Unscrew the back case.
+3. Carefully open the enclosure.
+
+### Identify the Geiger Tube
+
+Look for markings on the tube:
+
+* **J305**, **J321**, **J613**, **HH614**, or **M4011**
+
+If the tube is unmarked:
+
+* ~55 mm or ~65 mm → assume **HH614**
+
+## Step 3: Connect the ST-LINK Programmer
 
 ![Bosean FS-5000 connectors](img/fs5000-swd.jpg)
 
-1. Optional: Solder a 4-pin header to the SWD pads on the board for a reliable connection.
-2. Connect the ST-LINK V2 to the SWD pads using this pin configuration (top to bottom):
-  * 3.3V
-  * SWDIO
-  * SWCLK
-  * GND
+Locate the **SWD pads** on the board.
+
+### Wiring (top to bottom)
+
+Connect the ST-LINK as follows:
+
+* 3.3V → 3.3V
+* SWDIO → SWDIO
+* SWCLK → SWCLK
+* GND → GND
+
+### Tips
+
+* For a reliable connection, solder a 4-pin header to SWD
+
+⚠️ Double-check all connections before powering anything. Incorrect wiring can damage the device.
 
 ![ST-LINK V2 programmer](../../img/ST-LINK-V2.png)
 
-**WARNING:** Double-check connections to avoid damaging the device.
+## Step 4: Flash Rad Pro
 
-## Step 3: Flash the firmware
+1. Open the extracted firmware folder: `bosean-fs5000/`
+2. Run the Installer:
+   * **Windows:** double-click `install.bat`
+   * **Linux:** run `./install.sh` in a terminal
+   * **macOS:** open Terminal and run `install.sh`
+3. When prompted, enter your preferred language (e.g., `en`, `es`)
 
-1. Windows users: install the [ST-LINK driver](https://www.st.com/en/development-tools/stsw-link009.html).
-2. Download and extract the latest `radpro-[version].zip` from [Rad Pro releases](https://github.com/Gissio/radpro/releases).
-3. Navigate to the `bosean-fs5000` folder and run the appropriate script:
-  * Windows: Double click `install.bat`.
-  * Linux: Run `install.sh` in a terminal.
-  * macOS: Open `Terminal.app` (in `/Applications/Utilities`), navigate to the `bosean-fs5000` folder, and drag `install.sh` onto the Terminal icon in the dock.
-4. Select a language by entering its two-letter code (e.g., `en` for English) when prompted.
-5. Keep the OK/Power button of your Bosean FS-5000 pressed while flashing.
-6. The installer automatically backs up the original firmware to the `backup` folder. Store this file securely to restore the original firmware if needed.
-   * To restore, drag the backup file onto `install.bat` (Windows) or `install.sh` (macOS/Linux).
-7. Reassemble the device after flashing.
+The original firmware is automatically **backed up** into the `backup/` folder
+
+Rad Pro is flashed to the device.
+
+> Keep the backup file safe—you'll need it to restore the original firmware.
+
+### Restoring Original Firmware
+
+* **Windows:** drag the backup file onto `install.bat`
+* **Linux/macOS:** pass the backup file to `install.sh`
+
+## Step 5: Reassemble the Device
+
+* Disconnect the ST-LINK
+* Reassemble the device
 
 <!-- Note: check this [video](https://youtu.be/Ney8Cb1XnZk) for alternative installation instructions. -->
 
-## Step 4: Configure the device
+## Step 6: Basic Controls
 
-Use the following controls to operate your device:
+Once installed, here are the essential controls:
 
-* **Power on/off:** Press and long hold the OK/Power key.
-* **Switch measurement mode:** Use the Up/Back or Down/Settings key.
-* **Switch secondary measurement view:** Press the OK/Power key.
-* **Reset measurement/dismiss alert:** Press and long hold the Up/Back key.
-* **Toggle pulse sound (measurement view only):** Press and long hold both the Up/Back and Down/Settings key.
-* **Access settings:** Press and short hold the Down/Settings key.
-* **Navigate options:** Use the Up/Back or Down/Settings key.
-* **Select option:** Press and short hold the Right/Settings key or press the OK/Power key.
-* **Go back:** Press and short hold the Up/Back key.
-* **Toggle lock mode:** Press and long hold both the Up/Back and OK/Power keys.
+### Navigation
 
-To configure the device:
+* **Press Up / Down:** Change measurement mode / navigate menus
+* **Short Hold Down:** Select / open settings
+* **Short Hold Up:** Go back
 
-1. Go to **Settings > Geiger tube > Sensitivity** and select the option that matches your Geiger-Müller tube.
-2. For USB data connections on Windows, install the [CH340 driver](https://www.catalog.update.microsoft.com/Search.aspx?q=USB%5CVID_1A86%26PID_7523).
+### System
 
-For detailed usage, see the [Rad Pro User Manual](../../manual.md) and the [ionizing radiation field guide](https://github.com/Gissio/ionizing-radiation-field-guide).
+* **Long Hold OK:** Power on/off
+* **Long Hold Up + OK:** Toggle lock mode
 
-## Step 5: Support Rad Pro
+### Measurement Screen
 
-If you find Rad Pro useful:
+* **Short Hold Up:** Switch secondary display
+* **Long Hold Up:** Reset measurement / dismiss alerts
+* **Long Hold Up + Down:** Toggle pulse sound
 
-* Watch the [Rad Pro GitHub repository](https://github.com/Gissio/radpro) for release updates.
-* Star the project to show your support.
+### Random generator
 
-## Hardware-specific notes
+* **Short Hold Down:** Restart random generator
+
+## Step 7: First Configuration
+
+* Open **Settings > Geiger tube > Tube type**.
+* Select the tube you identified earlier.
+
+## Step 8: Finish Up
+
+* 📖 **Read the documentation**:
+  * [Rad Pro user's manual](../../users-manual.md) – Easy guide to using Rad Pro
+  * [Rad Pro reference manual](../../reference-manual.md) – Technical reference for Rad Pro
+  * [Ionizing radiation field guide](https://github.com/Gissio/ionizing-radiation-field-guide) – Learn about ionizing radiation
+* ⭐ **Support the project** by starring the repository: [https://github.com/Gissio/radpro](https://github.com/Gissio/radpro)
+* 👥 **Help us grow** — share Rad Pro on social networks, forums, or with fellow enthusiasts!
+
+## Hardware Notes
 
 <!-- Calculated as follows:
 
-* With 1-byte differential values: [100 pages * (1 timestamp record/page [16 bytes] + 2024 differential records/page [1 byte each])] = 202500 records
-* With 2-byte differential values: [100 pages * (1 timestamp record/page [16 bytes] + 1012 differential records/page [2 byte each])] = 101300 records
+* With 1-byte differential values: [101 pages * (1 timestamp record/page [16 bytes] + 2032 differential records/page [1 byte each])] = 205333 records
+* With 2-byte differential values: [101 pages * (1 timestamp record/page [16 bytes] + 1016 differential records/page [2 byte each])] = 102717 records
 
 * 60-minute and 10-minute intervals require 2-byte differential values.
 * 1-minute intervals and less require 1-byte differential values.
 
  -->
 
-* **Data storage:** Stores up to 202,500 data points. At 20 cpm (normal radiation levels), this supports:
-  * 4220 days at 60-minute intervals
-  * 703 days at 10-minute intervals
-  * 140 days at 1-minute intervals
-  * 23 days at 10-second intervals
-  * 56 hours at 1-second intervals
+### Data Storage Capacity
 
-* **HV profiles:** Not supported.
+Rad Pro stores up to **205,333 measurements**.
+
+At typical background radiation (~20 CPM), this corresponds to:
+
+* **60-minute interval:** ~4279 days
+* **10-minute interval:** ~713 days
+* **1-minute interval:** ~142 days
+* **10-second interval:** ~23 days
+* **1-second interval:** ~57 hours
