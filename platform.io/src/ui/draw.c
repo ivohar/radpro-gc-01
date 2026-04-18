@@ -442,7 +442,7 @@ void drawRightAlignedText(const char *s, const mr_rectangle_t *rectangle, const 
 
 void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *message)
 {
-#if defined(GC01)     
+#if defined(GC01_ORIGFNT)     
     setFont(font_medium);
 #else
     setFont(font_small);
@@ -510,7 +510,7 @@ void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *mess
     mr_rectangle_t lineRectangle;
     mr_point_t lineOffset;
 
-#if defined(GC01)     
+#if defined(GC01_ORIGFNT)     
     uint32_t linesTop = (rectangle->height - lineNum * FONT_MEDIUM_LINE_HEIGHT) / 2;
 #else
     uint32_t linesTop = (rectangle->height - lineNum * FONT_SMALL_LINE_HEIGHT) / 2;
@@ -520,7 +520,7 @@ void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *mess
 
     for (uint32_t i = 0; i < lineNum; i++)
     {
-#if defined(GC01)         
+#if defined(GC01_ORIGFNT)     
         lineRectangle = (mr_rectangle_t){rectangle->x, y, rectangle->width, FONT_MEDIUM_LINE_HEIGHT};
 #else
         lineRectangle = (mr_rectangle_t){rectangle->x, y, rectangle->width, FONT_SMALL_LINE_HEIGHT};
@@ -544,7 +544,7 @@ void drawCenteredMultilineText(const mr_rectangle_t *rectangle, const char *mess
             setStrokeColor(COLOR_ELEMENT_NEUTRAL);
         drawCenteredText(buffer, &lineRectangle, &lineOffset);
 
-#if defined(GC01) 
+#if defined(GC01_ORIGFNT)     
         y += FONT_MEDIUM_LINE_HEIGHT;
 #else
         y += FONT_SMALL_LINE_HEIGHT;
