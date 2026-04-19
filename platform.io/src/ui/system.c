@@ -61,7 +61,11 @@ void drawTitleBar(const char *title)
         strcatChar(buffer, ':');
         strcatUInt32(buffer, dateTime.minute, 2);
 
+#if defined(FONT_TITLEBAR)        
+        setFont(font_titlebar);
+#else
         setFont(font_small);
+#endif
         setStrokeColor(COLOR_ELEMENT_ACTIVE);
         drawRowRight(buffer, &rectangle);
 
@@ -112,7 +116,11 @@ void drawTitleBar(const char *title)
         drawRowRight(settings.pulseSound ? "9" : "8", &rectangle);
 
     // Title
+#if defined(FONT_TITLEBAR)    
+    setFont(font_titlebar);
+#else
     setFont(font_small);
+#endif
     setStrokeColor(COLOR_ELEMENT_ACTIVE);
     drawRowLeft(title, &rectangle);
 

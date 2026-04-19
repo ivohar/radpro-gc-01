@@ -128,7 +128,21 @@ for language_file in Path('../platform.io/src/system/strings').glob('*.h'):
 
     run_fontconv(font_color,
                  codepoint_set_small,
-                 f'font_small_{language}_color_23_{bpp_low}bpp.h',
+                 f'font_small_{language}_color_25_{bpp_low}bpp.h',
                  'font_small',
-                 pixels=23,
+                 pixels=25,
+                 bpp=bpp_low)
+
+    run_fontconv(font_color,
+                 codepoint_set_small,
+                 f'font_small_{language}_color_22_{bpp_low}bpp.h',
+                 'font_small',
+                 pixels=22,
+                 bpp=bpp_low)
+
+    run_fontconv(font_color,
+                 codepoint_set_small,
+                 f'font_titlebar_{language}_color_21_{bpp_low}bpp.h',
+                 'font_titlebar',
+                 pixels=21,
                  bpp=bpp_low)

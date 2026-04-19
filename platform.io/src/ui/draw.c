@@ -15,6 +15,9 @@
 #include FONT_LARGE
 #include FONT_MEDIUM
 #include FONT_SMALL
+#if defined(FONT_TITLEBAR)
+#include FONT_TITLEBAR
+#endif
 
 #include "../system/cstring.h"
 #include "../system/power.h"

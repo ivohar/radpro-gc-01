@@ -157,6 +157,9 @@ extern const uint8_t font_large[];
 extern const uint8_t font_medium[];
 extern const uint8_t font_small[];
 extern const uint8_t font_symbols[];
+#if defined(FONT_TITLEBAR)
+extern const uint8_t font_titlebar[];
+#endif
 
 extern const mr_rectangle_t contentRectangle;
 

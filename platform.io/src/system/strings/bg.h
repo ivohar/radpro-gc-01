@@ -31,9 +31,9 @@
 #define STRING_SVH "Св/ч"
 #define STRING_REM "рем"
 #define STRING_REMH "рем/ч"
-#define STRING_CPM "имп/мин"
+#define STRING_CPM "имп/м"
 #define STRING_CPS "имп/с"
-#define STRING_CPMUSVH "(имп/мин)/(мкСв/ч)"
+#define STRING_CPMUSVH "(имп/м)/(мкСв/ч)"
 #define STRING_MICROSECONDS "мкс"
 #define STRING_KHZ "кХц"
 #define STRING_VOLT_UNIT "В"
@@ -224,6 +224,10 @@
 #define STRING_THEME_DAY "Ден"
 #define STRING_THEME_DUSK "Здрач"
 #define STRING_THEME_NIGHT "Нощ"
+#if defined(DISPLAY_EXTRA_COLOR_SCHEMES) 
+// Display - FNIRSI enhancements menu items
+#define STRING_THEME_FNIRSI_BARBIE "Барби"
+#endif
 
 // Display contrast menu items prefix (followed by a number from 1 to 8)
 #define STRING_CONTRAST_LEVEL "Ниво"
