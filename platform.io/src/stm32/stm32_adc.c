@@ -32,11 +32,13 @@
 #define SQRT2 1.41421356237F
 // 400 samples @ 1 kHz to fit whole cycles of both 50 Hz and 60 Hz
 #define ELECTRIC_FIELD_SAMPLE_NUM 400
-#define ELECTRIC_FIELD_SCALE (SQRT2 * 0.9F)
+#define ELECTRIC_FIELD_OFFSET 126
+#define ELECTRIC_FIELD_SCALE (2 * 0.9F)
 // 400 samples @ 1 kHz to fit whole cycles of both 50 Hz and 60 Hz
 #define MAGNETIC_FIELD_SAMPLE_NUM 400
-#define MAGNETIC_FIELD_LINEAR_SCALE (SQRT2 * 0.000000005F * 2.8583F)
-#define MAGNETIC_FIELD_QUADRATIC_SCALE (SQRT2 * 0.000000005F * 0.0072F)
+#define MAGNETIC_FIELD_OFFSET 120
+#define MAGNETIC_FIELD_LINEAR_SCALE (2 * SQRT2 * 0.000000005F * 2.8583F)
+#define MAGNETIC_FIELD_QUADRATIC_SCALE (2 * SQRT2 * 0.000000005F * 0.0072F)
 
 #define ADC_END_SAMPLE 1
 #define ADC_PWR_BAT_SAMPLE (ADC_END_SAMPLE + PWR_BAT_SAMPLE_NUM)
@@ -101,7 +103,7 @@ static uint32_t convertADC(uint32_t sampleNum)
     return value;
 }
 
-static void updatePowerState(void)
+static void readPowerState(void)
 {
     adc_enable(ADC1);
 
@@ -256,7 +258,7 @@ void initADC(void)
     adc_calibrate(ADC1);
 
 #if defined(EMFMETER)
-    updatePowerState();
+    readPowerState();
 
     adc_enable(ADC1);
 
@@ -283,7 +285,7 @@ bool isBatteryCharging(void)
 float readBatteryVoltage()
 {
 #if !defined(EMFMETER)
-    updatePowerState();
+    readPowerState();
 #endif
 
 #if (defined(STM32F0) && !defined(GD32)) || defined(STM32G0) || defined(STM32L4)
@@ -300,51 +302,33 @@ float readBatteryVoltage()
 
 #if defined(EMFMETER)
 
-float calculateRMSValue(uint16_t *values, uint32_t count)
+float calculateRMSValue(uint16_t *values, uint32_t count, int32_t offset)
 {
-    if (count == 0)
-        return 0;
-
-    // Calculate mean value
-    uint32_t meanValue = 0;
-    for (uint32_t i = 0; i < count; i++)
-        meanValue += values[i];
-    meanValue /= count;
-
     // Filter by mean, and calculate low and high RMS values
-    uint32_t squaredLow = 0;
-    uint32_t squaredLowNum = 0;
-    uint32_t squaredHigh = 0;
-    uint32_t squaredHighNum = 0;
+    uint32_t squaredSum = 0;
     for (uint32_t i = 0; i < count; i++)
     {
-        uint32_t value = values[i];
-        if (value < meanValue)
+        int32_t value = (int32_t)values[i] - offset;
+        if (value > 0)
         {
-            squaredLow = addClamped(squaredLow, value * value);
-            squaredLowNum++;
-        }
-        else
-        {
-            squaredHigh = addClamped(squaredHigh, value * value);
-            squaredHighNum++;
+            uint32_t squaredValue = value * value;
+            squaredSum = addClamped(squaredSum, squaredValue);
         }
     }
 
-    if (squaredLowNum == 0 || squaredHighNum == 0)
-        return 0;
+    float rmsValue = sqrtf((float)squaredSum / count);
 
-    float rmsLow = sqrtf(squaredLow / squaredLowNum);
-    float rmsHigh = sqrtf(squaredHigh / squaredHighNum);
-
-    // Effective RMS value is the difference of high and low RMS values
-    return rmsHigh - rmsLow;
+    return rmsValue;
 }
 
 float readElectricFieldStrength(void)
 {
+    if (adcHardware.snapshot.electricFieldIndex == 0)
+        return 0.0F;
+
     float rmsValue = calculateRMSValue(adcHardware.snapshot.electricField,
-                                       adcHardware.snapshot.electricFieldIndex);
+                                       adcHardware.snapshot.electricFieldIndex,
+                                       ELECTRIC_FIELD_OFFSET);
 
     float electricFieldStrength = ELECTRIC_FIELD_SCALE * rmsValue;
 
@@ -356,8 +340,12 @@ float readElectricFieldStrength(void)
 
 float readMagneticFieldStrength(void)
 {
+    if (adcHardware.snapshot.magneticFieldIndex == 0)
+        return 0.0F;
+
     float rmsValue = calculateRMSValue(adcHardware.snapshot.magneticField,
-                                       adcHardware.snapshot.magneticFieldIndex);
+                                       adcHardware.snapshot.magneticFieldIndex,
+                                       MAGNETIC_FIELD_OFFSET);
 
     float magneticFieldStrength = MAGNETIC_FIELD_LINEAR_SCALE * rmsValue + MAGNETIC_FIELD_QUADRATIC_SCALE * rmsValue * rmsValue;
 

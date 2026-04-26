@@ -24,7 +24,9 @@ extern volatile uint32_t tubeDeadTime;
 void initTube(void);
 void initTubeHardware(void);
 
-void setupTube(void);
+void resetTube(void);
+
+const char *getTubeType(void);
 
 float getTubeSensitivity(void);
 uint32_t getLossOfCountTime(void);

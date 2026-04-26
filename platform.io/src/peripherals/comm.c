@@ -37,7 +37,7 @@ void initComm(void)
     initCommHardware();
 }
 
-void resetComm(bool open)
+void clearComm(bool open)
 {
     comm.state = COMM_RX;
 
@@ -86,6 +86,7 @@ enum GetAction
     GET_DEVICE_BATTERY_VOLTAGE,
     GET_DEVICE_TIME,
     GET_DEVICE_TIME_ZONE,
+    GET_TUBE_TYPE,
     GET_TUBE_TIME,
     GET_TUBE_PULSE_COUNT,
     GET_TUBE_RATE,
@@ -110,6 +111,7 @@ static const char *getTable[] = {
     "deviceBatteryVoltage",
     "deviceTime",
     "deviceTimeZone",
+    "tubeType",
     "tubeTime",
     "tubePulseCount",
     "tubeRate",
@@ -160,6 +162,11 @@ void processCommGet(const char *s)
 
         case GET_DEVICE_TIME_ZONE:
             pushCommFloat(getDeviceTimeZone(), 1);
+
+            break;
+
+        case GET_TUBE_TYPE:
+            pushCommString(getTubeType());
 
             break;
 
@@ -296,9 +303,9 @@ void processCommSet(const char *s)
             if (parseUInt32(&s, &intValue))
             {
                 if (intValue)
-                    powerOn(false);
+                    powerOn();
                 else
-                    powerOff(true);
+                    powerOff();
                 pushCommOk();
             }
 
@@ -391,7 +398,7 @@ void updateComm(void)
             processCommSet(s);
         else if (parseToken(&s, "RESET datalog"))
         {
-            resetDatalog();
+            clearDatalog();
             pushCommOk();
         }
 #if defined(BOOTLOADER)
@@ -441,9 +448,13 @@ void updateComm(void)
         case TRANSMIT_BOOTLOADER:
         {
             sleep(START_BOOTLOADER_TIME_MS);
-            powerOff(false);
+
+            powerOff();
+
+            // Turn off the display immediately; powerOff() alone would leave it on until next event loop.
             setBacklight(false);
             setDisplayEnabled(false);
+
             startBootloader();
 
             comm.transmitState = TRANSMIT_RESPONSE;

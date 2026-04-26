@@ -43,7 +43,7 @@ void updateView(void)
         if (!isPoweredOn())
         {
             if (event == EVENT_KEY_POWER)
-                powerOn(false);
+                powerOn();
             else
                 view.onViewEvent(EVENT_KEY_TOGGLEBACKLIGHT);
         }
@@ -51,22 +51,26 @@ void updateView(void)
         {
             if (event == EVENT_KEY_POWER)
             {
-                if (!isInLockMode())
-                    powerOff(false);
+                if (!isLockModeEnabled())
+                {
+                    triggerAndwaitForVibration();
+
+                    powerOff();
+                }
             }
             else
             {
                 if (event == EVENT_KEY_TOGGLELOCK)
                 {
-                    if (!isInLockMode())
+                    if (!isLockModeEnabled())
                     {
                         setMeasurementView();
-                        setLockMode(true);
+                        setLockModeEnabled(true);
 
                         event = EVENT_KEY_TOGGLEBACKLIGHT;
                     }
                     else
-                        setLockMode(false);
+                        setLockModeEnabled(false);
                 }
                 else
                     view.onViewEvent(event);
@@ -118,6 +122,11 @@ void updateView(void)
     }
 }
 
+void requestViewUpdate(void)
+{
+    view.drawUpdate = true;
+}
+
 void showView(OnViewEvent *onViewEvent)
 {
     view.onViewEvent = onViewEvent;
@@ -125,31 +134,26 @@ void showView(OnViewEvent *onViewEvent)
     requestViewUpdate();
 }
 
-void requestViewUpdate(void)
-{
-    view.drawUpdate = true;
-}
-
 void updateViewHeartbeat(void)
 {
     view.onViewEvent(EVENT_HEARTBEAT);
 
-    view.drawUpdate = true;
+    requestViewUpdate();
 }
 
 // Lock mode
 
-static bool viewLockMode;
+static bool lockModeEnabled;
 
-void setLockMode(bool value)
+void setLockModeEnabled(bool value)
 {
-    viewLockMode = value;
+    lockModeEnabled = value;
 
     requestViewUpdate();
     triggerVibration();
 }
 
-bool isInLockMode(void)
+bool isLockModeEnabled(void)
 {
-    return viewLockMode;
+    return lockModeEnabled;
 }

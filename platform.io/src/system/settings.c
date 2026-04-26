@@ -99,19 +99,17 @@ static uint32_t stateOffset;
 
 static const uint8_t statesPageId[STATES_PAGE_ID_SIZE] = SETTINGS_VERSION;
 
-static bool validateStatesPage(void)
+static bool validateStatePage(void)
 {
-    const uint8_t *page = readFlash(STATES_BASE, STATES_SIZE);
+    const uint8_t *page = readFlash(STATES_BASE + STATES_PAGE_ID_OFFSET, STATES_PAGE_ID_SIZE);
 
-    return memcmp(page + STATES_PAGE_ID_OFFSET, statesPageId, STATES_PAGE_ID_SIZE) == 0;
+    return memcmp(page, statesPageId, STATES_PAGE_ID_SIZE) == 0;
 }
 
-static void resetStatesPage(void)
+static void eraseStatePage(void)
 {
     eraseFlash(STATES_BASE);
     writeFlash(STATES_BASE + STATES_PAGE_ID_OFFSET, statesPageId, STATES_PAGE_ID_SIZE);
-
-    stateOffset = 0;
 }
 
 static bool validateState(const State *state)
@@ -145,21 +143,23 @@ static bool validateState(const State *state)
 
 static const State *loadLatestState(void)
 {
-    if (!validateStatesPage())
-        resetStatesPage();
-
-    // Find last state
-    const uint8_t *page = readFlash(STATES_BASE, STATES_SIZE);
-
     const State *lastState = NULL;
-    for (uint32_t offset = 0; offset < STATES_PAGE_LASTSTATE_OFFSET; offset += sizeof(State))
-    {
-        const State *state = (const State *)(page + offset);
-        if (validateState(state))
-        {
-            lastState = state;
+    stateOffset = STATES_PAGE_LASTSTATE_OFFSET;
 
-            stateOffset = offset + sizeof(State);
+    if (validateStatePage())
+    {
+        // Find last state
+        const uint8_t *page = readFlash(STATES_BASE, STATES_SIZE);
+
+        for (uint32_t offset = 0; offset < STATES_PAGE_LASTSTATE_OFFSET; offset += sizeof(State))
+        {
+            const State *state = (const State *)(page + offset);
+            if (validateState(state))
+            {
+                lastState = state;
+
+                stateOffset = offset + sizeof(State);
+            }
         }
     }
 
@@ -168,17 +168,17 @@ static const State *loadLatestState(void)
 
 static void appendState(State *state)
 {
-    // Try twice
-    for (uint32_t i = 0; i < 2; i++)
+    if (stateOffset >= STATES_PAGE_LASTSTATE_OFFSET)
     {
-        if ((stateOffset < STATES_PAGE_LASTSTATE_OFFSET) &&
-            writeFlash(STATES_BASE + stateOffset, (uint8_t *)state, sizeof(State)))
-            break;
+        eraseStatePage();
 
-        resetStatesPage();
+        stateOffset = 0;
     }
 
-    stateOffset += sizeof(State);
+    if (writeFlash(STATES_BASE + stateOffset, (uint8_t *)state, sizeof(State)))
+        stateOffset += sizeof(State);
+    else
+        stateOffset = STATES_PAGE_LASTSTATE_OFFSET;
 }
 
 void initSettings(void)
@@ -206,7 +206,7 @@ void initSettings(void)
     }
 }
 
-void setupSettings(void)
+void resetSettings(void)
 {
     selectMenuItem(&settingsMenu, 0);
 }
@@ -261,7 +261,7 @@ static const char *onSettingsMenuGetOption(menu_size_t index, MenuStyle *menuSty
 
 static void onSettingsMenuSelect(menu_size_t index)
 {
-    settingsMenuOptions[index].setView();
+    settingsMenuOptions[index].showView();
 }
 
 static MenuState settingsMenuState;

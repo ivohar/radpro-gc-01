@@ -43,9 +43,9 @@
 #define SOUND_ALARM_SHORT_TICKS ((uint32_t)(0.250 * SYSTICK_FREQUENCY))
 #define SOUND_ALARM_LONG_TICKS ((uint32_t)(0.500 * SYSTICK_FREQUENCY))
 
-#define POWERON_VIBRATION_TICKS ((uint32_t)(0.100 * SYSTICK_FREQUENCY))
+#define INFO_VIBRATION_TICKS ((uint32_t)(0.100 * SYSTICK_FREQUENCY))
 #define POWERON_BUZZER_TICKS ((uint32_t)(0.100 * SYSTICK_FREQUENCY))
-#define POWERON_VIBRATION_TICKS_EXT ((uint32_t)(0.150 * SYSTICK_FREQUENCY))
+#define POWERON_VIBRATION_TICKS ((uint32_t)(0.150 * SYSTICK_FREQUENCY))
 
 #define LOCKMODE_BACKLIGHT_TICKS (10 * SYSTICK_FREQUENCY)
 
@@ -69,8 +69,11 @@ static struct
 #endif
 
 #if defined(PULSE_LED)
-    bool pulseLEDEnabled;
+    LEDMode ledMode;
     volatile int32_t pulseLEDTimer;
+#if defined(LED_MULTIPLEX)
+    uint32_t ledMultiplexState;
+#endif
 #endif
 
 #if defined(VIBRATOR)
@@ -113,25 +116,6 @@ static const uint32_t alertSoundTicks[][2] = {
 };
 #endif
 
-void syncTick(void);
-
-void initEvents(void)
-{
-    events.keyboardTimer = KEY_TICKS;
-
-    events.heartbeatTimer = SYSTICK_FREQUENCY;
-
-    initEventsHardware();
-}
-
-void setupEvents(void)
-{
-    syncTick();
-
-    events.heartbeatTimer = SYSTICK_FREQUENCY;
-    events.previousHeartbeatCount = events.heartbeatCount;
-}
-
 // Timer
 
 static TimerState tickTimer(volatile int32_t *timer)
@@ -170,7 +154,7 @@ void onTick(void)
         events.heartbeatTimer = SYSTICK_FREQUENCY;
         events.heartbeatCount++;
 
-        onPulseHeartbeat();
+        onPulsesHeartbeat();
     }
 
     // Keyboard
@@ -179,7 +163,7 @@ void onTick(void)
     {
         events.keyboardTimer = KEY_TICKS;
 
-        updateKeyboard();
+        onKeyboardUpdate();
     }
 
     // Display
@@ -243,8 +227,31 @@ void onTick(void)
 
     // Pulse LED
 #if defined(PULSE_LED)
+#if defined(LED_MULTIPLEX)
+    if (events.ledMode == LEDMODE_MULTIPLEX)
+    {
+        events.ledMultiplexState++;
+        if (events.ledMultiplexState >= 7)
+            events.ledMultiplexState = 0;
+
+        setPulseLED(events.ledMultiplexState == 0);
+        setAlertLED(events.ledMultiplexState != 0);
+    }
+    else
+    {
+        if (tickTimer(&events.pulseLEDTimer) == TIMER_ELAPSED)
+            setPulseLED(false);
+    }
+#endif
     if (tickTimer(&events.pulseLEDTimer) == TIMER_ELAPSED)
         setPulseLED(false);
+#endif
+}
+
+void resetWatchdog(void)
+{
+#if !defined(SIMULATOR)
+    sleep(0);
 #endif
 }
 
@@ -267,13 +274,32 @@ void updateEvents(void)
         events.previousHeartbeatCount = heartbeatCount;
 
         updateMeasurements();
-        updateViewHeartbeat();
         updatePowerState();
+        updateViewHeartbeat();
     }
 
     updateDatalog();
     updateRNG();
     updateView();
+}
+
+// Heartbeat
+
+void startHeartbeatEvents(void)
+{
+    syncTick();
+
+    events.heartbeatTimer = SYSTICK_FREQUENCY;
+    events.previousHeartbeatCount = events.heartbeatCount;
+}
+
+// Keyboard
+
+void startKeyboardEvents(void)
+{
+    syncTick();
+
+    events.keyboardTimer = KEY_TICKS;
 }
 
 // Backlight
@@ -293,7 +319,7 @@ static void setBacklightTimer(int32_t ticks)
 
 void requestBacklightTrigger(void)
 {
-    if (isInLockMode())
+    if (isLockModeEnabled())
         events.requestedBacklightTimer = LOCKMODE_BACKLIGHT_TICKS;
     else
         events.requestedBacklightTimer = displayTimerValues[settings.displaySleep];
@@ -384,7 +410,16 @@ void triggerVibration(void)
 #if defined(VIBRATOR)
     syncTick();
 
-    setVibrationTimer(POWERON_VIBRATION_TICKS);
+    setVibrationTimer(INFO_VIBRATION_TICKS);
+#endif
+}
+
+void triggerAndwaitForVibration(void)
+{
+#if defined(VIBRATOR)
+    triggerVibration();
+
+    sleep(INFO_VIBRATION_TICKS);
 #endif
 }
 
@@ -396,7 +431,7 @@ void BuzzerAndVibration(void)
     setBuzzerTimer(POWERON_BUZZER_TICKS, 1, settings.soundAlertVolume);
 #endif
 #if defined(VIBRATOR)
-    setVibrationTimer(POWERON_VIBRATION_TICKS_EXT);
+    setVibrationTimer(POWERON_VIBRATION_TICKS);
 #endif
 }
 
@@ -405,12 +440,12 @@ void BuzzerAndVibration(void)
 
 #if defined(PULSE_LED)
 
-void setPulseLEDIndication(bool value)
+void setLEDMode(LEDMode mode)
 {
     syncTick();
 
+    events.ledMode = mode;
     events.pulseLEDTimer = 0;
-    events.pulseLEDEnabled = value;
 }
 
 static void setPulseLEDTimer(int32_t ticks)
@@ -447,7 +482,7 @@ void indicatePulse(void)
 #endif
 
 #if defined(PULSE_LED)
-    if (events.pulseLEDEnabled)
+    if (events.ledMode == LEDMODE_PULSE)
         setPulseLEDTimer(PULSE_LED_TICKS);
 #endif
 }

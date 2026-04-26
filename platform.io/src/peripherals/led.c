@@ -11,7 +11,6 @@
 #include "../measurements/pulses.h"
 #include "../peripherals/led.h"
 #include "../system/events.h"
-#include "../system/power.h"
 #include "../system/settings.h"
 
 #if defined(PULSE_LED)
@@ -28,57 +27,41 @@ void initLED(void)
 
 void updateLED(void)
 {
-    bool pulseLEDIndication;
-    bool pulseLED;
-
 #if !defined(ALERT_LED)
-    if (!isPoweredOn())
-    {
-        pulseLEDIndication = false;
-        pulseLED = false;
-    }
-    else
+    LEDMode ledMode = LEDMODE_OFF;
+    bool pulseLED = false;
+
+    if (isMeasurementsEnabled())
     {
         if (settings.alertPulseLED && getAlertLevel())
-        {
-            pulseLEDIndication = false;
             pulseLED = isAlertFlashing();
-        }
         else
-        {
-            pulseLEDIndication = settings.pulseLED;
-            pulseLED = false;
-        }
+            ledMode = settings.pulseLED ? LEDMODE_PULSE : LEDMODE_OFF;
     }
-#else
-    bool alertLED;
 
-    if (!isPoweredOn())
-    {
-        pulseLEDIndication = false;
-        pulseLED = false;
-        alertLED = false;
-    }
-    else
+    setLEDMode(ledMode);
+    setPulseLED(pulseLED);
+#else
+    LEDMode ledMode = LEDMODE_OFF;
+    bool pulseLED = false;
+    bool alertLED = false;
+
+    if (isMeasurementsEnabled())
     {
         if (settings.alertPulseLED && isAlertFlashing())
         {
-            pulseLEDIndication = false;
             pulseLED = (getAlertLevel() == ALERTLEVEL_WARNING);
             alertLED = true;
+
+            if (pulseLED && alertLED)
+                ledMode = LEDMODE_MULTIPLEX;
         }
         else
-        {
-            pulseLEDIndication = settings.pulseLED;
-            pulseLED = false;
-            alertLED = false;
-        }
+            ledMode = settings.pulseLED ? LEDMODE_PULSE : LEDMODE_OFF;
     }
-#endif
 
-    setPulseLEDIndication(pulseLEDIndication);
+    setLEDMode(ledMode);
     setPulseLED(pulseLED);
-#if defined(ALERT_LED)
     setAlertLED(alertLED);
 #endif
 }
@@ -100,11 +83,11 @@ void updateLED(void)
     bool pulseLEDEnable;
 
 #if !defined(ALERT_LED_EN)
-    pulseLEDEnable = settings.pulseLED && isPoweredOn();
+    pulseLEDEnable = settings.pulseLED && isMeasurementsEnabled();
 #else
     bool alertLEDEnable;
 
-    if (!isPoweredOn())
+    if (!isMeasurementsEnabled())
     {
         pulseLEDEnable = false;
         alertLEDEnable = false;

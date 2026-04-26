@@ -68,7 +68,7 @@ static const Menu gameStartMenu;
 static const Menu gameContinueMenu;
 static const Menu gameStrengthMenu;
 
-void setupGame(void)
+void resetGame(void)
 {
     memset(&game, 0, sizeof(game));
 
@@ -129,6 +129,8 @@ static void updateGameBoard(void)
 static void onGameCallback(void *userdata)
 {
 #if !defined(__EMSCRIPTEN__)
+    resetWatchdog();
+
     updateEvents();
 #endif
 }

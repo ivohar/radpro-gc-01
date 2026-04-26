@@ -13,7 +13,7 @@
 
 #include "../system/power.h"
 
-void initPower(void)
+void initPower(bool value)
 {
 }
 
@@ -31,9 +31,13 @@ bool isBatteryCharging(void)
     return true;
 }    
 
-uint32_t getBatteryNum(void)
+bool wasResetByWatchdog(void)
 {
-    return 1;
+    return false;
+}
+
+void clearResetFlags(void)
+{
 }
 
 #endif

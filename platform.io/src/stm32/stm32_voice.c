@@ -243,7 +243,7 @@ static void sendVoiceData(uint8_t value)
         value >>= 1;
     }
 
-    dma_setup_memory32_to_peripheral32(VOICE_TX_DMA_CHANNEL, (uint32_t *)&VOICE_TX_PORT->BSRR, voice.buffer, VOICE_TX_LENGTH);
+    dma_setup_memory32_to_peripheral32(VOICE_TX_DMA_CHANNEL, (uint32_t)&VOICE_TX_PORT->BSRR, (uint32_t)voice.buffer, VOICE_TX_LENGTH);
     dma_enable(VOICE_TX_DMA_CHANNEL);
 }
 
@@ -264,7 +264,7 @@ static void pushVoiceQueue(uint8_t value);
 static void clearVoiceQueue(void)
 {
     while (voice.requestedSequenceUpdate)
-        sleep(1);
+        syncTick();
 
     voice.requestedSequence.size = 0;
 }

@@ -85,13 +85,13 @@ static const uint16_t loggingModeIntervals[] = {
 
 static void stopDatalogRead(void);
 
-void setupDatalog(void)
+void resetDatalog(void)
 {
     selectMenuItem(&datalogMenu, 0);
     selectMenuItem(&datalogModeMenu, settings.loggingMode);
 }
 
-// Flash access
+// Page management
 
 static bool isFlashEmpty(uint32_t address, uint32_t count)
 {
@@ -106,7 +106,7 @@ static bool isFlashEmpty(uint32_t address, uint32_t count)
     return true;
 }
 
-static uint32_t alignToFlashWordSize(uint32_t value)
+static uint32_t alignAddressToFlashWordSize(uint32_t value)
 {
     return (value + FLASH_WORD_SIZE - 1) & ~(FLASH_WORD_SIZE - 1);
 }
@@ -150,7 +150,7 @@ static PageState readPageState(uint32_t pageBase)
     }
 }
 
-// Value encoders/decoders
+// Fixed value encoder/decoder
 
 static uint32_t encodeFixedUInt32(uint8_t *p, uint32_t value)
 {
@@ -168,6 +168,8 @@ static uint32_t decodeFixedUInt32(const uint8_t *p, uint32_t *value)
 
     return 4;
 }
+
+// Variable value encoder/decoder
 
 static uint32_t encodeVariableUInt32(uint8_t *p, uint32_t value)
 {
@@ -256,36 +258,37 @@ static uint32_t decodeVariableUInt32(const uint8_t *p, uint32_t *value)
     return 0;
 }
 
-// Write functions
+// Datalog write
 
 static void writePageStateAndAdvance(PageState pageState)
 {
-    // Mark current page
+    datalog.write.pageOffset = 0;
+
+    // Write page state
     uint8_t pageStateData[DATALOG_PAGE_STATE_SIZE];
     pageStateData[0] = pageState;
     memset(pageStateData + 1, 0xff, DATALOG_PAGE_STATE_SIZE - 1);
 
     if (!writeFlash(datalog.write.pageBase + DATALOG_PAGE_STATE_OFFSET, pageStateData, DATALOG_PAGE_STATE_SIZE))
     {
+        // Erase and try again
         eraseFlash(datalog.write.pageBase);
         writeFlash(datalog.write.pageBase + DATALOG_PAGE_STATE_OFFSET, pageStateData, DATALOG_PAGE_STATE_SIZE);
-
-        datalog.write.pageOffset = 0;
-
-        return;
     }
+    else
+    {
+        // Advance to next page
+        datalog.write.pageBase = getNextPage(datalog.write.pageBase);
 
-    // Advance to next page, erase if necessary
-    datalog.write.pageBase = getNextPage(datalog.write.pageBase);
-    datalog.write.pageOffset = 0;
-
-    if (!isFlashEmpty(datalog.write.pageBase, DATALOG_PAGE_SIZE))
-        eraseFlash(datalog.write.pageBase);
+        // Erase
+        if (!isFlashEmpty(datalog.write.pageBase, DATALOG_PAGE_SIZE))
+            eraseFlash(datalog.write.pageBase);
+    }
 }
 
 static void flushDatalogBuffer(void)
 {
-    uint32_t alignedLength = alignToFlashWordSize(datalog.write.bufferLength);
+    uint32_t alignedLength = alignAddressToFlashWordSize(datalog.write.bufferLength);
     memset(datalog.write.buffer + datalog.write.bufferLength, DATALOG_ENTRY_FILLER, alignedLength - datalog.write.bufferLength);
 
     writeFlash(datalog.write.pageBase + datalog.write.pageOffset, datalog.write.buffer, alignedLength);
@@ -364,6 +367,9 @@ static bool appendDatalogIncrementalEntry(void)
 
 void startDatalog(void)
 {
+    if (settings.loggingMode == DATALOG_LOGGINGMODE_OFF)
+        return;
+
     datalog.write.active = true;
 
     writeDatalogSessionStart();
@@ -383,11 +389,11 @@ void writeDatalogTimeChange(void)
         appendDatalogAbsoluteEntry();
 }
 
-void resetDatalog(void)
+void clearDatalog(void)
 {
     flushDatalogBuffer();
     writePageStateAndAdvance(PAGESTATE_RESET);
-    resetHistory();
+    clearHistory();
 
     stopDatalogRead();
 }
@@ -416,7 +422,7 @@ void updateDatalog(void)
     }
 }
 
-// Read functions
+// Datalog read
 
 static void readPage(void)
 {
@@ -553,7 +559,7 @@ bool readDatalog(DatalogRecord *record)
     return false;
 }
 
-// Common functions
+// Initialization
 
 void initDatalog(void)
 {
@@ -591,7 +597,7 @@ void initDatalog(void)
 
     // Set write head
     datalog.write.pageBase = datalog.read.pageBase;
-    datalog.write.pageOffset = alignToFlashWordSize(datalog.read.pageOffset);
+    datalog.write.pageOffset = alignAddressToFlashWordSize(datalog.read.pageOffset);
 }
 
 // Logging mode menu
@@ -641,9 +647,9 @@ void showDatalogModeMenuView(void)
     showMenu(&datalogModeMenu);
 }
 
-// Data log reset confirmation view
+// Data log clear confirmation view
 
-static void onDatalogResetConfirmationEvent(ViewEvent event)
+static void onDatalogClearConfirmationEvent(ViewEvent event)
 {
     switch (event)
     {
@@ -663,9 +669,9 @@ static void onDatalogResetConfirmationEvent(ViewEvent event)
     }
 }
 
-// Data log reset alert view
+// Data log clear alert view
 
-static void onDatalogResetAlertEvent(ViewEvent event)
+static void onDatalogClearAlertEvent(ViewEvent event)
 {
     switch (event)
     {
@@ -675,9 +681,9 @@ static void onDatalogResetAlertEvent(ViewEvent event)
         break;
 
     case EVENT_KEY_SELECT:
-        resetDatalog();
+        clearDatalog();
 
-        showView(onDatalogResetConfirmationEvent);
+        showView(onDatalogClearConfirmationEvent);
 
         break;
 
@@ -691,16 +697,16 @@ static void onDatalogResetAlertEvent(ViewEvent event)
     }
 }
 
-void showDatalogResetAlertView(void)
+void showDatalogClearAlertView(void)
 {
-    showView(onDatalogResetAlertEvent);
+    showView(onDatalogClearAlertEvent);
 }
 
 // Data log menu
 
 static const ViewOption datalogMenuOptions[] = {
     {STRING_LOGGING_MODE, showDatalogModeMenuView},
-    {STRING_RESET, showDatalogResetAlertView},
+    {STRING_RESET, showDatalogClearAlertView},
 };
 
 static const char *onDatalogMenuGetOption(menu_size_t index, MenuStyle *menuStyle)
@@ -712,7 +718,7 @@ static const char *onDatalogMenuGetOption(menu_size_t index, MenuStyle *menuStyl
 
 static void onDatalogMenuSelect(menu_size_t index)
 {
-    datalogMenuOptions[index].setView();
+    datalogMenuOptions[index].showView();
 }
 
 static MenuState datalogMenuState;

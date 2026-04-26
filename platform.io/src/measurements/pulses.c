@@ -95,7 +95,7 @@ static struct
 
     bool rateOverThreshold;
 
-    // onPulseHeartbeat
+    // onPulsesHeartbeat
     PulsePeriod previousPeriod;
     uint32_t previousPeriodTick;
 
@@ -111,9 +111,10 @@ static struct
     menu_size_t alertsMenuIndex;
 } pulses;
 
-void setupPulses(void)
+void resetPulses(void)
 {
     syncTick();
+
     Dose tubeDose = pulses.tubeDose;
     memset(&pulses, 0, sizeof(pulses));
     pulses.previousTubePulseCount = tubePulseCount;
@@ -121,10 +122,10 @@ void setupPulses(void)
 
     updateDoseUnits();
 
-    setupInstantaneousRate();
-    setupAverageRate();
-    setupCumulativeDose();
-    setupHistory();
+    resetInstantaneousRate();
+    resetAverageRate();
+    resetCumulativeDose();
+    resetHistory();
 
     selectMenuItem(&pulsesMenu, 0);
     selectMenuItem(&pulsesIndicationMenu, 0);
@@ -234,7 +235,7 @@ void onPulseTick(void)
     }
 }
 
-void onPulseHeartbeat(void)
+void onPulsesHeartbeat(void)
 {
     if (!isMeasurementsEnabled())
         return;

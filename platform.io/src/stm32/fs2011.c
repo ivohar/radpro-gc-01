@@ -20,21 +20,26 @@
 
 // System
 
+void initGPIO(void)
+{
+#if defined(STM32F0)
+    // Enable GPIOA, GPIOB, GPIOF
+    set_bits(RCC->AHBENR, RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOFEN);
+#elif defined(STM32F1)
+    // Enable GPIOA, GPIOB
+    set_bits(RCC->APB2ENR, RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN);
+#endif
+}
+
 void initSystem(void)
 {
     // Set system clock
     setFastSystemClock(false);
 
-#if defined(STM32F0)
-    // Enable GPIOA, GPIOB, GPIOF
-    set_bits(RCC->AHBENR, RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOFEN);
-#elif defined(STM32F1)
+#if defined(STM32F1)
     // Disable JTAG, TIM3 partial remap
     rcc_enable_afio();
     modify_bits(AFIO->MAPR, AFIO_MAPR_SWJ_CFG_Msk | AFIO_MAPR_TIM3_REMAP_Msk, AFIO_MAPR_SWJ_CFG_JTAGDISABLE | AFIO_MAPR_TIM3_REMAP_1);
-
-    // Enable GPIOA, GPIOB
-    set_bits(RCC->APB2ENR, RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN);
 #endif
 }
 

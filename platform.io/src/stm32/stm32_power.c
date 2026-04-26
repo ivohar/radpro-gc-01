@@ -14,10 +14,10 @@
 #include "../system/power.h"
 #include "../stm32/device.h"
 
-void initPower(void)
+void initPower(bool value)
 {
     // GPIO
-    setPowerEnabled(false);
+    setPowerEnabled(value);
 
 #if defined(PWR_VCC)
     gpio_set(PWR_VCC_PORT, PWR_VCC_PIN);
@@ -120,9 +120,20 @@ bool isBatteryCharging(void)
 
 #endif
 
-uint32_t getBatteryNum(void)
+bool wasResetByWatchdog(void)
 {
-    return PWR_BAT_NUM;
+#if FIRMWARE_BASE == 0x08000000
+    return get_bits(RCC->CSR, RCC_CSR_IWDGRSTF);
+#else
+    return false;
+#endif
+}
+
+void clearResetFlags(void)
+{
+#if FIRMWARE_BASE == 0x08000000
+    set_bits(RCC->CSR, RCC_CSR_RMVF);
+#endif
 }
 
 #endif

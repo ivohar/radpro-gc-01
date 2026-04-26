@@ -108,7 +108,7 @@ void drawTitleBar(const char *title)
 
     // Lock icon
     setStrokeColor(COLOR_ELEMENT_NEUTRAL);
-    if (isInLockMode())
+    if (isLockModeEnabled())
         drawRowRight("<", &rectangle);
 
     // Sound icon

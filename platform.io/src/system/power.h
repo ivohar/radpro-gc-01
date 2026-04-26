@@ -19,15 +19,18 @@
 #define POWER_MENU
 #endif
 
-void initPower(void);
+void initPower(bool value);
 
 void setPowerEnabled(bool value);
 bool isUSBPowered(void);
 bool isBatteryCharging(void);
-uint32_t getBatteryNum(void);
 
-void powerOn(bool isBoot);
-void powerOff(bool showBatteryIndicator);
+bool wasResetByWatchdog(void);
+void clearResetFlags(void);
+
+void boot(void);
+void powerOn(void);
+void powerOff(void);
 bool isPoweredOn(void);
 
 void updatePowerState(void);
