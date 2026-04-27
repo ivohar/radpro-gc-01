@@ -105,7 +105,7 @@ static const mr_color_t displayColors[][4] = {
 {mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000), mr_get_color(0x000000)},
 
     // Game piece white
-{mr_get_color(0xFFFFFF), mr_get_color(0xFFFFFF), mr_get_color(0xA58D79), mr_get_color(0xF8FCF8)},
+{mr_get_color(0xFFFFFF), mr_get_color(0xFFFFFF), mr_get_color(0xD39387), mr_get_color(0xF8FCF8)},
 #endif
 };
 #else
