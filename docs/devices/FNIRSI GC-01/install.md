@@ -7,68 +7,28 @@ This guide explains how to install **Rad Pro** on FNIRSI GC-01 and JOY-IT JT-RAD
 Make sure you have:
 
 * A **USB data cable** (charging-only cables will not work)
-* A **Phillips screwdriver**
-* A **computer** running Windows 10 or Windows 11
+* A **Windows 10 or Windows 11 computer**
 
-### Important Warning
-
-⚠️ **DO NOT attempt installation from macOS or Linux.** These operating systems are **not supported** and can brick your device. You will need a Windows 10/11 computer to recover it if something goes wrong.
+> ⚠️ **Use a Windows 10/11 computer.** macOS and Linux are not supported for installation. If something goes wrong on an unsupported OS, recovery requires a Windows machine.
 
 ## Step 1: Download the Firmware
 
-1. Go to the Rad Pro releases page: https://github.com/Gissio/radpro/releases
+1. Go to the Rad Pro releases page: <https://github.com/Gissio/radpro/releases>
 2. Download the latest `radpro-[version].zip`.
-3. Extract it on your computer.
+3. Extract the archive on your computer.
 
-## Step 2: Identify the Hardware
+## Step 2: Flash Rad Pro
 
-![FNIRSI GC-01 circuit board](img/gc-01-board-type.jpg)
+1. Make sure your device is powered off.
+2. Connect it to your computer using the USB data cable.
+3. A **USB drive** should appear.
 
-To select the correct firmware and settings, you'll need to identify two components inside the device.
+   > If no drive appears, your device may be incompatible. See Troubleshooting below.
 
-### Open the Device
-
-1. Power off the device.
-2. Unscrew the back case.
-3. Carefully open the enclosure.
-
-### Identify the Microprocessor
-
-Look for the square chip on the board. It should be one of:
-
-* CH32F103R8T6 (WCH)
-* APM32F103RBT6 (Geehy)
-
-If the chip is unmarked or unclear, don't worry—proceed to the next step.
-
-### Identify the Geiger Tube
-
-Look for markings on the tube:
-
-* **J305**, **J321**, **J613**, **HH614**, or **M4011**
-
-If the tube is unmarked:
-
-* ~55 mm or ~65 mm → assume **HH614**
-
-### Reassemble the Device
-
-Once identified, close the device and screw it back together.
-
-## Step 3: Flash Rad Pro
-
-### Connect the Device
-
-1. Connect the device to your computer.
-2. A **USB drive** should appear.
-
-   > If no drive appears, your device may be incompatible.
-
-3. Open the extracted firmware folder: `fnirsi-gc01_[microprocessor]/firmware/` and choose the correct firmware file: `radpro-fnirsi-gc01_[microprocessor]-[language]-x.y.z-install.bin`
-   * `[microprocessor]` is `ch32f103r8t6` or `apm32f103rbt6`
+4. Open the extracted firmware folder: `fnirsi-gc01_[microprocessor]/firmware/` and choose the correct firmware file: `radpro-fnirsi-gc01_[microprocessor]-[language]-x.y.z-install.bin`
+   * `[microprocessor]` is `apm32f103rbt6` or `ch32f103r8t6`. Start with `apm32f103rbt6`. If you get a **Drive full** error, disconnect the device and retry using `ch32f103r8t6`.
    * `[language]` is a two-letter code (e.g., `en`, `es`)
-   * Not sure about the microprocessor? Start with `apm32f103rbt6`. If you get a **Drive full** error, disconnect the device and retry using `ch32f103r8t6`.
-4. Copy the file to the USB drive.
+5. Copy the file to the USB drive.
 
 The device will automatically reboot when the transfer completes.
 
@@ -76,39 +36,28 @@ After reboot, **Rad Pro is installed**.
 
 ### Troubleshooting
 
-**Device does not reboot after copying:**
-
-* Safely eject the drive and reconnect
-* Try copying the file again
-
 **Device not detected:**
 
-* Check your USB cable (must support data)
+* Make sure your USB cable supports data transfer
 * Try another USB port
+* Try a USB hub
+* Hold **Right/Settings + OK/Power** to expose the USB drive
+* After plugging in, press the **reset switch** (located near the USB connector, opposite the charge LED)
 
-**Want to go back to stock firmware?**
+**Installation fails:**
 
-* Copy the original firmware (in the [firmware](firmware) folder) to the device using the same process
+* Hold **OK/Power** before plugging in the USB cable, and keep holding throughout the process
+* If the file copy seems to succeed but the device doesn't reboot correctly, try copying the file a second time
+
+**Want to restore the original firmware?**
+
+* Copy the stock firmware from the [firmware](firmware) folder to the device using the same process
 
 **Still no joy?**
 
 * Try the alternative installation instructions: [install-stlink.md](install-stlink.md)
 
-<!--
-If installation fails, try the following:
-
-* Hold **OK/Power** while powering on and keep holding during the process
-* Hold **Right/Settings + OK/Power** to expose the USB drive
-* Press the **reset switch** (near the USB connector) after plugging in
-* Copy the file **twice**
-
-If needed:
-
-* Press the reset switch and retry the full process
-* Use the alternative method: `install-stlink.md` 
--->
-
-## Step 4: Basic Controls
+## Step 3: Basic Controls
 
 Once installed, here are the essential controls:
 
@@ -134,12 +83,16 @@ Once installed, here are the essential controls:
 
 * **Press Right:** Restart random generator
 
-## Step 5: First Configuration
+## Step 4: First Configuration
 
-* Open **Settings > Geiger tube > Tube type**.
-* Select the tube you identified earlier.
+Check that background radiation readings are in the expected range of **~0.05–0.25 µSv/h**.
 
-## Step 6: Finish Up
+If readings are too low:
+
+1. Open **Settings > Geiger tube > Tube type**
+2. Select **HH614**
+
+## Step 5: Finish Up
 
 * 📖 **Read the documentation**:
   * [Rad Pro user's manual](../../users-manual.md) – Easy guide to using Rad Pro
