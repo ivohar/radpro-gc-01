@@ -1,0 +1,18 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 19, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "fnirsi-gc01_ch32f103r8",
+      "displayName": "FNIRSI GC-01 CH32F103R8",
+      "description": "Configure firmware build for FNIRSI GC-01 CH32F103R8.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/fnirsi-gc01_ch32f103r8",
+      "cacheVariables": {
+        "RADPRO_BOARD": "fnirsi-gc01_ch32f103r8",
+        "RADPRO_LANGUAGE": "en",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-none-eabi.cmake"
+      }
+    }
+  ]
+}
