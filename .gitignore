@@ -1,5 +1,10 @@
 __pycache__
 .vscode
 build
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
 tools/oldbins/
 tools/fnirsi*/
