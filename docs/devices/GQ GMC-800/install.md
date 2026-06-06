@@ -4,8 +4,6 @@ This guide explains how to install **Rad Pro** on GQ GMC-800 Geiger counters.
 
 ## What You'll Need
 
-Make sure you have:
-
 * A **USB data cable** (charging-only cables will not work)
 * A **computer** with a modern web browser (Chrome/Edge recommended)
 

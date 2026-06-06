@@ -4,8 +4,6 @@ This guide explains how to install **Rad Pro** on FNIRSI GC-01 and JOY-IT JT-RAD
 
 ## What You'll Need
 
-Make sure you have:
-
 * A **USB data cable** (charging-only cables will not work)
 * A **Windows 10 or Windows 11 computer**
 
@@ -46,6 +44,8 @@ After reboot, **Rad Pro is installed**.
 
 **Installation fails:**
 
+* Try another USB port
+* Try a USB hub
 * Hold **OK/Power** before plugging in the USB cable, and keep holding throughout the process
 * If the file copy seems to succeed but the device doesn't reboot correctly, try copying the file a second time
 

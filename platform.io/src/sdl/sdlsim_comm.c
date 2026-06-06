@@ -37,7 +37,7 @@ void openComm(void)
     sercomm = ser_create();
     if (sercomm == NULL)
     {
-        printf("Could not create serial port instance.\n");
+        printf("error: could not create serial port instance.\n");
 
         return;
     }
@@ -54,7 +54,7 @@ void openComm(void)
     int32_t result = ser_open(sercomm, &options);
     if (result)
     {
-        printf("Could not open serial port: %s\n", sererr_last());
+        printf("error: could not open serial port: %s\n", sererr_last());
 
         ser_destroy(sercomm);
         sercomm = NULL;

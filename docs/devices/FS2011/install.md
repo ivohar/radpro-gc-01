@@ -4,8 +4,6 @@ This guide explains how to install **Rad Pro** on FS2011 and YT-203B Geiger coun
 
 ## What You'll Need
 
-Make sure you have:
-
 * An **ST-LINK V2 programmer** (or compatible clone)
 * A **4-pin header** or jumper wires (for SWD connection)
 * A **Phillips screwdriver**

@@ -378,6 +378,9 @@ void startDatalog(void)
 
 void stopDatalog(void)
 {
+    if (!datalog.write.active)
+        return;
+
     appendDatalogAbsoluteEntry();
 
     datalog.write.active = false;
@@ -396,6 +399,14 @@ void clearDatalog(void)
     clearHistory();
 
     stopDatalogRead();
+
+    // Re-establish a session baseline so logging continues on the fresh page
+    // instead of starting with a bare incremental entry
+    if (datalog.write.active)
+    {
+        writeDatalogSessionStart();
+        appendDatalogAbsoluteEntry();
+    }
 }
 
 void updateDatalog(void)
@@ -623,12 +634,27 @@ static void onDatalogModeMenuSelect(menu_size_t index)
     if (settings.loggingMode == index)
         return;
 
-    if ((settings.loggingMode != DATALOG_LOGGINGMODE_OFF) && (index == DATALOG_LOGGINGMODE_OFF))
+    if (index == DATALOG_LOGGINGMODE_OFF)
+    {
+        // Stop before updating the mode, so the closing entry records the active mode
         stopDatalog();
-    else if ((settings.loggingMode == DATALOG_LOGGINGMODE_OFF) && (index != DATALOG_LOGGINGMODE_OFF))
-        startDatalog();
 
-    settings.loggingMode = index;
+        settings.loggingMode = index;
+    }
+    else
+    {
+        bool loggingWasOff = (settings.loggingMode == DATALOG_LOGGINGMODE_OFF);
+
+        // Update the mode before starting, so startDatalog() does not early-out
+        settings.loggingMode = index;
+
+        if (loggingWasOff)
+            startDatalog();
+        else
+            // Interval changed mid-session: write a fresh absolute entry so the
+            // new interval is recorded and read-back timestamps stay correct
+            writeDatalogTimeChange();
+    }
 }
 
 static MenuState datalogModeMenuState;

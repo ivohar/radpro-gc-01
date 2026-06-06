@@ -64,7 +64,7 @@ bool writeFlash(uint32_t dest, const uint8_t *source, uint32_t count)
     for (uint32_t i = 0; i < count; i++)
         if (flashImage[dest + i] != 0xff)
         {
-            printf("writeFlash: writing to non-erased memory: 0x%08x\n", dest);
+            printf("warning: writeFlash writing to non-erased memory: 0x%08x\n", dest);
 
             return false;
         }

@@ -9,8 +9,6 @@ Use this method if:
 
 ## What You'll Need
 
-Make sure you have:
-
 * An **ST-LINK V2 programmer** (or compatible clone)
 * A **4-pin header** or jumper wires (for SWD connection)
 * A **Phillips screwdriver**

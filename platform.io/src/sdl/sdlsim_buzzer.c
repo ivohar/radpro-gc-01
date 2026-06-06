@@ -71,7 +71,7 @@ void initBuzzer(void)
     buzzer.audioDeviceId = SDL_OpenAudio(&audioSpec, NULL);
     if (buzzer.audioDeviceId < 0)
     {
-        printf("Could not open audio: %s\n", SDL_GetError());
+        printf("error: could not open audio: %s\n", SDL_GetError());
 
         exit(1);
     }

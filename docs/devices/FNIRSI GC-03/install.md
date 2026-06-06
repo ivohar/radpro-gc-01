@@ -4,8 +4,6 @@ This guide explains how to install **Rad Pro** on FNIRSI GC-03 Geiger counters.
 
 ## What You'll Need
 
-Make sure you have:
-
 * A **USB data cable** (charging-only cables will not work)
 * A **Windows 10 or Windows 11 computer**
 
