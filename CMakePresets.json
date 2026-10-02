@@ -4,15 +4,72 @@
   "configurePresets": [
     {
       "name": "fnirsi-gc01_ch32f103r8",
-      "displayName": "FNIRSI GC-01 CH32F103R8",
-      "description": "Configure firmware build for FNIRSI GC-01 CH32F103R8.",
+      "displayName": "FNIRSI GC-01 CH32F103R8 (English)",
+      "description": "FNIRSI GC-01 with CH32F103R8 MCU - English",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/fnirsi-gc01_ch32f103r8",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "RADPRO_BOARD": "fnirsi-gc01_ch32f103r8",
         "RADPRO_LANGUAGE": "en",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-none-eabi.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-none-eabi.cmake",
+        "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "fnirsi-gc01_apm32f103rb",
+      "displayName": "FNIRSI GC-01 APM32F103RB (English)",
+      "description": "FNIRSI GC-01 with APM32F103RB MCU - English",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "RADPRO_BOARD": "fnirsi-gc01_apm32f103rb",
+        "RADPRO_LANGUAGE": "en",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-none-eabi.cmake",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "fnirsi-gc03",
+      "displayName": "FNIRSI GC-03 (English)",
+      "description": "FNIRSI GC-03 - English",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "RADPRO_BOARD": "fnirsi-gc03",
+        "RADPRO_LANGUAGE": "en",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-none-eabi.cmake",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "simulator",
+      "displayName": "SDL Simulator",
+      "description": "SDL-based desktop simulator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/simulator",
+      "cacheVariables": {
+        "RADPRO_SIMULATOR": "ON",
+        "RADPRO_LANGUAGE": "en",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "fnirsi-gc01_ch32f103r8",
+      "configurePreset": "fnirsi-gc01_ch32f103r8"
+    },
+    {
+      "name": "fnirsi-gc01_apm32f103rb",
+      "configurePreset": "fnirsi-gc01_apm32f103rb"
+    },
+    {
+      "name": "fnirsi-gc03",
+      "configurePreset": "fnirsi-gc03"
+    },
+    {
+      "name": "simulator",
+      "configurePreset": "simulator"
     }
   ]
 }
