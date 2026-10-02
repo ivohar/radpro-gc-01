@@ -1,0 +1,9 @@
+# Optional: Add this to .gitignore if you don't want to commit vendored CMSIS headers
+# Note: If you choose this approach, developers will need to run tools/vendor-cmsis.sh
+# before building.
+#
+# Alternatively, you can commit the vendor/cmsis/ directory to make builds fully
+# self-contained without requiring the vendor script to be run first.
+
+# Uncomment the line below if you want to exclude vendored CMSIS headers:
+# vendor/cmsis/
