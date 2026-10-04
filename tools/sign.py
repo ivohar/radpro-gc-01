@@ -155,12 +155,11 @@ envs = [
     "bosean-fs600",
     "bosean-fs1000",
     "bosean-fs5000",
-    # 'bosean-fs5000_landscape',
     "fnirsi-gc01_ch32f103r8",
     "fnirsi-gc01_apm32f103rb",
     "fnirsi-gc03",
     "gq-gmc800",
-    # 'gq-gmc800_landscape',
+    "gq-gmc800v2",
 ]
 
 for env in envs:
