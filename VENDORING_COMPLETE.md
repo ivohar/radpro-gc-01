@@ -96,7 +96,7 @@ Once the vendored headers are in place, test the build:
 ```bash
 # Using CMake Presets
 cmake --preset fnirsi-gc01_ch32f103r8
-cmake --build build/fnirsi-gc01_ch32f103r8
+cmake --build build/fnirsi-gc01_ch32f103r8-en
 
 # Or using manual configuration
 cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake -DRADPRO_BOARD=fnirsi-gc01_ch32f103r8

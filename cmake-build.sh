@@ -77,7 +77,7 @@ if [ "$SIMULATOR" = true ]; then
     BUILD_DIR="build/simulator"
     BUILD_NAME="simulator"
 else
-    BUILD_DIR="build/${BOARD}"
+    BUILD_DIR="build/${BOARD}-${LANGUAGE}"
     BUILD_NAME="${BOARD}"
 fi
 

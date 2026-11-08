@@ -86,14 +86,28 @@ def sign_firmware(env_name):
 
     for language in languages:
         build_name = env_name + "-" + language
-        build_dir = get_radpro_path() + "platform.io/.pio/build/" + build_name + "/"
-        bin_file = build_dir + "firmware.bin"
-        elf_file = build_dir + "firmware.elf"
+
+        # CMake build: build/<env>-<language>/<env>.{bin,elf}
+        build_dir = get_radpro_path() + "build/" + build_name + "/"
+        bin_file = build_dir + env_name + ".bin"
+        elf_file = build_dir + env_name + ".elf"
+
+        # Fall back to PlatformIO build: platform.io/.pio/build/<env>-<language>/firmware.{bin,elf}
+        if not os.path.exists(elf_file):
+            pio_build_dir = (
+                get_radpro_path() + "platform.io/.pio/build/" + build_name + "/"
+            )
+            if os.path.exists(pio_build_dir + "firmware.elf"):
+                bin_file = pio_build_dir + "firmware.bin"
+                elf_file = pio_build_dir + "firmware.elf"
 
         print("Building " + build_name + "...")
 
         # Read firmware
         if not os.path.exists(elf_file):
+            print("warning: file not found: " + elf_file)
+            continue
+        if not os.path.exists(bin_file):
             print("warning: file not found: " + bin_file)
             continue
 

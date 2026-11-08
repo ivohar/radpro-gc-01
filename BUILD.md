@@ -44,7 +44,7 @@ cmake --preset fnirsi-gc01_ch32f103r8
 cmake --build --preset fnirsi-gc01_ch32f103r8
 
 # Or use ninja directly
-ninja -C build/fnirsi-gc01_ch32f103r8
+ninja -C build/fnirsi-gc01_ch32f103r8-en
 ```
 
 Available presets:
@@ -111,9 +111,9 @@ Set to `ON` to build the SDL-based simulator instead of firmware.
 
 After a successful firmware build, you will find:
 
-- `build/<board>/<board>.elf` - ELF executable
-- `build/<board>/<board>.bin` - Binary firmware image
-- `build/<board>/<board>.hex` - Intel HEX firmware image
+- `build/<board>-<language>/<board>.elf` - ELF executable
+- `build/<board>-<language>/<board>.bin` - Binary firmware image
+- `build/<board>-<language>/<board>.hex` - Intel HEX firmware image
 - `build/<board>/radpro.map` - Linker map file
 
 ## Flashing Firmware
@@ -122,11 +122,11 @@ The CMake build produces `.bin` and `.hex` files that can be flashed using your 
 
 ```bash
 # Example using st-flash (STM32)
-st-flash write build/fnirsi-gc01_ch32f103r8/fnirsi-gc01_ch32f103r8.bin 0x08004000
+st-flash write build/fnirsi-gc01_ch32f103r8-en/fnirsi-gc01_ch32f103r8.bin 0x08004000
 
 # Example using OpenOCD
 openocd -f interface/stlink.cfg -f target/stm32f1x.cfg \
-  -c "program build/fnirsi-gc01_ch32f103r8/fnirsi-gc01_ch32f103r8.bin 0x08004000 verify reset exit"
+  -c "program build/fnirsi-gc01_ch32f103r8-en/fnirsi-gc01_ch32f103r8.bin 0x08004000 verify reset exit"
 ```
 
 Note: The flash offset address varies by board (see linker scripts in `platform.io/scripts/`).

@@ -7,7 +7,7 @@
       "displayName": "FNIRSI GC-01 CH32F103R8 (English)",
       "description": "FNIRSI GC-01 with CH32F103R8 MCU - English",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/${presetName}-en",
       "cacheVariables": {
         "RADPRO_BOARD": "fnirsi-gc01_ch32f103r8",
         "RADPRO_LANGUAGE": "en",
@@ -20,7 +20,7 @@
       "displayName": "FNIRSI GC-01 APM32F103RB (English)",
       "description": "FNIRSI GC-01 with APM32F103RB MCU - English",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/${presetName}-en",
       "cacheVariables": {
         "RADPRO_BOARD": "fnirsi-gc01_apm32f103rb",
         "RADPRO_LANGUAGE": "en",
@@ -33,7 +33,7 @@
       "displayName": "FNIRSI GC-03 (English)",
       "description": "FNIRSI GC-03 - English",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/${presetName}-en",
       "cacheVariables": {
         "RADPRO_BOARD": "fnirsi-gc03",
         "RADPRO_LANGUAGE": "en",

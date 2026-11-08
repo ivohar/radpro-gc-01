@@ -30,7 +30,7 @@ static cstring tubeTypeStrings[] = {
 
 static const float tubeSensitivities[] = {
     135.200F,
-    108.345F,
+    153.8F,
     30.157F,
     106.105F,
     3.267F,

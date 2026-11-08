@@ -40,6 +40,23 @@ if(NOT RADPRO_SIMULATOR)
     endif()
 endif()
 
+# Validate language selection
+if(NOT EXISTS "${RADPRO_SOURCE_DIR}/src/system/strings/${RADPRO_LANGUAGE}.h")
+    message(FATAL_ERROR "Unsupported RADPRO_LANGUAGE: ${RADPRO_LANGUAGE} (no strings file found)")
+endif()
+
+# Firmware build directories are expected to be named <board>-<language>
+# (e.g. build/fnirsi-gc01_ch32f103r8-en), which is what tools/sign.py looks for.
+if(NOT RADPRO_SIMULATOR)
+    set(RADPRO_BUILD_NAME "${RADPRO_BOARD}-${RADPRO_LANGUAGE}")
+    get_filename_component(_radpro_binary_dir_name "${CMAKE_BINARY_DIR}" NAME)
+    if(NOT _radpro_binary_dir_name STREQUAL RADPRO_BUILD_NAME)
+        message(WARNING
+            "Build directory '${_radpro_binary_dir_name}' does not match the expected name "
+            "'${RADPRO_BUILD_NAME}'. tools/sign.py looks for build/${RADPRO_BUILD_NAME}/.")
+    endif()
+endif()
+
 # ============================================================================
 # Helper Functions
 # ============================================================================
@@ -661,7 +678,7 @@ add_custom_command(TARGET radpro POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Build completed successfully!"
     COMMAND ${CMAKE_COMMAND} -E echo "========================================="
     COMMAND ${CMAKE_COMMAND} -E echo "Output files in: ${CMAKE_BINARY_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E echo "  ${RADPRO_BOARD} (ELF)"
+    COMMAND ${CMAKE_COMMAND} -E echo "  ${RADPRO_BOARD}.elf (ELF)"
     COMMAND ${CMAKE_COMMAND} -E echo "  ${RADPRO_BOARD}.bin (Binary)"
     COMMAND ${CMAKE_COMMAND} -E echo "  ${RADPRO_BOARD}.hex (Intel HEX)"
     COMMAND ${CMAKE_COMMAND} -E echo "  radpro.map (Linker map)"
@@ -675,6 +692,7 @@ add_custom_command(TARGET radpro POST_BUILD
 # Set output name
 set_target_properties(radpro PROPERTIES
     OUTPUT_NAME "${RADPRO_BOARD}"
+    SUFFIX ".elf"
 )
 
 # ============================================================================

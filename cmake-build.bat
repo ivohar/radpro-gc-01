@@ -103,7 +103,7 @@ if %SIMULATOR%==1 (
     set BUILD_DIR=build\simulator
     set BUILD_NAME=simulator
 ) else (
-    set BUILD_DIR=build\%BOARD%
+    set BUILD_DIR=build\%BOARD%-%LANGUAGE%
     set BUILD_NAME=%BOARD%
 )
 

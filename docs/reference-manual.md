@@ -35,8 +35,8 @@ Calculates the **electric and magnetic field strength** over a 400 ms window.
 Rad Pro includes default sensitivity values derived from numerical simulations using [Rad Lab](https://github.com/Gissio/radlab). These values are calculated for a standard Cs-137 gamma source and apply to the most commonly used GM tubes:
 
 * J305: 135.200 cpm/µSv/h
-* M4011: 108.345 cpm/µSv/h
-* J321: 108.345 cpm/µSv/h
+* M4011: 153.8 cpm/µSv/h
+* J321: 153.8 cpm/µSv/h
 * HH614: 30.157 cpm/µSv/h
 * СБМ20 (SBM20): 106.105 cpm/µSv/h
 * СИЗБГ (SI3BG): 3.267 cpm/µSv/h

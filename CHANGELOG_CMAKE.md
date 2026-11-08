@@ -148,7 +148,7 @@ cmake --build --preset simulator
 
 ### 5. Verify Output Files
 ```bash
-ls -lh build/fnirsi-gc01_ch32f103r8/
+ls -lh build/fnirsi-gc01_ch32f103r8-en/
 # Should see: .elf, .bin, .hex, .map files
 ```
 

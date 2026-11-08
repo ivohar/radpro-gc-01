@@ -41,7 +41,7 @@ cmake-build.bat         # Windows - builds default board
 ### 4. Flash
 
 ```bash
-# Find your firmware in: build/fnirsi-gc01_ch32f103r8/
+# Find your firmware in: build/fnirsi-gc01_ch32f103r8-en/
 # Flash with your preferred tool (st-flash, OpenOCD, etc.)
 ```
 
@@ -59,7 +59,7 @@ cmake --preset fnirsi-gc01_ch32f103r8
 # Build
 cmake --build --preset fnirsi-gc01_ch32f103r8
 
-# Output in: build/fnirsi-gc01_ch32f103r8/
+# Output in: build/fnirsi-gc01_ch32f103r8-en/
 ```
 
 ### Build with Wrapper Script
@@ -132,14 +132,14 @@ After building, find in `build/<board>/`:
 
 ```bash
 # st-flash (STM32)
-st-flash write build/fnirsi-gc01_ch32f103r8/fnirsi-gc01_ch32f103r8.bin 0x08004000
+st-flash write build/fnirsi-gc01_ch32f103r8-en/fnirsi-gc01_ch32f103r8.bin 0x08004000
 
 # OpenOCD
 openocd -f interface/stlink.cfg -f target/stm32f1x.cfg \
-  -c "program build/fnirsi-gc01_ch32f103r8/fnirsi-gc01_ch32f103r8.bin 0x08004000 verify reset exit"
+  -c "program build/fnirsi-gc01_ch32f103r8-en/fnirsi-gc01_ch32f103r8.bin 0x08004000 verify reset exit"
 
 # WCH-Link (for CH32)
-wlink flash build/fnirsi-gc01_ch32f103r8/fnirsi-gc01_ch32f103r8.bin
+wlink flash build/fnirsi-gc01_ch32f103r8-en/fnirsi-gc01_ch32f103r8.bin
 ```
 
 ## Troubleshooting
