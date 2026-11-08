@@ -1,14 +1,42 @@
 cmake_minimum_required(VERSION 3.19)
 
+option(RADPRO_SIMULATOR "Build the SDL-based simulator target" OFF)
+
+# Firmware builds must use the ARM cross toolchain. Default to the bundled
+# toolchain file so a plain "cmake -G Ninja -B <dir>" works.
+if(NOT RADPRO_SIMULATOR AND NOT CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/arm-none-eabi.cmake" CACHE FILEPATH "Toolchain file")
+endif()
+
+# Visual Studio generators always compile with MSVC (the toolchain file's
+# compiler is ignored), which cannot build the firmware.
+if(NOT RADPRO_SIMULATOR AND CMAKE_GENERATOR MATCHES "Visual Studio")
+    message(FATAL_ERROR
+        "The '${CMAKE_GENERATOR}' generator cannot build the ARM firmware (it always uses MSVC).\n"
+        "Use Ninja instead, e.g.:\n"
+        "  cmake --preset fnirsi-gc01_ch32f103r8\n"
+        "  cmake -G Ninja -B build/<board>-<language> -DRADPRO_BOARD=<board> -DRADPRO_LANGUAGE=<language>\n"
+        "or cmake-build.sh / cmake-build.bat. Delete the build directory first: the generator of an "
+        "existing build directory cannot be changed.")
+endif()
+
 # Project setup
 project(radpro LANGUAGES C ASM)
+
+if(NOT RADPRO_SIMULATOR AND NOT (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm"))
+    message(FATAL_ERROR
+        "Firmware builds need arm-none-eabi-gcc, but the C compiler is "
+        "'${CMAKE_C_COMPILER}' (${CMAKE_C_COMPILER_ID}, ${CMAKE_SYSTEM_PROCESSOR}).\n"
+        "This usually means the build directory was configured without the toolchain file. "
+        "Delete the build directory and configure again with "
+        "-DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake (or use the presets).")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
 # Build options
-option(RADPRO_SIMULATOR "Build the SDL-based simulator target" OFF)
 set(RADPRO_BOARD "fnirsi-gc01_ch32f103r8" CACHE STRING "Target board configuration for firmware builds")
 set(RADPRO_LANGUAGE "en" CACHE STRING "Language for strings and font selection")
 
@@ -152,6 +180,7 @@ file(READ "${RADPRO_BOARD_JSON_PATH}" RADPRO_BOARD_JSON_CONTENT)
 radpro_json_extract("${RADPRO_BOARD_JSON_CONTENT}" cpu RADPRO_BOARD_CPU)
 radpro_json_extract("${RADPRO_BOARD_JSON_CONTENT}" extra_flags RADPRO_BOARD_EXTRA_FLAGS)
 radpro_json_extract("${RADPRO_BOARD_JSON_CONTENT}" f_cpu RADPRO_BOARD_F_CPU)
+radpro_json_extract("${RADPRO_BOARD_JSON_CONTENT}" product_line RADPRO_BOARD_PRODUCT_LINE)
 
 # Process extra flags from board JSON and extract defines
 # The extra_flags string has format like: "-D STM32 -D STM32F1 -D FLASH_BASE_=0x08000000"
@@ -418,39 +447,92 @@ if(RADPRO_BOARD_F_CPU)
 endif()
 
 # ============================================================================
-# Font Configuration
+# Language, Font and Firmware Size Configuration
 # ============================================================================
 
-# Determine font definitions based on display type
-set(RADPRO_FONT_DEFINITIONS "")
-if(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_COLOR" AND RADPRO_BOARD_DEFINES MATCHES "DISPLAY_320X240" AND NOT RADPRO_BOARD_DEFINES MATCHES "DISPLAY_125PPI")
-    set(RADPRO_FONT_DEFINITIONS
-        FONT_SYMBOLS="ui/fonts/font_symbols_color.h"
-        FONT_LARGE="ui/fonts/font_large_color_115.h"
-        FONT_SMALL="ui/fonts/font_small_${RADPRO_LANGUAGE}_color_21.h"
-        FONT_MEDIUM="ui/fonts/font_medium_${RADPRO_LANGUAGE}_color_32.h"
+# FIRMWARE_SIZE in the board blocks above is only a fallback; the actual value
+# depends on the language and comes from platformio.ini (see below).
+set(RADPRO_FALLBACK_FIRMWARE_SIZE "")
+foreach(_define IN LISTS RADPRO_BOARD_DEFINES)
+    if(_define MATCHES "^FIRMWARE_SIZE=(.+)$")
+        set(RADPRO_FALLBACK_FIRMWARE_SIZE "${CMAKE_MATCH_1}")
+    endif()
+endforeach()
+list(FILTER RADPRO_BOARD_DEFINES EXCLUDE REGEX "^FIRMWARE_SIZE=")
+
+# platformio.ini is the single source of truth for the per-language settings:
+# each [env:<board>-<language>] section defines FIRMWARE_SIZE, LANGUAGE, STRINGS
+# and the FONT_* headers. Use the same values so both build systems match.
+set(RADPRO_LANGUAGE_KEYS FIRMWARE_SIZE LANGUAGE STRINGS FONT_SMALL FONT_MEDIUM FONT_LARGE FONT_SYMBOLS)
+set(RADPRO_PLATFORMIO_INI "${RADPRO_SOURCE_DIR}/platformio.ini")
+set(RADPRO_PIO_ENV "${RADPRO_BOARD}-${RADPRO_LANGUAGE}")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${RADPRO_PLATFORMIO_INI}")
+
+set(_pio_env_section "")
+if(EXISTS "${RADPRO_PLATFORMIO_INI}")
+    file(READ "${RADPRO_PLATFORMIO_INI}" _pio_ini)
+    # Section body: everything after the header up to the next "[" (no section uses "[" in its body)
+    string(REGEX MATCH "\\[env:${RADPRO_PIO_ENV}\\][^[]*" _pio_env_section "${_pio_ini}")
+endif()
+
+set(RADPRO_LANGUAGE_DEFINITIONS "")
+if(_pio_env_section)
+    foreach(_key IN LISTS RADPRO_LANGUAGE_KEYS)
+        # Matches e.g.  -DFONT_SMALL='"fonts/font_small_en_color_21.h"'  or  -DFIRMWARE_SIZE=0xb800
+        if(NOT _pio_env_section MATCHES "-D[ \t]*${_key}=([^\r\n]*)")
+            message(FATAL_ERROR "[env:${RADPRO_PIO_ENV}] in ${RADPRO_PLATFORMIO_INI} does not define ${_key}")
+        endif()
+        string(STRIP "${CMAKE_MATCH_1}" _value)
+        # Drop the shell quoting PlatformIO uses: '"en"' -> "en"
+        if(_value MATCHES "^'(.*)'$")
+            set(_value "${CMAKE_MATCH_1}")
+        endif()
+        set(RADPRO_PIO_${_key} "${_value}")
+        list(APPEND RADPRO_LANGUAGE_DEFINITIONS "${_key}=${_value}")
+    endforeach()
+    set(RADPRO_LANGUAGE_CONFIG_SOURCE "platformio.ini [env:${RADPRO_PIO_ENV}]")
+else()
+    # No PlatformIO environment for this board/language (e.g. the *_landscape
+    # boards): derive the values from the display type instead.
+    message(WARNING
+        "No [env:${RADPRO_PIO_ENV}] section in ${RADPRO_PLATFORMIO_INI}; "
+        "guessing FIRMWARE_SIZE and fonts from the board configuration.")
+
+    if(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_COLOR" AND RADPRO_BOARD_DEFINES MATCHES "DISPLAY_320X240" AND NOT RADPRO_BOARD_DEFINES MATCHES "DISPLAY_125PPI")
+        set(_font_symbols "font_symbols_color.h")
+        set(_font_large "font_large_color_115.h")
+        set(_font_small "font_small_${RADPRO_LANGUAGE}_color_21.h")
+        set(_font_medium "font_medium_${RADPRO_LANGUAGE}_color_32.h")
+    elseif(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_COLOR" AND RADPRO_BOARD_DEFINES MATCHES "DISPLAY_240X320")
+        set(_font_symbols "font_symbols_color.h")
+        set(_font_large "font_large_color_84.h")
+        set(_font_small "font_small_${RADPRO_LANGUAGE}_color_21.h")
+        set(_font_medium "font_medium_${RADPRO_LANGUAGE}_color_32.h")
+    elseif(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_COLOR" AND RADPRO_BOARD_DEFINES MATCHES "DISPLAY_125PPI")
+        set(_font_symbols "font_symbols_color.h")
+        set(_font_large "font_large_color_84.h")
+        set(_font_small "font_small_${RADPRO_LANGUAGE}_color_16.h")
+        set(_font_medium "font_medium_${RADPRO_LANGUAGE}_color_24.h")
+    elseif(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_MONOCHROME")
+        set(_font_symbols "font_symbols_monochrome.h")
+        set(_font_large "font_large_monochrome.h")
+        set(_font_small "font_small_${RADPRO_LANGUAGE}_monochrome.h")
+        set(_font_medium "font_medium_${RADPRO_LANGUAGE}_monochrome.h")
+    else()
+        message(FATAL_ERROR "Cannot determine fonts for board ${RADPRO_BOARD}")
+    endif()
+
+    set(RADPRO_PIO_FIRMWARE_SIZE "${RADPRO_FALLBACK_FIRMWARE_SIZE}")
+    set(RADPRO_LANGUAGE_DEFINITIONS
+        FIRMWARE_SIZE=${RADPRO_FALLBACK_FIRMWARE_SIZE}
+        LANGUAGE="${RADPRO_LANGUAGE}"
+        STRINGS="system/strings/${RADPRO_LANGUAGE}.h"
+        FONT_SYMBOLS="ui/fonts/${_font_symbols}"
+        FONT_LARGE="ui/fonts/${_font_large}"
+        FONT_SMALL="ui/fonts/${_font_small}"
+        FONT_MEDIUM="ui/fonts/${_font_medium}"
     )
-elseif(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_COLOR" AND RADPRO_BOARD_DEFINES MATCHES "DISPLAY_240X320")
-    set(RADPRO_FONT_DEFINITIONS
-        FONT_SYMBOLS="ui/fonts/font_symbols_color.h"
-        FONT_LARGE="ui/fonts/font_large_color_84.h"
-        FONT_SMALL="ui/fonts/font_small_${RADPRO_LANGUAGE}_color_21.h"
-        FONT_MEDIUM="ui/fonts/font_medium_${RADPRO_LANGUAGE}_color_32.h"
-    )
-elseif(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_COLOR" AND RADPRO_BOARD_DEFINES MATCHES "DISPLAY_125PPI")
-    set(RADPRO_FONT_DEFINITIONS
-        FONT_SYMBOLS="ui/fonts/font_symbols_color.h"
-        FONT_LARGE="ui/fonts/font_large_color_84.h"
-        FONT_SMALL="ui/fonts/font_small_${RADPRO_LANGUAGE}_color_16.h"
-        FONT_MEDIUM="ui/fonts/font_medium_${RADPRO_LANGUAGE}_color_24.h"
-    )
-elseif(RADPRO_BOARD_DEFINES MATCHES "DISPLAY_MONOCHROME")
-    set(RADPRO_FONT_DEFINITIONS
-        FONT_SYMBOLS="ui/fonts/font_symbols_monochrome.h"
-        FONT_LARGE="ui/fonts/font_large_monochrome.h"
-        FONT_SMALL="ui/fonts/font_small_${RADPRO_LANGUAGE}_monochrome.h"
-        FONT_MEDIUM="ui/fonts/font_medium_${RADPRO_LANGUAGE}_monochrome.h"
-    )
+    set(RADPRO_LANGUAGE_CONFIG_SOURCE "fallback (derived from board configuration)")
 endif()
 
 # ============================================================================
@@ -574,6 +656,28 @@ message(STATUS "Using vendored CMSIS headers:")
 message(STATUS "  Core:   ${CMSIS_CORE_DIR}")
 message(STATUS "  Device: ${CMSIS_DEVICE_INCLUDE_DIR} (${CMSIS_FAMILY})")
 
+# CMSIS startup and system files (what PlatformIO's "cmsis" framework adds).
+# The startup file provides the vector table (g_pfnVectors in .isr_vector) and
+# weak default handlers; Rad Pro overrides Reset_Handler, SysTick_Handler etc.
+# Without it, no vector table is emitted and LTO discards all interrupt handlers.
+if(NOT RADPRO_BOARD_PRODUCT_LINE)
+    message(FATAL_ERROR "No product_line in ${RADPRO_BOARD_JSON_PATH}")
+endif()
+string(TOLOWER "${RADPRO_BOARD_PRODUCT_LINE}" _product_line_lower)
+string(TOLOWER "${CMSIS_FAMILY}" _cmsis_family_lower)
+set(CMSIS_STARTUP_FILE "${CMSIS_DEVICE_DIR}/Templates/gcc/startup_${_product_line_lower}.s")
+set(CMSIS_SYSTEM_FILE "${CMSIS_DEVICE_DIR}/Templates/system_${_cmsis_family_lower}xx.c")
+foreach(_cmsis_file "${CMSIS_STARTUP_FILE}" "${CMSIS_SYSTEM_FILE}")
+    if(NOT EXISTS "${_cmsis_file}")
+        message(FATAL_ERROR "CMSIS source not found: ${_cmsis_file}")
+    endif()
+endforeach()
+# The ST startup files use the .s extension but must go through the GCC driver as assembly
+set_source_files_properties("${CMSIS_STARTUP_FILE}" PROPERTIES LANGUAGE ASM)
+target_sources(radpro PRIVATE "${CMSIS_STARTUP_FILE}" "${CMSIS_SYSTEM_FILE}")
+message(STATUS "  Startup: ${CMSIS_STARTUP_FILE}")
+message(STATUS "  System:  ${CMSIS_SYSTEM_FILE}")
+
 # Include directories
 target_include_directories(radpro PRIVATE
     "${RADPRO_SOURCE_DIR}/src"
@@ -594,10 +698,8 @@ endif()
 
 # Compile definitions
 target_compile_definitions(radpro PRIVATE
-    LANGUAGE="${RADPRO_LANGUAGE}"
-    STRINGS="system/strings/${RADPRO_LANGUAGE}.h"
     ${RADPRO_BOARD_DEFINES}
-    ${RADPRO_FONT_DEFINITIONS}
+    ${RADPRO_LANGUAGE_DEFINITIONS}
 )
 
 # Compile options
@@ -615,6 +717,9 @@ target_compile_options(radpro PRIVATE
 target_link_options(radpro PRIVATE
     -nostdlib
     -flto
+    # LTO code generation happens at link time; override the -O3 that
+    # CMAKE_C_FLAGS_RELEASE puts on the link line (PlatformIO links with -Os)
+    -Os
     -Wl,--gc-sections
     -Wl,-Map=${CMAKE_BINARY_DIR}/radpro.map
     ${RADPRO_BOARD_COMPILE_OPTIONS}
@@ -705,6 +810,8 @@ message("  RadPro Firmware Build Configuration")
 message("=========================================")
 message("  Board:           ${RADPRO_BOARD}")
 message("  Language:        ${RADPRO_LANGUAGE}")
+message("  Firmware size:   ${RADPRO_PIO_FIRMWARE_SIZE}")
+message("  Lang/font from:  ${RADPRO_LANGUAGE_CONFIG_SOURCE}")
 message("  CPU:             ${RADPRO_BOARD_CPU}")
 message("  F_CPU:           ${RADPRO_BOARD_F_CPU}")
 message("  Linker script:   ${RADPRO_BOARD_LINKER_SCRIPT}")
